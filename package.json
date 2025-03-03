@@ -41,5 +41,9 @@
 		"onlyBuiltDependencies": [
 			"esbuild"
 		]
-	}
+	},
+  "dependencies": {
+    "firebase": "^11.4.0",
+    "firebase-admin": "^13.2.0"
+  }
 }
