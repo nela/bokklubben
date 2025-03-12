@@ -1,3 +1,4 @@
+import { Routes } from "$lib/routeConfig";
 import { firebaseAdmin } from "$lib/server/firebase.admin";
 import { redirect, type Handle } from "@sveltejs/kit";
 import type { DecodedIdToken } from "firebase-admin/auth";
@@ -10,8 +11,8 @@ export const handle: Handle = async ({ event, resolve }) => {
 
   if (!session) {
     event.locals.userSession = undefined;
-    if (event.url.pathname !== '/login') {
-      throw redirect(303, '/login');
+    if (event.url.pathname !== Routes.login) {
+      throw redirect(303, Routes.login);
     }
   } else {
     let decodedIdToken: DecodedIdToken | undefined = undefined;
@@ -33,8 +34,8 @@ export const handle: Handle = async ({ event, resolve }) => {
     }
   }
 
-  if (event.url.pathname !== '/login' && !event.locals.userSession) {
-    throw redirect(303, '/login');
+  if (event.url.pathname !== Routes.login && !event.locals.userSession) {
+    throw redirect(303, Routes.login);
   }
 
   console.debug(`Request took ${performance.now() - start}ms.`);

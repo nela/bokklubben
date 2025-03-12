@@ -1,6 +1,7 @@
 import { firebaseAdmin } from "$lib/server/firebase.admin";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { handle } from "./hooks.server";
+import { Routes } from "$lib/routeConfig";
 
 vi.mock('$lib/server/firebase.admin', () => ({
   firebaseAdmin: { auth: vi.fn() }
@@ -27,7 +28,7 @@ describe('server hook', () => {
     const res = handle({ event, resolve: resolveFn })
 
     expect(event.cookies.get).toHaveBeenCalledExactlyOnceWith('session');
-    await expect(res).rejects.toEqual({ status: 303, location: '/login' })
+    await expect(res).rejects.toEqual({ status: 303, location: Routes.login })
     expect(event.locals.userSession).toBeUndefined();
     expect(resolveFn).not.toHaveBeenCalled();
   });
@@ -40,7 +41,7 @@ describe('server hook', () => {
 
     const resolveFn = vi.fn();
     const res = handle({ event, resolve: resolveFn });
-    await expect(res).rejects.toEqual({ status: 303, location: '/login' });
+    await expect(res).rejects.toEqual({ status: 303, location: Routes.login });
     expect(consoleErrorSpy).toHaveBeenCalledTimes(2);
     expect(event.locals.userSession).toBeUndefined();
     expect(resolveFn).not.toHaveBeenCalled();
@@ -54,7 +55,7 @@ describe('server hook', () => {
 
     const resolveFn = vi.fn();
     const res = handle({ event, resolve: resolveFn });
-    await expect(res).rejects.toEqual({ status: 303, location: '/login' });
+    await expect(res).rejects.toEqual({ status: 303, location: Routes.login });
     expect(consoleErrorSpy).toHaveBeenCalledOnce();
     expect(event.locals.userSession).toBeUndefined();
     expect(resolveFn).not.toHaveBeenCalled();
@@ -68,7 +69,7 @@ describe('server hook', () => {
 
     const resolveFn = vi.fn();
     const res = handle({ event, resolve: resolveFn });
-    await expect(res).rejects.toEqual({ status: 303, location: '/login' });
+    await expect(res).rejects.toEqual({ status: 303, location: Routes.login });
     expect(consoleErrorSpy).toHaveBeenCalledOnce();
     expect(event.locals.userSession).toBeUndefined();
     expect(resolveFn).not.toHaveBeenCalled();
