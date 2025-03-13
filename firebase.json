@@ -6,7 +6,7 @@
   "emulators": {
     "apphosting": {
       "port": 5002,
-      "rootDirectory": "app",
+      "rootDirectory": "./",
       "startCommand": "pnpm run dev"
     },
     "auth": {
