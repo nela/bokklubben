@@ -1,1 +1,29 @@
-{"kind":"identitytoolkit#DownloadAccountResponse","users":[{"localId":"tHpsqfjAQY5aaXe6K7dQKwlxjzQd","lastLoginAt":"1741332750896","displayName":"Skywalker","photoUrl":"","emailVerified":false,"email":"n@n.no","salt":"fakeSalt9p839Mnph8FyVnJNbeKc","passwordHash":"fakeHash:salt=fakeSalt9p839Mnph8FyVnJNbeKc:password=123456","passwordUpdatedAt":1741332750896,"validSince":"1741332750","mfaInfo":[],"createdAt":"1741332750896","providerUserInfo":[{"providerId":"password","email":"n@n.no","federatedId":"n@n.no","rawId":"n@n.no","displayName":"Skywalker","photoUrl":""}]}]}
+{
+	"kind": "identitytoolkit#DownloadAccountResponse",
+	"users": [
+		{
+			"localId": "tHpsqfjAQY5aaXe6K7dQKwlxjzQd",
+			"lastLoginAt": "1741332750896",
+			"displayName": "Skywalker",
+			"photoUrl": "",
+			"emailVerified": false,
+			"email": "n@n.no",
+			"salt": "fakeSalt9p839Mnph8FyVnJNbeKc",
+			"passwordHash": "fakeHash:salt=fakeSalt9p839Mnph8FyVnJNbeKc:password=123456",
+			"passwordUpdatedAt": 1741332750896,
+			"validSince": "1741332750",
+			"mfaInfo": [],
+			"createdAt": "1741332750896",
+			"providerUserInfo": [
+				{
+					"providerId": "password",
+					"email": "n@n.no",
+					"federatedId": "n@n.no",
+					"rawId": "n@n.no",
+					"displayName": "Skywalker",
+					"photoUrl": ""
+				}
+			]
+		}
+	]
+}
