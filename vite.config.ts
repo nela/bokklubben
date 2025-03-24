@@ -5,6 +5,7 @@ import { defineConfig } from 'vite';
 export default defineConfig({
 	plugins: [sveltekit()],
 
+	optimizeDeps: { include: ['nodemailer'] }, //, exclude: [ 'pg-native' ] }
 	test: {
 		workspace: [
 			{

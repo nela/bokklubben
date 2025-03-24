@@ -1,5 +1,6 @@
 import { SERVICE_ACCOUNT } from '$env/static/private';
 import admin, { type ServiceAccount } from 'firebase-admin';
+import { getFirestore } from 'firebase-admin/firestore';
 
 function getFirebaseAdmin() {
 	if (!admin.apps.length) {
@@ -22,3 +23,4 @@ function getFirebaseAdmin() {
 }
 
 export const firebaseAdmin = getFirebaseAdmin();
+export const db = getFirestore();

@@ -1,7 +1,12 @@
 import { goto } from '$app/navigation';
 import type { LoginHandler } from '$lib/components/login/LoginHandler.model';
 import { Routes } from '$lib/routeConfig';
-import { signInWithEmailAndPassword, type Auth, type UserCredential } from 'firebase/auth';
+import {
+	signInWithEmailAndPassword,
+	type Auth,
+	type ParsedToken,
+	type UserCredential
+} from 'firebase/auth';
 
 async function signIn<T, D = void>(
 	fn: (auth: Auth, ...args: Array<T | D>) => Promise<UserCredential>,
