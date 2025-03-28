@@ -3,7 +3,6 @@
 	import { auth } from '$lib/firebase.client';
 	import { createLoginHandler } from '$lib/handlers/login';
 
-	const handler = createLoginHandler(auth);
 </script>
 
-<Login {handler} />
+<Login />

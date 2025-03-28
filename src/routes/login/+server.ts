@@ -1,5 +1,8 @@
+import { AuthenticationError } from '$lib/errors/auth';
+import { createSessionToken } from '$lib/server/auth/util';
 import { firebaseAdmin } from '$lib/server/firebase.admin';
-import { redirect, type RequestHandler } from '@sveltejs/kit';
+import { error, redirect, type RequestHandler } from '@sveltejs/kit';
+import { err, ResultAsync } from 'neverthrow';
 
 export const POST: RequestHandler = async ({ request }: { request: Request }) => {
 	const body = (await request.json()) as { idToken: string | undefined };
@@ -8,25 +11,33 @@ export const POST: RequestHandler = async ({ request }: { request: Request }) =>
 		throw redirect(303, '/login');
 	}
 
-	const expiresIn = 60 * 60 * 24 * 5 * 1000;
+	const expiresIn = 3600 * 1000 * 24;
+	// const sessionToken = await createSessionToken(body.idToken, expiresIn);
+  const sessionToken = new ResultAsync(Promise.reject('Simon says'))
 
-	const sessionCookie = await firebaseAdmin.auth().createSessionCookie(body.idToken, { expiresIn });
+	return sessionToken.match(
+		(token) => {
+			const options = {
+				maxAge: expiresIn,
+				httpOnly: true,
+				// secure: true,
+				sameSite: 'lax',
+				path: '/'
+			};
 
-	const options = {
-		maxAge: expiresIn,
-		httpOnly: true,
-		// secure: true,
-		sameSite: 'lax',
-		path: '/'
-	};
+			const header = new Headers();
+			header.append('set-cookie', `session=${token}; ${JSON.stringify(options)}`);
 
-	const header = new Headers();
-	header.append('set-cookie', `session=${sessionCookie}; ${JSON.stringify(options)}`);
-
-	return new Response('login', {
-		status: 200,
-		headers: header
-	});
+			return new Response('login', {
+				status: 200,
+				headers: header
+			});
+		},
+		(err) => {
+      console.log(`Error ${err}`);
+      error(500, { message: 'Failed to login. Please try again later.' });
+    }
+	);
 };
 
 export const DELETE: RequestHandler = async () => {

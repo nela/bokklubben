@@ -2,7 +2,7 @@ import { signInWithEmailAndPassword, type Auth, type UserCredential } from 'fire
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { goto } from '$app/navigation';
 import { createLoginHandler } from './login';
-import { Routes } from '$lib/routeConfig';
+import { PublicRoute } from '$lib/utils/constants';
 
 vi.mock('$app/navigation', () => ({
 	goto: vi.fn()
@@ -29,7 +29,7 @@ describe('login handler', () => {
 			user: { getIdToken: vi.fn().mockResolvedValueOnce('fake-id-token') }
 		} as unknown as UserCredential);
 
-		fetchSpy.mockResolvedValueOnce(new Response(Routes.login, { status: 200 }));
+		fetchSpy.mockResolvedValueOnce(new Response(PublicRoute.Login, { status: 200 }));
 
 		const mockAuth = { signOut: vi.fn() };
 
@@ -43,7 +43,7 @@ describe('login handler', () => {
 			'123456'
 		);
 		expect(fetchSpy).toHaveBeenCalledOnce();
-		expect(fetchSpy).toHaveBeenCalledExactlyOnceWith(Routes.login, {
+		expect(fetchSpy).toHaveBeenCalledExactlyOnceWith(PublicRoute.Login, {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
 			body: '{"idToken":"fake-id-token"}'
@@ -56,7 +56,7 @@ describe('login handler', () => {
 		vi.mocked(signInWithEmailAndPassword).mockRejectedValueOnce(new Error());
 
 		fetchSpy.mockImplementationOnce(() =>
-			Promise.resolve(new Response(Routes.login, { status: 200 }))
+			Promise.resolve(new Response(PublicRoute.Login, { status: 200 }))
 		);
 
 		const mockAuth = { signOut: vi.fn() };

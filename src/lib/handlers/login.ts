@@ -1,7 +1,9 @@
 import { goto } from '$app/navigation';
 import type { LoginHandler } from '$lib/components/login/LoginHandler.model';
-import { Routes } from '$lib/routeConfig';
+import { AuthenticationError } from '$lib/errors/auth';
+import { PublicRoute, UserRoute } from '$lib/utils/constants';
 import { signInWithEmailAndPassword, type Auth, type UserCredential } from 'firebase/auth';
+import { fromPromise, ok, safeTry } from 'neverthrow';
 
 async function signIn<T, D = void>(
 	fn: (auth: Auth, ...args: Array<T | D>) => Promise<UserCredential>,
@@ -12,7 +14,7 @@ async function signIn<T, D = void>(
 		const user = await fn(fnAuth, ...fnArgs);
 		const idToken = await user.user.getIdToken();
 
-		await fetch(Routes.login, {
+		await fetch(PublicRoute.Login, {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify({ idToken })
@@ -30,3 +32,4 @@ export const createLoginHandler = (auth: Auth): LoginHandler => ({
 	emailAndPassword: (email: string, password: string) => () =>
 		signIn(signInWithEmailAndPassword, auth, email, password)
 });
+

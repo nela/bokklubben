@@ -1,7 +1,7 @@
 import { initializeApp } from 'firebase/app';
 import { connectAuthEmulator, getAuth, type Auth } from 'firebase/auth';
 
-function getFirebaseClient() {
+export function getFirebaseClient() {
 	const firebaseConfig = import.meta.env.PROD
 		? {
 				apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
