@@ -1,7 +1,7 @@
 import { SERVICE_ACCOUNT } from '$env/static/private';
 import admin, { type ServiceAccount } from 'firebase-admin';
 
-function getFirebaseAdmin() {
+function getFirebaseAdmin(): typeof admin {
 	if (!admin.apps.length) {
 		const config = import.meta.env.PROD
 			? {
