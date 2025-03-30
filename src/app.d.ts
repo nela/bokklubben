@@ -3,7 +3,7 @@
 declare global {
 	namespace App {
 		interface Locals {
-			user: { uid: string; email: string | undefined } | undefined;
+			user: { uid: string; email: string } | undefined;
 			session: string | undefined;
 		}
 		// interface Error {}

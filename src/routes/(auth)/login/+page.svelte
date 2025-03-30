@@ -1,8 +1,7 @@
 <script lang="ts">
-	import Login from '$lib/components/login/Login.svelte';
+	import Login from '$lib/components/login/login.svelte';
 	import { auth } from '$lib/firebase.client';
-	import { createLoginHandler } from '$lib/handlers/login';
-
+	import { performAuth } from '$lib/utils/auth/auth';
 </script>
 
-<Login />
+<Login {auth} {performAuth} />

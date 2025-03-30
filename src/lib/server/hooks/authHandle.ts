@@ -1,5 +1,5 @@
 import { type Handle } from '@sveltejs/kit';
-import { deleteSessionTokenCookie as deleteSessionCookie, verifySessionCookie } from '../auth/session';
+import { deleteSessionCookie, verifySessionCookie } from '../auth/session';
 
 export const authHandle: Handle = async ({ event, resolve }) => {
 	const token = event.cookies.get('session');
@@ -11,16 +11,16 @@ export const authHandle: Handle = async ({ event, resolve }) => {
 
 	const tokenPromise = await verifySessionCookie(token);
 
-  return tokenPromise.match(
-    (token) => {
-      const { uid, email } = token.value;
-      event.locals.user = { uid, email };
-      return resolve(event);
-    },
-    (_) => {
-      deleteSessionCookie(event.cookies);
-      event.locals.user = undefined;
-      return resolve(event);
-    }
-  )
+	return tokenPromise.match(
+		(decodedToken) => {
+			const { uid, email } = decodedToken;
+			event.locals.user = { uid, email: email! };
+			return resolve(event);
+		},
+		() => {
+			deleteSessionCookie(event.cookies);
+			event.locals.user = undefined;
+			return resolve(event);
+		}
+	);
 };
