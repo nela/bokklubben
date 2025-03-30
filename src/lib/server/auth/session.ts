@@ -5,7 +5,10 @@ import type { DecodedIdToken } from 'firebase-admin/auth';
 import { fromPromise, type ResultAsync } from 'neverthrow';
 import { firebaseAdmin } from '../firebase/firebase.admin';
 
-export function createSessionCookie(idToken: string, expiresIn: number): ResultAsync<string, AuthError> {
+export function createSessionCookie(
+	idToken: string,
+	expiresIn: number
+): ResultAsync<string, AuthError> {
 	return fromPromise(
 		firebaseAdmin.auth().createSessionCookie(idToken, { expiresIn }),
 		(e) => new AuthInternalError({ cause: e })
@@ -19,20 +22,20 @@ export function verifySessionCookie(token: string): ResultAsync<DecodedIdToken, 
 	);
 }
 
-export function deleteSessionTokenCookie(cookies: Cookies) {
-	cookies.set('session', '', {
+export function deleteSessionCookie(cookies: Cookies) {
+	cookies.delete('session', {
 		httpOnly: true,
 		sameSite: 'lax',
 		maxAge: 0,
-		path: PublicRoute.Login
+		path: '/'
 	});
 }
 
-export function setSessionTokenCookie(cookies: Cookies, token: string, expiresAt: Date): void {
+export function setSessionCookie(cookies: Cookies, token: string, expiresAt: Date): void {
 	cookies.set('session', token, {
 		httpOnly: true,
 		sameSite: 'lax',
 		expires: expiresAt,
-		path: UserRoute.Dashboard
+		path: '/'
 	});
 }

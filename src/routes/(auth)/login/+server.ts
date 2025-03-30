@@ -1,5 +1,5 @@
+import { createSessionCookie } from '$lib/server/auth/session';
 import { error, redirect, type RequestHandler } from '@sveltejs/kit';
-import { err, ResultAsync } from 'neverthrow';
 
 export const POST: RequestHandler = async ({ request }: { request: Request }) => {
 	const body = (await request.json()) as { idToken: string | undefined };
@@ -9,8 +9,7 @@ export const POST: RequestHandler = async ({ request }: { request: Request }) =>
 	}
 
 	const expiresIn = 3600 * 1000 * 24;
-	// const sessionToken = await createSessionToken(body.idToken, expiresIn);
-  const sessionToken = err('went wrong')
+	const sessionToken = await createSessionCookie(body.idToken, expiresIn);
 
 	return sessionToken.match(
 		(token) => {
@@ -18,7 +17,7 @@ export const POST: RequestHandler = async ({ request }: { request: Request }) =>
 				maxAge: expiresIn,
 				httpOnly: true,
 				// secure: true,
-				sameSite: 'lax',
+				sameSite: 'Lax',
 				path: '/'
 			};
 
@@ -30,19 +29,6 @@ export const POST: RequestHandler = async ({ request }: { request: Request }) =>
 				headers: header
 			});
 		},
-		(err) => {
-      console.error(`Error ASDFASDF ${err}`);
-      error(500, { message: 'Failed to login. Please try again later.' });
-    }
+		(_) => error(500, { message: 'Failed to login. Please try again later.' })
 	);
-};
-
-export const DELETE: RequestHandler = async () => {
-	const header = new Headers();
-	header.append('set-cookie', `session=; Max-Age=0`);
-
-	return new Response('login', {
-		status: 200,
-		headers: header
-	});
 };

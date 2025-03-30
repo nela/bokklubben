@@ -4,15 +4,15 @@ import type { DecodedIdToken } from 'firebase-admin/auth';
 import { errAsync, okAsync } from 'neverthrow';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { mock, type MockProxy } from 'vitest-mock-extended';
-import { authHandle } from './handle';
-import { deleteSessionTokenCookie, verifySessionCookie } from '../auth/session';
+import { authHandle } from './authHandle';
+import { deleteSessionCookie, verifySessionCookie } from '../auth/session';
 
 vi.mock('../auth/session', () => ({
-	verifySessionToken: vi.fn(),
-	deleteSessionTokenCookie: vi.fn()
+	verifySessionCookie: vi.fn(),
+	deleteSessionCookie: vi.fn()
 }));
 
-describe('Authentication Hook', () => {
+describe.only('Authentication Hook', () => {
 	let event: MockProxy<RequestEvent>;
 	const resolveMock = vi.fn();
 
@@ -48,7 +48,7 @@ describe('Authentication Hook', () => {
 		);
 		await authHandle({ event: event, resolve: resolveMock });
 
-		expect(deleteSessionTokenCookie).toHaveBeenCalledExactlyOnceWith(event.cookies);
+		expect(deleteSessionCookie).toHaveBeenCalledExactlyOnceWith(event.cookies);
 		expect(event.locals.user).toBeUndefined();
 		expect(resolveMock).toHaveBeenCalledExactlyOnceWith(event);
 	});

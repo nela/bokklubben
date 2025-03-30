@@ -7,7 +7,7 @@ vi.mock('$app/navigation', () => ({
 	goto: vi.fn()
 }));
 
-describe.only('Perform Authentication Flow', () => {
+describe('Perform Authentication Flow', () => {
 	const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 	const fetchSpy = vi.spyOn(global, 'fetch');
 	const signOut = vi.fn();
