@@ -22,3 +22,4 @@ function getFirebaseAdmin(): typeof admin {
 }
 
 export const firebaseAdmin = getFirebaseAdmin();
+export const db = firebaseAdmin.app().firestore();
