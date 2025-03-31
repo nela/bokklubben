@@ -1,4 +1,6 @@
+import { fromPromise } from 'neverthrow';
 import { NO_REPLY_EMAIL, SENDGRID_TOKEN, SENDGRID_URL } from './config';
+import { EmailInternalError } from '$lib/errors/mail';
 
 export interface EmailContent {
 	value: string;
@@ -9,10 +11,9 @@ export async function sendEmail(
 	sendTo: string | Array<string>,
 	subject: string,
 	content: EmailContent
-) {
-	let res: Response | undefined = undefined;
-	try {
-		res = await fetch(SENDGRID_URL, {
+){
+  return fromPromise(
+    fetch(SENDGRID_URL, {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json',
@@ -28,10 +29,7 @@ export async function sendEmail(
 					to: [{ email: e }]
 				}))
 			})
-		});
-	} catch (error) {
-		console.error(error);
-	}
-
-	return res?.ok ?? false;
+		}),
+    (e) => new EmailInternalError({ cause: e })
+  )
 }

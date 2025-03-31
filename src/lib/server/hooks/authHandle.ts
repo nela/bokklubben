@@ -13,8 +13,12 @@ export const authHandle: Handle = async ({ event, resolve }) => {
 
 	return tokenPromise.match(
 		(decodedToken) => {
-			const { uid, email } = decodedToken;
-			event.locals.user = { uid, email: email! };
+			const { uid, email, admin } = decodedToken;
+			event.locals.user = {
+        uid: uid,
+        admin: admin ?? false,
+        email: email!
+      };
 			return resolve(event);
 		},
 		() => {

@@ -1,41 +1,51 @@
 import { DbInternalError, type DbError } from '$lib/errors/db';
+import type { DocumentData, WithFieldValue } from 'firebase-admin/firestore';
 import { fromPromise, ok, ResultAsync, safeTry } from 'neverthrow';
 import { db } from '../firebase/firebase.admin';
-import { deleteDoc, doc } from 'firebase/firestore';
+import { unwrapSingleQueryResult } from './utils';
 
-
-export function storeInvitation(record: UserInvitationRecord): ResultAsync<string, DbError> {
-  return fromPromise(
-    db.collection('invites').add(record),
-    (e) => new DbInternalError({ cause: e })
-  ).map((doc) => doc.id)
+enum DbCollection {
+  INVITATIONS = 'invitations'
 }
 
-export function deleteInvitationById(id: string) {
-  return fromPromise(
-    db.collection('invites').where('id', '==', id).get(),
-    (e) => new DbInternalError({ cause: e })
-  ).map(
-      (doc) => doc.forEach((d) => fromPromise(
-        d.ref.delete(),
-        (e) => new DbInternalError({ cause: e })
-      )),
+function storeRecord<T extends WithFieldValue<DocumentData>>(
+  collection: DbCollection,
+) {
+  return function(record: T): ResultAsync<string, DbError> {
+    return safeTry(
+      async function* () {
+        const result = yield* fromPromise(
+          db.collection(collection).add(record),
+          (e) => new DbInternalError({ cause: e })
+        );
+
+        return ok(result.id);
+      }
     )
+  }
 }
 
-export function deleteInvitationById2(id: string) {
-  return safeTry(
-    async function*() {
-      const query = yield* fromPromise(
-        db.collection('invites').where('id', '==', id).get(),
-        (e) => new DbInternalError({ cause: e })
-      )
+function deleteRecordById(collection: DbCollection){
+  return function(id: string) {
+    return safeTry(
+      async function* () {
+        const result = yield* fromPromise(
+          db.collection(collection).where('id', '==', id).get(),
+          (e) => new DbInternalError({ cause: e })
+        )
 
-      const doc = query.forEach((d) => d.ref.delete())
-      const asdf = query.docs[0]
-      asdf.ref.delete();
+        const doc = yield* unwrapSingleQueryResult(result.docs, id, collection)
 
-      return ok();
-    }
-  )
+        const deleteResult = yield* fromPromise(
+          doc.ref.delete(),
+          (e) => new DbInternalError({ cause: e })
+        );
+
+        return ok(deleteResult);
+      }
+    )
+  }
 }
+
+export const storeInvitationRecord = storeRecord<UserInvitationRecord>(DbCollection.INVITATIONS);
+export const deleteInvitationById = deleteRecordById(DbCollection.INVITATIONS);
