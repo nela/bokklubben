@@ -9,12 +9,14 @@ export const authHandle: Handle = async ({ event, resolve }) => {
 		return resolve(event);
 	}
 
-	const tokenPromise = await verifySessionCookie(token);
-
-	return tokenPromise.match(
-		(decodedToken) => {
-			const { uid, email } = decodedToken;
-			event.locals.user = { uid, email: email! };
+	return verifySessionCookie(token).match(
+		(decodedIdToken) => {
+			const { uid, email, admin } = decodedIdToken;
+			event.locals.user = {
+				uid: uid,
+				admin: admin ?? false,
+				email: email!
+			};
 			return resolve(event);
 		},
 		() => {

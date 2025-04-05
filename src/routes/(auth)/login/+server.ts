@@ -1,34 +1,31 @@
+import { AuthUserNotFoundError } from '$lib/errors/auth';
 import { createSessionCookie } from '$lib/server/auth/session';
-import { error, redirect, type RequestHandler } from '@sveltejs/kit';
+import { error, json, redirect, type RequestHandler } from '@sveltejs/kit';
 
-export const POST: RequestHandler = async ({ request }: { request: Request }) => {
+export const POST: RequestHandler = async ({ request, cookies }) => {
 	const body = (await request.json()) as { idToken: string | undefined };
 
 	if (!body.idToken) {
 		throw redirect(303, '/login');
 	}
 
-	const expiresIn = 3600 * 1000 * 24;
-	const sessionToken = await createSessionCookie(body.idToken, expiresIn);
+	const expiresIn = 3600 * 1000;
 
-	return sessionToken.match(
+	return createSessionCookie(body.idToken, expiresIn).match(
 		(token) => {
-			const options = {
+			cookies.set('session', token, {
 				maxAge: expiresIn,
 				httpOnly: true,
 				// secure: true,
-				sameSite: 'Lax',
+				sameSite: 'lax',
 				path: '/'
-			};
-
-			const header = new Headers();
-			header.append('set-cookie', `session=${token}; ${JSON.stringify(options)}`);
-
-			return new Response('login', {
-				status: 200,
-				headers: header
 			});
+
+			return json({ message: 'Signin successful.' }, { status: 200 });
 		},
-		() => error(500, { message: 'Failed to login. Please try again later.' })
+		(e) =>
+			e instanceof AuthUserNotFoundError
+				? error(401)
+				: error(500, 'Failed to login. Please try again later.')
 	);
 };

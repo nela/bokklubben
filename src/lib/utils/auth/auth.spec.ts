@@ -1,13 +1,13 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { goto } from '$app/navigation';
-import { performAuth } from './auth';
 import { PublicRoute, UserRoute } from '../constants';
+import { signIn } from './auth';
 
 vi.mock('$app/navigation', () => ({
 	goto: vi.fn()
 }));
 
-describe('Perform Authentication Flow', () => {
+describe('Sign Up', () => {
 	const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 	const fetchSpy = vi.spyOn(global, 'fetch');
 	const signOut = vi.fn();
@@ -24,7 +24,7 @@ describe('Perform Authentication Flow', () => {
 	it('should catch error and call signOut when authFn throws error', async () => {
 		const authFn = vi.fn().mockRejectedValueOnce(new Error('Bad Request.'));
 
-		await performAuth(() => authFn(), signOut);
+		await signIn(() => authFn(), signOut);
 
 		expect(authFn).toHaveBeenCalledOnce();
 		expect(fetchSpy).not.toHaveBeenCalled();
@@ -37,7 +37,7 @@ describe('Perform Authentication Flow', () => {
 		authUser.user.getIdToken.mockRejectedValueOnce('Oopsie');
 		const authFn = vi.fn().mockImplementationOnce(() => authUser);
 
-		await performAuth(() => authFn(), signOut);
+		await signIn(() => authFn(), signOut);
 
 		expect(authFn).toHaveBeenCalledOnce();
 		expect(authUser.user.getIdToken).toHaveBeenCalledOnce();
@@ -52,7 +52,7 @@ describe('Perform Authentication Flow', () => {
 		const authFn = vi.fn().mockImplementationOnce(() => authUser);
 		fetchSpy.mockResolvedValueOnce(new Response(null, { status: 500 }));
 
-		await performAuth(() => authFn(), signOut);
+		await signIn(() => authFn(), signOut);
 
 		expect(authFn).toHaveBeenCalledOnce();
 		expect(authUser.user.getIdToken).toHaveBeenCalledOnce();
@@ -71,7 +71,7 @@ describe('Perform Authentication Flow', () => {
 		const authFn = vi.fn().mockImplementationOnce(() => authUser);
 		fetchSpy.mockResolvedValueOnce(new Response(null, { status: 200 }));
 
-		await performAuth(() => authFn(), signOut);
+		await signIn(() => authFn(), signOut);
 
 		expect(authFn).toHaveBeenCalledOnce();
 		expect(authUser.user.getIdToken).toHaveBeenCalledOnce();

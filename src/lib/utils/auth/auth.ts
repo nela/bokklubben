@@ -2,10 +2,7 @@ import { goto } from '$app/navigation';
 import { PublicRoute, UserRoute } from '$lib/utils/constants';
 import { type UserCredential } from 'firebase/auth';
 
-export async function performAuth(
-	authFn: () => Promise<UserCredential>,
-	signOut: () => Promise<void>
-) {
+export async function signIn(authFn: () => Promise<UserCredential>, signOut: () => Promise<void>) {
 	try {
 		const userCredential = await authFn();
 		const idToken = await userCredential.user.getIdToken();

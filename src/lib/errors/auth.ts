@@ -1,9 +1,15 @@
 import { TaggedError } from './tagged-error';
 
-export class AuthInternalError extends TaggedError<'AuthError'> {
+export class AuthInternalError extends TaggedError<'AuthInternalError'> {
 	constructor(options: ErrorOptions = {}) {
 		super('Authentication error', options);
 	}
 }
 
-export type AuthError = AuthInternalError;
+export class AuthUserNotFoundError extends TaggedError<'AuthUserNotFoundError '> {
+	constructor(options: ErrorOptions = {}) {
+		super('Firebase Authenticaiton user not found', options);
+	}
+}
+
+export type AuthError = AuthInternalError | AuthUserNotFoundError;

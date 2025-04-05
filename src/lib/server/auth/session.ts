@@ -1,16 +1,28 @@
-import { AuthInternalError, type AuthError } from '$lib/errors/auth';
+import { AuthInternalError, AuthUserNotFoundError, type AuthError } from '$lib/errors/auth';
 import type { Cookies } from '@sveltejs/kit';
 import type { DecodedIdToken } from 'firebase-admin/auth';
-import { fromPromise, type ResultAsync } from 'neverthrow';
+import { errAsync, fromPromise, type ResultAsync } from 'neverthrow';
+import { fetchRegisteredUserByParam } from '../db/queries';
 import { firebaseAdmin } from '../firebase/firebase.admin';
 
-export function createSessionCookie(
-	idToken: string,
-	expiresIn: number
-): ResultAsync<string, AuthError> {
+function _createSessionCookie(idToken: string, expiresIn: number): ResultAsync<string, AuthError> {
 	return fromPromise(
 		firebaseAdmin.auth().createSessionCookie(idToken, { expiresIn }),
 		(e) => new AuthInternalError({ cause: e })
+	);
+}
+
+function _verifyIdToken(idToken: string) {
+	return fromPromise(
+		firebaseAdmin.auth().verifyIdToken(idToken, true),
+		(e) => new AuthInternalError({ cause: e })
+	);
+}
+
+function _deleteFirebaseAuthUser(uid: string) {
+	return fromPromise(
+		firebaseAdmin.auth().deleteUser(uid),
+		(e) => new AuthUserNotFoundError({ cause: e })
 	);
 }
 
@@ -37,4 +49,22 @@ export function setSessionCookie(cookies: Cookies, token: string, expiresAt: Dat
 		expires: expiresAt,
 		path: '/'
 	});
+}
+
+export function createSessionCookie(idToken: string, expiresIn: number) {
+	return _verifyIdToken(idToken)
+		.andThen((decodedIdToken) =>
+			fetchRegisteredUserByParam({ key: 'uid', value: decodedIdToken.uid }).orElse((e) =>
+				_deleteFirebaseAuthUser(decodedIdToken.uid).andThen(() =>
+					errAsync(new AuthUserNotFoundError({ cause: e }))
+				)
+			)
+		)
+		.andThen(() => _createSessionCookie(idToken, expiresIn));
+}
+
+if (import.meta.env.VITEST) {
+	module.exports.privateCreateSessionCookie = _createSessionCookie;
+	module.exports.privateVerifyIdToken = _verifyIdToken;
+	module.exports.privateDeleteFirebaseAuthUser = _deleteFirebaseAuthUser;
 }

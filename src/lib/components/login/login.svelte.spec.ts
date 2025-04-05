@@ -61,12 +61,12 @@ describe('Login.svelte', () => {
 		it('should call signInHandler.emailAndPassword on click', async () => {
 			const user = userEvent.setup();
 
-			const mockPerformAuth = vi.fn();
+			const mockSignIn = vi.fn();
 			const mockSignOut = vi.fn();
 
 			const { getByTestId, getByPlaceholderText } = render(Login, {
 				props: {
-					performAuth: mockPerformAuth,
+					signIn: mockSignIn,
 					auth: {
 						signOut: mockSignOut()
 					} as unknown as Auth
@@ -85,7 +85,7 @@ describe('Login.svelte', () => {
 			expect(button).toBeEnabled();
 			await user.click(button);
 
-			expect(mockPerformAuth).toHaveBeenCalledOnce();
+			expect(mockSignIn).toHaveBeenCalledOnce();
 		});
 	});
 });

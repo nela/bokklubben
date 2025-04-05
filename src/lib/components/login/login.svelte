@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { validators } from '$lib/utils/helpers';
 	import {
 		GithubAuthProvider,
 		GoogleAuthProvider,
@@ -9,7 +10,7 @@
 		type UserCredential
 	} from 'firebase/auth';
 
-	export let performAuth: (
+	export let signIn: (
 		authFn: () => Promise<UserCredential>,
 		signOut: () => Promise<void>
 	) => Promise<void>;
@@ -26,7 +27,7 @@
 	};
 
 	const handleLogin = (provider: AuthProvider) => {
-		performAuth(providerMap[provider], () => auth.signOut());
+		signIn(providerMap[provider], () => auth.signOut());
 	};
 
 	let email: string = '';
@@ -34,10 +35,7 @@
 
 	let disabled = true;
 
-	const emailRegex =
-		/^(?!\.)(?!.*\.\.)([A-Z0-9_'+\-\.]*)[A-Z0-9_+-]@([A-Z0-9][A-Z0-9\-]*\.)+[A-Z]{2,}$/i; // eslint-disable-line no-useless-escape
-
-	$: disabled = !(emailRegex.test(email) && password.length > 5);
+	$: disabled = !(validators.parseEmail(email) && password.length > 5);
 </script>
 
 <h1>Velkommen skal du være</h1>
@@ -68,6 +66,14 @@
 		Log in with Email and Password
 	</button>
 </div>
+
+<button
+	data-testid="google-auth-btn"
+	aria-label="Log in with Google"
+	on:click={() => handleLogin('google')}
+>
+	Log in with Google
+</button>
 
 <style>
 	.login-form {
