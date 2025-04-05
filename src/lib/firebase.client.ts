@@ -14,7 +14,8 @@ function getFirebaseClient() {
 			}
 		: {
 				projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-				apiKey: 'apiKey'
+				apiKey: 'apiKey',
+				authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN
 			};
 
 	const app = initializeApp(firebaseConfig);

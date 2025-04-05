@@ -16,9 +16,11 @@ function getFirebaseAdmin(): typeof admin {
 
 	if (import.meta.env.DEV) {
 		process.env['FIREBASE_AUTH_EMULATOR_HOST'] = 'localhost:9099';
+		process.env['FIRESTORE_EMULATOR_HOST'] = 'localhost:8080';
 	}
 
 	return admin;
 }
 
 export const firebaseAdmin = getFirebaseAdmin();
+export const db = firebaseAdmin.app().firestore();
