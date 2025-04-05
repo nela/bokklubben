@@ -55,9 +55,9 @@ jobs:
       - name: Lint
         run: pnpm run lint
 
-  unit-tests:
+  vitest:
     runs-on: ubuntu-latest
-    needs: [install, lint]
+    needs: [install]
     if: ${{ needs.lint.result == 'success' }}
     steps:
       - name: Checkout
@@ -80,10 +80,10 @@ jobs:
       - name: Run unit tests
         run: pnpm run test
 
-  e2e-tests:
+  playwright:
     timeout-minutes: 60
     runs-on: ubuntu-latest
-    needs: [install, unit-tests]
+    needs: [install]
     if: ${{ needs.unit-tests.result == 'success' }}
     steps:
       - name: Checkout
@@ -110,7 +110,7 @@ jobs:
         run: pnpm exec playwright install --with-deps
 
       - name: Run Playwright tests
-        run: firebase emulators:exec --only auth --import emulator_seed 'pnpm exec playwright test'
+        run: firebase emulators:start --import emulator_seed 'pnpm exec playwright test'
 
       - uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}

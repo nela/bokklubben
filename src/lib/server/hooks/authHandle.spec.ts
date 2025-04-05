@@ -31,7 +31,7 @@ describe('Authentication Hook', () => {
 
 	it('should return undefined local user when session cookie is not present', async () => {
 		event.cookies.get = vi.fn().mockReturnValueOnce(undefined);
-		event.locals.user = { uid: 'uid', email: 'n@n.no' };
+		event.locals.user = { admin: true, uid: 'uid', email: 'n@n.no' };
 
 		await authHandle({ event: event, resolve: resolveMock });
 
@@ -53,9 +53,9 @@ describe('Authentication Hook', () => {
 		expect(resolveMock).toHaveBeenCalledExactlyOnceWith(event);
 	});
 
-	it('should add user when valid session token', async () => {
+	it('should add admin user when valid session token', async () => {
 		event.cookies.get = vi.fn().mockReturnValueOnce('correct-session-token');
-		const expectedUser = { uid: 'uid', email: 'n@n.no' };
+		const expectedUser = { admin: true, uid: 'uid', email: 'n@n.no' };
 
 		vi.mocked(verifySessionCookie).mockReturnValueOnce(
 			okAsync(expectedUser as unknown as DecodedIdToken)
