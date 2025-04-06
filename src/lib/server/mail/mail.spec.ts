@@ -1,9 +1,9 @@
 import { afterAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import { sendEmail, type EmailContent } from './mail';
+import { EmailInternalError } from '$lib/errors/mail';
 
-describe('mail', () => {
+describe('Mail', () => {
 	const fetchSpy = vi.spyOn(global, 'fetch');
-	const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
 	vi.stubEnv('VITE_SENDGRID_API_KEY_WEB', 'mocked-sendgrid-apikey');
 	vi.stubEnv('VITE_SENDGRID_URL', 'https://sendgridurl.com');
@@ -24,17 +24,16 @@ describe('mail', () => {
 		const res = await sendEmail('to', 'subject', { type: 'text/plain', value: 'invalid' });
 
 		expect(fetchSpy).toHaveBeenCalledOnce();
-		expect(consoleErrorSpy).toHaveBeenCalledOnce();
-		expect(res).toEqual(false);
+		expect(res._unsafeUnwrapErr()).toBeInstanceOf(EmailInternalError);
 	});
 
 	[
 		{
-			label: 'to is a string',
+			label: 'recepients is a string',
 			to: 'n@n.no'
 		},
 		{
-			label: 'to is an array',
+			label: 'recepients is an array',
 			to: ['n@n.no', 'm@m.mo']
 		}
 	].forEach(({ label, to }, i) => {
@@ -75,8 +74,8 @@ describe('mail', () => {
 
 			expect(fetchSpy).toHaveBeenCalledOnce();
 			expect(fetchSpy).toHaveBeenCalledWith('https://sendgridurl.com', expectedPayload);
-			expect(consoleErrorSpy).not.toHaveBeenCalled();
-			expect(res).toEqual(true);
+			expect(res.isOk()).toEqual(true);
+			expect(res._unsafeUnwrap().status).toEqual(200);
 		});
 	});
 });

@@ -1,18 +1,28 @@
+import { fromPromise } from 'neverthrow';
 import { NO_REPLY_EMAIL, SENDGRID_TOKEN, SENDGRID_URL } from './config';
+import { EmailInternalError } from '$lib/errors/mail';
 
 export interface EmailContent {
 	value: string;
 	type: 'text/plain' | 'text/html';
 }
 
+export function createHtmlString(head: string, body: string) {
+	return (
+		'<html>' +
+		`<head><meta http-equiv="Content-Type" content="text/html charset=UTF-8"/>${head}</head>` +
+		`<body>${body}</body>` +
+		'</html>'
+	);
+}
+
 export async function sendEmail(
-	sendTo: string | Array<string>,
+	recepients: string | Array<string>,
 	subject: string,
 	content: EmailContent
 ) {
-	let res: Response | undefined = undefined;
-	try {
-		res = await fetch(SENDGRID_URL, {
+	return fromPromise(
+		fetch(SENDGRID_URL, {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json',
@@ -24,14 +34,11 @@ export async function sendEmail(
 				},
 				subject: subject,
 				content: [content],
-				personalizations: (Array.isArray(sendTo) ? sendTo : [sendTo]).map((e) => ({
+				personalizations: (Array.isArray(recepients) ? recepients : [recepients]).map((e) => ({
 					to: [{ email: e }]
 				}))
 			})
-		});
-	} catch (error) {
-		console.error(error);
-	}
-
-	return res?.ok ?? false;
+		}),
+		(e) => new EmailInternalError({ cause: e })
+	);
 }
