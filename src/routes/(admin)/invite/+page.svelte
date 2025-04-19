@@ -1,13 +1,12 @@
 <script lang="ts">
+	import type { UserAdminInvitationDto } from '$lib/dto/dto';
 	import { validators, firstToUpperRestToLowerCase } from '$lib/utils/helpers';
-	import type { UserInvitationDto } from './+server';
 
 	let roles: Array<string> = $state(['']);
 	let firstName: string = $state('');
 	let lastName: string = $state('');
 	let email: string = $state('');
 	let admin: boolean | undefined = $state(undefined);
-	let handle: string = $state('');
 
 	let invitationSuccess: boolean | undefined = $state(undefined);
 	let message: string | undefined = $state(undefined);
@@ -18,13 +17,12 @@
 			return;
 		}
 
-		const payload: UserInvitationDto = {
+		const payload: UserAdminInvitationDto = {
 			firstName: firstToUpperRestToLowerCase(firstName),
 			lastName: firstToUpperRestToLowerCase(lastName),
 			email: email,
 			roles: roles.filter((r) => r.length > 0),
-			admin: admin,
-			handle: handle.length > 0 ? handle : undefined
+			admin: admin
 		};
 
 		let res: Response | undefined;
@@ -79,15 +77,6 @@
 		required
 	/>
 
-	<input
-		data-testid="handle"
-		aria-label="Handle"
-		type="text"
-		placeholder="Handle"
-		bind:value={handle}
-		required
-	/>
-
 	<input data-testid="admin" aria-label="Is Admin" bind:checked={admin} type="checkbox" required />
 
 	<div>
@@ -109,10 +98,3 @@
 		{message}
 	{/if}
 </div>
-
-<style lang="scss">
-	.form {
-		display: flex;
-		flex-direction: column;
-	}
-</style>

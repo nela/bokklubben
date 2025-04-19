@@ -1,20 +1,17 @@
-export interface UserInvitationRecord {
+interface UserBase {
 	email: string;
 	firstName: string;
 	lastName: string;
-	seed: string;
-	expiresAt: string; //ISO format;
 	roles: Array<string>;
 	admin?: boolean;
-	handle?: string;
 }
 
-export interface UserRecord {
+export interface UserInvitationRecord extends UserBase {
+	seed: string;
+	expiresAt: string; //ISO format;
+}
+
+export interface UserRecord extends UserBase {
 	uid: string;
-	email: string;
-	firstName: string;
-	lastName: string;
-	roles: Array<string>;
-	admin?: boolean;
-	handle?: string;
+	username: string;
 }
