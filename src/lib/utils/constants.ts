@@ -1,11 +1,3 @@
-export enum PublicRoute {
-	Login = '/login'
-}
-
-export enum UserRoute {
-	Dashboard = '/'
-}
-
 export const BREAKPOINTS = {
 	sm: {
 		unit: 'px',
