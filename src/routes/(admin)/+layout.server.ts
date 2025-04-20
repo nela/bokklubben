@@ -1,15 +1,14 @@
 import { redirect } from '@sveltejs/kit';
 import type { LayoutServerLoad } from '../(app)/$types';
-import { PublicRoute, UserRoute } from '$lib/utils/constants';
 
 export const load: LayoutServerLoad = async ({ locals: { user } }) => {
 	if (!user) {
-		return redirect(303, PublicRoute.Login);
+		throw redirect(303, '/login');
 	}
 
 	if (!user.admin) {
-		return redirect(303, UserRoute.Dashboard);
+		throw redirect(303, '/');
 	}
 
-	return {};
+	return;
 };

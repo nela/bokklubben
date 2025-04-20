@@ -1,23 +1,17 @@
 import Email from '$lib/components/email.svelte';
+import type { UserAdminInvitationDto } from '$lib/dto/dto';
+import { EmailInternalError } from '$lib/errors/mail';
 import type { UserInvitationRecord } from '$lib/server/db/model';
-import { deleteInvitationById, storeInvitationRecord } from '$lib/server/db/queries';
-import { sendEmail } from '$lib/server/mail/mail';
-import { createHtmlString, parseNonNullable } from '$lib/utils/helpers';
+import { deleteRecordByRef, storeInvitationRecord } from '$lib/server/db/queries';
+import { createHtmlString, sendEmail } from '$lib/server/mail/mail';
+import { parseNonNullable } from '$lib/utils/helpers';
 import { error, json, type RequestHandler } from '@sveltejs/kit';
 import { createHash } from 'crypto';
+import { errAsync } from 'neverthrow';
 import { render } from 'svelte/server';
 
-export interface UserInvitationDto {
-	email: string;
-	firstName: string;
-	lastName: string;
-	roles?: Array<string>;
-	admin?: boolean;
-	handle?: string;
-}
-
 export const POST: RequestHandler = async ({ request }: { request: Request }) => {
-	const body = (await request.json()) as UserInvitationDto;
+	const body = (await request.json()) as UserAdminInvitationDto;
 
 	const expiresAt = new Date(new Date().getTime() + 60 * 60 * 24 * 7 * 1000);
 
@@ -30,23 +24,25 @@ export const POST: RequestHandler = async ({ request }: { request: Request }) =>
 			.digest('hex')
 	});
 
-	const recordId = await storeInvitationRecord(userInvitationRecord);
-
-	if (recordId.isErr()) {
-		return error(500, 'Failed to store invitation. Try again later.');
-	}
-
-	const renderOutput = render(Email, { props: { seed: userInvitationRecord.seed } });
-	const response = await sendEmail(body.email, 'Invitasjon til bokklubben', {
-		type: 'text/html',
-		value: createHtmlString(renderOutput.head, renderOutput.body)
-	});
-
-	return response.match(
-		() => json({ message: 'Invitation sent successfully.' }, { status: 200 }),
-		() => {
-			deleteInvitationById(recordId.value);
-			return error(500, 'Failed to send email. Try again later.');
-		}
-	);
+	return storeInvitationRecord(userInvitationRecord)
+		.andThen((record) => {
+			const renderOutput = render(Email, { props: { seed: userInvitationRecord.seed } });
+			return sendEmail(body.email, 'Invitasjon til bokklubben', {
+				type: 'text/html',
+				value: createHtmlString(renderOutput.head, renderOutput.body)
+			}).orElse((e) => {
+				deleteRecordByRef(record);
+				return errAsync(e);
+			});
+		})
+		.match(
+			() => json({ message: 'Invitation sent successfully.' }, { status: 200 }),
+			(e) =>
+				error(
+					500,
+					e instanceof EmailInternalError
+						? 'Failed to send email. Try again later.'
+						: 'Unable to store invitaiton record'
+				)
+		);
 };
