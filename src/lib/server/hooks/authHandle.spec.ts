@@ -5,9 +5,9 @@ import { errAsync, okAsync } from 'neverthrow';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { mock, type MockProxy } from 'vitest-mock-extended';
 import { authHandle } from './authHandle';
-import { deleteSessionCookie, verifySessionCookie } from '../auth/session';
+import { deleteSessionCookie, verifySessionCookie } from '$lib/server/services/auth';
 
-vi.mock('../auth/session', () => ({
+vi.mock('$lib/server/services/auth', () => ({
 	verifySessionCookie: vi.fn(),
 	deleteSessionCookie: vi.fn()
 }));

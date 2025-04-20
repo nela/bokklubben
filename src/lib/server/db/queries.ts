@@ -1,9 +1,9 @@
 import { DbInternalError, type DbError } from '$lib/errors/db';
 import type { DocumentData, DocumentReference, WithFieldValue } from 'firebase-admin/firestore';
 import { fromPromise, ok, ResultAsync, safeTry } from 'neverthrow';
-import { db } from '../firebase/firebase.admin';
 import type { UserInvitationRecord, UserRecord } from './model';
 import { unwrapSingleQueryResult } from './utils';
+import { db } from '$lib/server/services/firebase';
 
 enum DbCollection {
 	INVITATION = 'invitation',

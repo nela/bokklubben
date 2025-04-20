@@ -1,5 +1,5 @@
 import { type Handle } from '@sveltejs/kit';
-import { deleteSessionCookie, verifySessionCookie } from '../auth/session';
+import { deleteSessionCookie, verifySessionCookie } from '$lib/server/services/auth';
 
 export const authHandle: Handle = async ({ event, resolve }) => {
 	const token = event.cookies.get('session');
