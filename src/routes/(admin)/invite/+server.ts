@@ -3,7 +3,7 @@ import type { UserAdminInvitationDto } from '$lib/dto/dto';
 import { EmailInternalError } from '$lib/errors/mail';
 import type { UserInvitationRecord } from '$lib/server/db/model';
 import { deleteRecordByRef, storeInvitationRecord } from '$lib/server/db/queries';
-import { createHtmlString, sendEmail } from '$lib/server/mail/mail';
+import { createHtmlString, sendEmail } from '$lib/server/services/mail';
 import { parseNonNullable } from '$lib/utils/helpers';
 import { error, json, type RequestHandler } from '@sveltejs/kit';
 import { createHash } from 'crypto';

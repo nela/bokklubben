@@ -16,7 +16,7 @@ export function createHtmlString(head: string, body: string) {
 	);
 }
 
-export async function sendEmail(
+export function sendEmail(
 	recepients: string | Array<string>,
 	subject: string,
 	content: EmailContent
