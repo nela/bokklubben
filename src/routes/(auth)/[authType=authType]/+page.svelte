@@ -3,6 +3,11 @@
 	import type { PageProps } from './$types';
 	import { goto } from '$app/navigation';
 	import { AuthProvider, performAuth, type AuthType } from '$lib/services/auth';
+	import GoogleIcon from '$lib/components/icons/google-icon.svelte';
+	import MicrosoftIcon from '$lib/components/icons/microsoft-icon.svelte';
+	import GithubIcon from '$lib/components/icons/github-icon.svelte';
+
+	const iconSize = 80;
 
 	let { data }: PageProps = $props();
 
@@ -56,27 +61,22 @@
 		Log in with Email and Password
 	</button>
 
-	<button
-		data-testid="google-auth-btn"
-		aria-label="Log in with Google"
+	<br />
+	<GoogleIcon
+		size={iconSize}
 		onclick={() => onAuth(AuthProvider.GOOGLE)}
-	>
-		Log in with google
-	</button>
+		aria-label="Sign in with Google"
+	/>
 
-	<button
-		data-testid="microsoft-auth-btn"
-		aria-label="Log in with Microsoft"
+	<MicrosoftIcon
+		size={iconSize}
 		onclick={() => onAuth(AuthProvider.MICROSOFT)}
-	>
-		Log in with microsoft
-	</button>
+		aria-label="Sign in with Microsoft"
+	/>
 
-	<button
-		data-testid="github-auth-btn"
-		aria-label="Log in with github"
+	<GithubIcon
+		size={iconSize}
 		onclick={() => onAuth(AuthProvider.GITHUB)}
-	>
-		Log in with github
-	</button>
+		aria-label="Sign in with Github"
+	/>
 </div>
