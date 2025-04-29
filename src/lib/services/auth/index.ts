@@ -1,1 +1,1 @@
-export { AuthProvider, performAuth, type AuthType } from './auth';
+export { AuthProvider, performAuth, validateUserPassword, type AuthType } from './auth';
