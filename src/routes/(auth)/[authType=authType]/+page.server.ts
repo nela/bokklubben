@@ -4,6 +4,8 @@ import { redirect } from '@sveltejs/kit';
 import { err } from 'neverthrow';
 import type { PageServerLoad } from './$types';
 
+export const ssr = true;
+
 export const load: PageServerLoad = async ({ url, params }) => {
 	if (params.authType === 'signin') {
 		return;

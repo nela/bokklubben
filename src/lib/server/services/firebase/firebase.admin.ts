@@ -1,11 +1,13 @@
-import { SERVICE_ACCOUNT } from '$env/static/private';
 import admin, { type ServiceAccount } from 'firebase-admin';
 
 function getFirebaseAdmin(): typeof admin {
 	if (!admin.apps.length) {
+		const serviceAccount = JSON.parse(
+			import.meta.env.VITE_FIREBASE_SERVICE_ACCOUNT
+		) as ServiceAccount;
 		const config = import.meta.env.PROD
 			? {
-					credential: admin.credential.cert(JSON.parse(SERVICE_ACCOUNT) as ServiceAccount)
+					credential: admin.credential.cert(serviceAccount)
 				}
 			: {
 					projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID
