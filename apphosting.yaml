@@ -1,22 +1,28 @@
-# Settings for Backend (on Cloud Run).
-# See https://firebase.google.com/docs/app-hosting/configure#cloud-run
 runConfig:
   minInstances: 0
-  # maxInstances: 100
-  # concurrency: 80
-  # cpu: 1
-  # memoryMiB: 512
-# Environment variables and secrets.
-# env:
-# Configure environment variables.
-# See https://firebase.google.com/docs/app-hosting/configure#user-defined-environment
-# - variable: MESSAGE
-#   value: Hello world!
-#   availability:
-#     - BUILD
-#     - RUNTIME
-
-# Grant access to secrets in Cloud Secret Manager.
-# See https://firebase.google.com/docs/app-hosting/configure#secret-parameters
-# - variable: MY_SECRET
-#   secret: mySecretRef
+  maxInstances: 2
+env:
+  - variable: VITE_FIREBASE_API_KEY
+    secret: firebase-api-key
+  - variable: VITE_FIREBASE_AUTH_DOMAIN
+    secret: firebase-auth-domain
+  - variable: VITE_FIREBASE_PROJECT_ID
+    secret: firebase-project-id
+  - variable: VITE_FIREBASE_STORAGE_BUCKET
+    secret: firebase-storage-bucket
+  - variable: VITE_FIREBASE_MESSAGING_SENDER_ID
+    secret: firebase-messaging-sender-id
+  - variable: VITE_FIREBASE_APP_ID
+    secret: firebase-app-id
+  - variable: VITE_FIREBASE_MEASUREMENT_ID
+    secret: firebase-measurement-id
+  - variable: VITE_FIREBASE_SERVICE_ACCOUNT
+    secret: firebase-admin-service-account
+  - variable: VITE_SENDGRID_API_KEY_RELAY
+    secret: sendgrid-api-key-relay
+  - variable: VITE_SENDGRID_API_KEY_WEB
+    secret: sendgrid-api-key-web
+  - variable: VITE_SENDGRID_URL
+    secret: sendgrid-url
+  - variable: VITE_NO_REPLY_MAIL
+    secret: no-reply-email
