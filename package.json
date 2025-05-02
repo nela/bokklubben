@@ -13,7 +13,8 @@
 		"format": "prettier --write .",
 		"lint": "prettier --check . && eslint .",
 		"test:unit": "vitest",
-		"test": "npm run test:unit -- --run"
+		"test": "npm run test:unit -- --run",
+		"start": "node build"
 	},
 	"devDependencies": {
 		"@eslint/compat": "^1.2.7",
@@ -21,7 +22,6 @@
 		"@playwright/test": "^1.51.1",
 		"@sveltejs/adapter-auto": "^5.0.0",
 		"@sveltejs/adapter-node": "^5.2.12",
-		"@sveltejs/adapter-static": "^3.0.8",
 		"@sveltejs/kit": "^2.20.2",
 		"@sveltejs/vite-plugin-svelte": "^5.0.3",
 		"@testing-library/jest-dom": "^6.6.3",
