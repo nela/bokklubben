@@ -1,6 +1,6 @@
 import type { UserInvitationDto } from '$lib/dto/dto';
 import { fetchInvitationByParam } from '$lib/server/db/queries';
-import { redirect } from '@sveltejs/kit';
+import { redirect, type Actions } from '@sveltejs/kit';
 import { err } from 'neverthrow';
 import type { PageServerLoad } from './$types';
 
@@ -31,3 +31,19 @@ export const load: PageServerLoad = async ({ url, params }) => {
 			}
 		);
 };
+
+export const actions: Actions = {
+  signin: async({ request, locals: { supabase } }) => {
+    const formData = await request.formData();
+    const email = formData.get('email') as string;
+    const password = formData.get('password') as string;
+
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+
+    if (error) {
+      console.error(error)
+    } else {
+      redirect(303, '/')
+    }
+  },
+}

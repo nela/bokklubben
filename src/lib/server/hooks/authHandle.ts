@@ -1,44 +1,18 @@
 import { redirect, type Handle } from '@sveltejs/kit';
-import { deleteSessionCookie, verifySessionCookie } from '$lib/server/services/auth';
 import { createServerClient } from '@supabase/ssr';
-
-const sbUrl = import.meta.env.VITE_SB_PUBLIC_URL;
-const sbKey = import.meta.env.VITE_SB_PUBLIC_ANON_KEY;
-
-export const authHandle: Handle = async ({ event, resolve }) => {
-	const token = event.cookies.get('session');
-
-	if (!token) {
-		event.locals.user = undefined;
-		return resolve(event);
-	}
-
-	return verifySessionCookie(token).match(
-		(decodedIdToken) => {
-			const { uid, email, admin } = decodedIdToken;
-			event.locals.user = {
-				uid: uid,
-				admin: admin ?? false,
-				email: email!
-			};
-			return resolve(event);
-		},
-		() => {
-			deleteSessionCookie(event.cookies);
-			event.locals.user = undefined;
-			return resolve(event);
-		}
-	);
-};
+import { PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY  } from '$env/static/public'
 
 export const supabaseHandle: Handle = async ({ event, resolve }) => {
-	event.locals.supabase = createServerClient(sbUrl, sbKey, {
-		cookies: {
-			getAll: () => event.cookies.getAll(),
-			setAll: (cookiesToSet) => {
-				cookiesToSet.forEach(({ name, value, options }) => {
-					event.cookies.set(name, value, { ...options, path: '/' });
-				});
+	event.locals.supabase = createServerClient(
+    PUBLIC_SUPABASE_URL,
+    PUBLIC_SUPABASE_ANON_KEY,
+    {
+      cookies: {
+        getAll: () => event.cookies.getAll(),
+        setAll: (cookiesToSet) => {
+          cookiesToSet.forEach(({ name, value, options }) => {
+            event.cookies.set(name, value, { ...options, path: '/' });
+          });
 			}
 		}
 	});
@@ -70,10 +44,11 @@ export const supabaseHandle: Handle = async ({ event, resolve }) => {
 	});
 };
 
-const authGuard: Handle = async({ event, resolve }) => {
+export const authGuard: Handle = async({ event, resolve }) => {
   const { session, user } = await event.locals.safeGetSession();
   event.locals.session = session;
   event.locals.user = user;
+  console.log(event.url.pathname);
 
   if (!event.locals.session && !event.url.pathname.startsWith('/sign')) {
     throw redirect(303, '/signin')
