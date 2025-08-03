@@ -1,18 +1,16 @@
 import { redirect, type Handle } from '@sveltejs/kit';
 import { createServerClient } from '@supabase/ssr';
-import { PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY  } from '$env/static/public'
+import { PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY } from '$env/static/public';
+import { fetchMemberByUuid } from '../db/queries';
 
 export const supabaseHandle: Handle = async ({ event, resolve }) => {
-	event.locals.supabase = createServerClient(
-    PUBLIC_SUPABASE_URL,
-    PUBLIC_SUPABASE_ANON_KEY,
-    {
-      cookies: {
-        getAll: () => event.cookies.getAll(),
-        setAll: (cookiesToSet) => {
-          cookiesToSet.forEach(({ name, value, options }) => {
-            event.cookies.set(name, value, { ...options, path: '/' });
-          });
+	event.locals.supabase = createServerClient(PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY, {
+		cookies: {
+			getAll: () => event.cookies.getAll(),
+			setAll: (cookiesToSet) => {
+				cookiesToSet.forEach(({ name, value, options }) => {
+					event.cookies.set(name, value, { ...options, path: '/' });
+				});
 			}
 		}
 	});
@@ -38,25 +36,43 @@ export const supabaseHandle: Handle = async ({ event, resolve }) => {
 		return { session, user };
 	};
 
+	event.locals.fetchMember = async (uuid: string) => {
+		return fetchMemberByUuid(uuid).match(
+			(m) => m,
+			(_) => null
+		);
+	};
+
 	return resolve(event, {
 		filterSerializedResponseHeaders: (name) =>
 			name === 'content-range' || name === 'x-supabase-api-version'
 	});
 };
 
-export const authGuard: Handle = async({ event, resolve }) => {
-  const { session, user } = await event.locals.safeGetSession();
-  event.locals.session = session;
-  event.locals.user = user;
-  console.log(event.url.pathname);
+export const authGuard: Handle = async ({ event, resolve }) => {
+	const { session, user } = await event.locals.safeGetSession();
 
-  if (!event.locals.session && !event.url.pathname.startsWith('/sign')) {
-    throw redirect(303, '/signin')
+	if (!session || !user) {
+		return event.url.pathname.startsWith('/auth') ? resolve(event) : redirect(303, '/auth');
+	}
+
+	event.locals.session = session;
+	event.locals.user = user;
+
+	if (event.locals.session && event.url.pathname.startsWith('/auth')) {
+		throw redirect(303, '/');
+	}
+
+	const member = await event.locals.fetchMember(user.id);
+	if (!member) {
+    await event.locals.supabase.auth.signOut();
+    throw redirect(303, '/auth?error=unauthorized');
   }
 
-  if (event.locals.session && event.url.pathname.startsWith('/sign')) {
-    throw redirect(303, '/')
+  if (member.appRole !== 'admin' && event.url.pathname.startsWith('/admin')) {
+    throw redirect(303, '/');
   }
 
-  return resolve(event);
-}
+	event.locals.member = member;
+	return resolve(event);
+};

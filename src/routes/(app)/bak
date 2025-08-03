@@ -1,0 +1,162 @@
+
+<!-- <script lang="ts"> -->
+<!-- 	import * as Menubar from '$lib/components/ui/menubar/index.js'; -->
+<!-- </script> -->
+<!---->
+<!-- <div class="flex items-center justify-between border-b bg-background px-4 py-3"> -->
+<!-- 	<!-- Left Side --> -->
+<!-- 	<div class="text-lg font-bold"> -->
+<!-- 		<a href="/">Bokklubben</a> -->
+<!-- 	</div> -->
+<!---->
+<!-- 	<!-- Middle Navigation --> -->
+<!-- 	<nav class="hidden items-center gap-6 md:flex"> -->
+<!-- 		<a href="/books" class="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">Books</a> -->
+<!-- 		<a href="/medlemmer" class="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">Medlemmer</a> -->
+<!-- 		<a href="/meets" class="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">Meets</a> -->
+<!-- 		<a href="/protokoll" class="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">Protokoll</a> -->
+<!-- 	</nav> -->
+<!---->
+<!-- 	<!-- Right Side --> -->
+<!-- 	<div> -->
+<!-- 		<Menubar.Root> -->
+<!-- 			<Menubar.Menu> -->
+<!-- 				<Menubar.Trigger>Profile</Menubar.Trigger> -->
+<!-- 				<Menubar.Content> -->
+<!-- 					<Menubar.Item onselect={(e) => e.preventDefault()}> -->
+<!-- 						<form class="w-full"> -->
+<!-- 							<button type="submit" class="w-full text-left"> Log out </button> -->
+<!-- 						</form> -->
+<!-- 					</Menubar.Item> -->
+<!-- 				</Menubar.Content> -->
+<!-- 			</Menubar.Menu> -->
+<!-- 		</Menubar.Root> -->
+<!-- 	</div> -->
+<!-- </div> -->
+<!---->
+<!-- <main> -->
+<!-- 	<slot /> -->
+<!-- </main> -->
+
+<!-- <script lang="ts"> -->
+<!--   let isProfileMenuOpen = false; -->
+<!---->
+<!--   function closeMenu() { -->
+<!--     isProfileMenuOpen = false; -->
+<!--   } -->
+<!-- </script> -->
+<!---->
+<!-- <div class="flex items-center justify-between border-b bg-background px-4 py-3"> -->
+<!--   <!-- Left Side --> -->
+<!--   <div class="text-lg font-bold"> -->
+<!--     <a href="/">Bokklubben</a> -->
+<!--   </div> -->
+<!---->
+<!--   <!-- Middle Navigation --> -->
+<!--   <nav class="hidden items-center gap-6 md:flex"> -->
+<!--     <a href="/books" class="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">Books</a> -->
+<!--     <a href="/medlemmer" class="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">Medlemmer</a> -->
+<!--     <a href="/meets" class="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">Meets</a> -->
+<!--     <a href="/protokoll" class="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">Protokoll</a> -->
+<!--   </nav> -->
+<!---->
+<!--   <!-- Right Side - Basic HTML/Svelte Dropdown --> -->
+<!--   <div class="relative"> -->
+<!--     <button -->
+<!--       on:click={() => (isProfileMenuOpen = !isProfileMenuOpen)} -->
+<!--       class="flex h-10 w-max items-center justify-center rounded-md bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none" -->
+<!--       aria-haspopup="true" -->
+<!--       aria-expanded={isProfileMenuOpen} -->
+<!--     > -->
+<!--       Profile -->
+<!--     </button> -->
+<!--     {#if isProfileMenuOpen} -->
+<!--       <div -->
+<!--         class="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md border bg-popover p-1 text-popover-foreground shadow-md focus:outline-none" -->
+<!--         role="menu" -->
+<!--       > -->
+<!--         <form class="w-full" role="none"> -->
+<!--           <button -->
+<!--             type="submit" -->
+<!--             on:click={closeMenu} -->
+<!--             class="w-full rounded-sm px-2 py-1.5 text-left text-sm hover:bg-accent" -->
+<!--             role="menuitem" -->
+<!--           > -->
+<!--             Log out -->
+<!--           </button> -->
+<!--         </form> -->
+<!--       </div> -->
+<!--     {/if} -->
+<!--   </div> -->
+<!-- </div> -->
+<!---->
+<!-- <main> -->
+<!--   <slot /> -->
+<!-- </main> -->
+
+
+<!-- <script lang="ts"> -->
+<!-- 	import * as Menubar from '$lib/components/ui/menubar/index.js'; -->
+<!-- </script> -->
+<!---->
+<!-- <div class="flex items-center justify-between border-b bg-background px-4 py-3"> -->
+<!-- 	<!-- Left Side --> -->
+<!-- 	<div class="text-lg font-bold"> -->
+<!-- 		<a href="/">Bokklubben</a> -->
+<!-- 	</div> -->
+<!---->
+<!-- 	<!-- Middle & Right Navigation using Shadcn Menubar --> -->
+<!-- 	<div class="hidden md:block"> -->
+<!-- 		<Menubar.Root class="rounded-none border-none bg-transparent p-0"> -->
+<!-- 			<a href="/books"><Menubar.Trigger class="cursor-pointer">Books</Menubar.Trigger></a> -->
+<!-- 			<a href="/medlemmer"><Menubar.Trigger class="cursor-pointer">Medlemmer</Menubar.Trigger></a> -->
+<!-- 			<a href="/meets"><Menubar.Trigger class="cursor-pointer">Meets</Menubar.Trigger></a> -->
+<!-- 			<a href="/protokoll"><Menubar.Trigger class="cursor-pointer">Protokoll</Menubar.Trigger></a> -->
+<!---->
+<!-- 			<Menubar.Menu> -->
+<!-- 				<Menubar.Trigger>Profile</Menubar.Trigger> -->
+<!-- 				<Menubar.Content> -->
+<!-- 					<Menubar.Item onselect={(e) => e.preventDefault()}> -->
+<!-- 						<form class="w-full"> -->
+<!-- 							<button type="submit" class="w-full text-left"> Log out </button> -->
+<!-- 						</form> -->
+<!-- 					</Menubar.Item> -->
+<!-- 				</Menubar.Content> -->
+<!-- 			</Menubar.Menu> -->
+<!-- 		</Menubar.Root> -->
+<!-- 	</div> -->
+<!-- 	 -->
+<!-- 	<!-- Placeholder for mobile menu button --> -->
+<!-- 	<div class="md:hidden"> -->
+<!-- 		<!-- Hamburger Menu Button --> -->
+<!-- 	</div> -->
+<!-- </div> -->
+
+
+
+
+
+	<!-- Mobile Navigation -->
+	<!-- <div class="md:hidden"> -->
+	<!-- 	<Sheet.Root> -->
+	<!-- 		<!-- <Sheet.Trigger asChild let:builder> --> -->
+ <!--      <Sheet.Trigger> -->
+	<!-- 			<button use:builder.action class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium p-2"> -->
+	<!-- 				<Menu class="h-6 w-6" /> -->
+	<!-- 				<span class="sr-only">Toggle navigation menu</span> -->
+	<!-- 			</button> -->
+	<!-- 		</Sheet.Trigger> -->
+	<!-- 		<Sheet.Content side="left"> -->
+	<!-- 			<Sheet.Header> -->
+	<!-- 				<Sheet.Title>Bokklubben</Sheet.Title> -->
+	<!-- 			</Sheet.Header> -->
+	<!-- 			<nav class="grid gap-4 py-4 text-lg"> -->
+	<!-- 				<a href="/books" class="hover:underline">Books</a> -->
+	<!-- 				<a href="/medlemmer" class="hover:underline">Medlemmer</a> -->
+	<!-- 				<a href="/meets" class="hover:underline">Meets</a> -->
+	<!-- 				<a href="/protokoll" class="hover:underline">Protokoll</a> -->
+	<!-- 				<a href="/profile" class="hover:underline">Profile</a> -->
+	<!-- 			</nav> -->
+	<!-- 		</Sheet.Content> -->
+	<!-- 	</Sheet.Root> -->
+	<!-- </div> -->

@@ -8,7 +8,7 @@ export class AuthInternalError extends TaggedError<'AuthInternalError'> {
 
 export class AuthUserNotFoundError extends TaggedError<'AuthUserNotFoundError '> {
 	constructor(options: ErrorOptions = {}) {
-		super('Firebase Authenticaiton user not found', options);
+		super('Authenticaiton user not found', options);
 	}
 }
 

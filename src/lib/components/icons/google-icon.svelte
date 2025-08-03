@@ -1,9 +1,12 @@
 <script lang="ts">
 	import type { WithElementRef } from '$lib/utils/types';
+	import { getTheme } from '@sejohnson/svelte-themes';
 	import type { SVGAttributes } from 'svelte/elements';
 
+	const theme = getTheme();
+
 	let {
-		color = 'light',
+		color = theme.resolvedTheme === 'dark' ? 'dark' : 'light',
 		shape = 'sq',
 		size = 16,
 		ref = $bindable(null),

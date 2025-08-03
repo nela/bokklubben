@@ -1,17 +1,24 @@
 <script lang="ts">
 	import type { WithElementRef } from '$lib/utils/types';
+	import { getTheme } from '@sejohnson/svelte-themes';
 	import type { SVGAttributes } from 'svelte/elements';
 
+	const theme = getTheme();
+
 	let {
-		color = 'dark',
+		color = theme.resolvedTheme === 'dark' ? 'light' : 'dark',
 		size = 50,
 		type = 'bold',
+		width = $bindable(null),
+		height = $bindable(null),
 		ref = $bindable(null),
 		...rest
 	}: WithElementRef<
 		SVGAttributes<SVGElement> & {
 			color?: 'dark' | 'light';
 			size?: number;
+			width?: number | null;
+			height?: number | null;
 			type?: 'bold' | 'normal';
 		},
 		SVGElement
@@ -19,8 +26,8 @@
 </script>
 
 <svg
-	width={size}
-	height={size * 1.15}
+	width={width ? width : size}
+	height={height ? height : size * 1.15}
 	viewBox="0 0 88 101"
 	fill="none"
 	bind:this={ref}
