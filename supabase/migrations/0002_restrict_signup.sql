@@ -3,7 +3,7 @@
 create or replace function public.verify_authorization()
 returns trigger
 language plpgsql
-security definer set search_path = public
+security definer set search_path = ''
 as $$
 begin
 	if not exists (select 1 from public.members where email = new.email and fk_auth_id is null) then
@@ -20,7 +20,7 @@ create trigger before_user_signup_check_invitation
 create or replace function public.link_member()
 returns trigger
 language plpgsql
-security definer set search_path = public
+security definer set search_path = ''
 as $$
 begin
 	update public.members
