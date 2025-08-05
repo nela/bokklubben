@@ -6,7 +6,7 @@ import { err, fromPromise, ok, ResultAsync, safeTry } from 'neverthrow';
 import { DbInternalError, DbTooManyRowsError, type DbError } from '$lib/errors/db';
 import { unwrapSingleQueryResult } from './utils';
 import { count, eq, inArray } from 'drizzle-orm';
-import { ClubTitle, type Member } from '$lib/dto/dto';
+import { ClubTitle, type Member, type PublicMember } from '$lib/dto/dto';
 import type { MemberDbDto } from './model';
 import { authUsers } from 'drizzle-orm/supabase';
 
@@ -141,4 +141,36 @@ export function fetchMemberByUuid(uuid: string) {
 
 		return ok(mapMember(member, titles));
 	});
+}
+
+export function fetchMembers(): ResultAsync<Array<PublicMember>, DbError> {
+	return fromPromise(
+		db
+			.select({
+				memberId: members.id,
+				firstname: members.firstname,
+				lastname: members.lastname,
+				username: members.username,
+				memberSince: members.memberSince,
+				memberTo: members.memberTo,
+				clubTitle: clubTitles.name
+			})
+			.from(members)
+			.leftJoin(memberClubTitle, eq(memberClubTitle.fkMemberId, members.id))
+			.leftJoin(clubTitles, eq(clubTitles.id, memberClubTitle.fkClubTitleId)),
+		(e) => new DbInternalError({ cause: e })
+	).map((res) =>
+		Map.groupBy(res, ({ memberId }) => memberId)
+			.values()
+			.map((m) => {
+				const { memberId, clubTitle, ...first } = m[0];
+				return {
+					...first,
+					titles: m
+						.map((e) => (e.clubTitle ? (e.clubTitle as ClubTitle) : null))
+						.filter((ct) => ct !== null)
+				};
+			})
+			.toArray()
+	);
 }

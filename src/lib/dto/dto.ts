@@ -21,4 +21,13 @@ export interface Member {
 	memberTo?: Date | null;
 	appRole: AppRole;
 	titles: Array<ClubTitle>;
-}
+};
+
+export interface PublicMember {
+	firstname: string;
+	lastname: string;
+	username: string | null;
+	memberSince: Date;
+	memberTo?: Date | null;
+	titles: Array<ClubTitle>;
+};

@@ -6,7 +6,8 @@
 	import { ClubTitle } from '$lib/dto/dto';
 	import type { DateValue } from '@internationalized/date';
 	import { quintOut } from 'svelte/easing';
-	import { crossfade, fly, slide } from 'svelte/transition';
+	import { crossfade, fly } from 'svelte/transition';
+	import type { ActionData } from '../auth/$types';
 
 	let { form }: { form?: ActionData } = $props();
 
@@ -20,23 +21,6 @@
 	let memberSinceForm = $derived.by(() => memberSinceValue?.toDate('UTC'));
 
 	let activeForm: 'member' | 'book' | 'event' = $derived('member');
-	export const [send, receive] = crossfade({
-		duration: (d) => Math.sqrt(d * 200),
-
-		fallback(node, params) {
-			const style = getComputedStyle(node);
-			const transform = style.transform === 'none' ? '' : style.transform;
-
-			return {
-				duration: 600,
-				easing: quintOut,
-				css: (t) => `
-				transform: ${transform} scale(${t});
-				opacity: ${t}
-			`
-			};
-		}
-	});
 </script>
 
 <div class="bg-background flex h-dvh w-screen">
@@ -140,9 +124,7 @@
 				</form>
 			</div>
 		{:else if activeForm === 'book'}
-			<div
-				class="relative mx-auto flex w-full max-w-lg flex-col gap-8"
-			>
+			<div class="relative mx-auto flex w-full max-w-lg flex-col gap-8">
 				<div
 					in:fly={{ x: -100, duration: 300, delay: 300 }}
 					out:fly={{ x: -100, duration: 300 }}
