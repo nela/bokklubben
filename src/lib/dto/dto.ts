@@ -1,24 +1,33 @@
-interface UserBaseDto {
+export enum ClubTitle {
+	CTO = 'CTO',
+	CFO = 'CFO',
+	WHIP = 'Whip',
+	BUREAUCRAT = 'Byråkraten',
+	USURPER = 'USURPER',
+	EXECUTIONER = 'Bøddel',
+	PROBATE = 'Prospekt',
+	HONORARY = 'Ærede Medlem',
+	FOUNDING_FATHER = 'Founding Father'
+}
+
+export type AppRole = 'admin' | 'regular';
+
+export interface Member {
+	firstname: string;
+	lastname: string;
+	username: string | null;
 	email: string;
-	firstName: string;
-	lastName: string;
-	admin?: boolean;
-	roles?: Array<string>;
-}
+	memberSince: Date;
+	memberTo?: Date | null;
+	appRole: AppRole;
+	titles: Array<ClubTitle>;
+};
 
-export type UserAdminInvitationDto = UserBaseDto;
-
-export interface UserInvitationDto {
-	email: string;
-	username: string;
-}
-
-export interface UserRegistrationDto extends UserInvitationDto {
-	uid: string;
-	idToken: string;
-}
-
-export interface UserDto extends UserBaseDto {
-	username: string;
-	uid: string;
-}
+export interface PublicMember {
+	firstname: string;
+	lastname: string;
+	username: string | null;
+	memberSince: Date;
+	memberTo?: Date | null;
+	titles: Array<ClubTitle>;
+};

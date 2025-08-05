@@ -1,0 +1,41 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1754086268508,
+      "tag": "0000_add_members",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1754086273617,
+      "tag": "0001_insert_club_titles",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1754155004043,
+      "tag": "0002_restrict_signup",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1754398091376,
+      "tag": "0003_add_meets",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1754398106608,
+      "tag": "0004_add_books",
+      "breakpoints": true
+    }
+  ]
+}

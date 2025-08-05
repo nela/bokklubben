@@ -2,18 +2,16 @@
 	import type { Snippet } from 'svelte';
 	import { Button } from './ui/button';
 	import LoaderIcon from './icons/loader-icon.svelte';
-	import type { MouseEventHandler } from 'svelte/elements';
+
 	let {
 		disabled,
 		pending,
 		success,
-		onclick,
 		children
 	}: {
 		disabled?: boolean;
-		pending?: boolean;
-		success?: boolean;
-		onclick: MouseEventHandler<HTMLButtonElement>;
+		pending: boolean;
+		success: boolean;
 		children: Snippet;
 	} = $props();
 </script>
@@ -22,7 +20,6 @@
 	type={pending ? 'button' : 'submit'}
 	disabled={!!disabled || pending || success}
 	class="relative"
-	{onclick}
 >
 	{@render children()}
 

@@ -1,0 +1,36 @@
+
+-- 1. Create Members with fk_auth_id as NULL
+INSERT INTO public.members (fk_auth_id, firstname, lastname, username, email, app_role)
+VALUES
+    (NULL, 'Admin', 'User', 'admin_user', 'admin@test.com', 'admin'),
+    (NULL, 'John', 'Doe', 'johndoe', 'john@test.com', 'regular'),
+    (NULL, 'Jane', 'Smith', 'janesmith', 'jane@test.com', 'regular'),
+    (NULL, 'James', 'Bond', 'jbond', 'james@test.com', 'regular'),
+    (NULL, 'Peter', 'Jones', 'peterjones', 'peter@test.com', 'regular'),
+    (NULL, 'Mary', 'Jane', 'maryjane', 'mary@test.com', 'regular');
+
+INSERT INTO auth.users (instance_id, id, aud, role, email, encrypted_password, email_confirmed_at, invited_at, confirmation_token, confirmation_sent_at, recovery_token, recovery_sent_at, email_change_token_new, email_change, email_change_sent_at, last_sign_in_at, raw_app_meta_data, raw_user_meta_data, is_super_admin, created_at, updated_at, phone, phone_confirmed_at, phone_change, phone_change_token, phone_change_sent_at, email_change_token_current, email_change_confirm_status, banned_until, reauthentication_token, reauthentication_sent_at, is_sso_user, deleted_at, is_anonymous) VALUES ('00000000-0000-0000-0000-000000000000', 'a2604cbd-0b75-4b3a-af2e-76ea10df1247', 'authenticated', 'authenticated', 'admin@test.com', '$2a$10$zhwXD6u5g3x46W1kGlW5guQHzYIpYzCKqGGDj6nh/MwLwAmo1Ppzi', '2025-07-30 15:07:44.801261+00', NULL, '', NULL, '', NULL, '', '', NULL, NULL, '{"provider": "email", "providers": ["email"]}', '{"email_verified": true}', NULL, '2025-07-30 15:07:44.75853+00', '2025-07-30 15:07:44.809039+00', NULL, NULL, '', '', NULL, '', 0, NULL, '', NULL, false, NULL, false);
+INSERT INTO auth.users (instance_id, id, aud, role, email, encrypted_password, email_confirmed_at, invited_at, confirmation_token, confirmation_sent_at, recovery_token, recovery_sent_at, email_change_token_new, email_change, email_change_sent_at, last_sign_in_at, raw_app_meta_data, raw_user_meta_data, is_super_admin, created_at, updated_at, phone, phone_confirmed_at, phone_change, phone_change_token, phone_change_sent_at, email_change_token_current, email_change_confirm_status, banned_until, reauthentication_token, reauthentication_sent_at, is_sso_user, deleted_at, is_anonymous) VALUES ('00000000-0000-0000-0000-000000000000', '53fb6375-347d-4309-b298-8509435171eb', 'authenticated', 'authenticated', 'john@test.com', '$2a$10$qUl6RhdCZtwwK5e.mxdAreOslPB6rYyxUayMSGc1t/1/qZGcWqMj.', '2025-07-30 15:08:05.057618+00', NULL, '', NULL, '', NULL, '', '', NULL, NULL, '{"provider": "email", "providers": ["email"]}', '{"email_verified": true}', NULL, '2025-07-30 15:08:05.036328+00', '2025-07-30 15:08:05.061757+00', NULL, NULL, '', '', NULL, '', 0, NULL, '', NULL, false, NULL, false);
+INSERT INTO auth.users (instance_id, id, aud, role, email, encrypted_password, email_confirmed_at, invited_at, confirmation_token, confirmation_sent_at, recovery_token, recovery_sent_at, email_change_token_new, email_change, email_change_sent_at, last_sign_in_at, raw_app_meta_data, raw_user_meta_data, is_super_admin, created_at, updated_at, phone, phone_confirmed_at, phone_change, phone_change_token, phone_change_sent_at, email_change_token_current, email_change_confirm_status, banned_until, reauthentication_token, reauthentication_sent_at, is_sso_user, deleted_at, is_anonymous) VALUES ('00000000-0000-0000-0000-000000000000', '7cfe5be9-c7aa-4e26-8217-f21fd17376f0', 'authenticated', 'authenticated', 'jane@test.com', '$2a$10$MbfW4pWJG7awNcdWac/CMuRgGdHiy1aumtTSC.7qGaO9q8FgRwpFi', '2025-07-30 15:08:23.772331+00', NULL, '', NULL, '', NULL, '', '', NULL, NULL, '{"provider": "email", "providers": ["email"]}', '{"email_verified": true}', NULL, '2025-07-30 15:08:23.763714+00', '2025-07-30 15:08:23.773844+00', NULL, NULL, '', '', NULL, '', 0, NULL, '', NULL, false, NULL, false);
+INSERT INTO auth.users (instance_id, id, aud, role, email, encrypted_password, email_confirmed_at, invited_at, confirmation_token, confirmation_sent_at, recovery_token, recovery_sent_at, email_change_token_new, email_change, email_change_sent_at, last_sign_in_at, raw_app_meta_data, raw_user_meta_data, is_super_admin, created_at, updated_at, phone, phone_confirmed_at, phone_change, phone_change_token, phone_change_sent_at, email_change_token_current, email_change_confirm_status, banned_until, reauthentication_token, reauthentication_sent_at, is_sso_user, deleted_at, is_anonymous) VALUES ('00000000-0000-0000-0000-000000000000', '3cf90944-c126-4fde-a26a-b1d2078f98a4', 'authenticated', 'authenticated', 'james@test.com', '$2a$10$JgQWwbGeMShbf/uPVd1ABOdU6B72j.mQdOmOW/gzEWkrmpsDSw5q.', '2025-07-30 15:08:45.975471+00', NULL, '', NULL, '', NULL, '', '', NULL, NULL, '{"provider": "email", "providers": ["email"]}', '{"email_verified": true}', NULL, '2025-07-30 15:08:45.966745+00', '2025-07-30 15:08:45.977037+00', NULL, NULL, '', '', NULL, '', 0, NULL, '', NULL, false, NULL, false);
+
+
+INSERT INTO auth.identities (provider_id, user_id, identity_data, provider, last_sign_in_at, created_at, updated_at, id) VALUES ('a2604cbd-0b75-4b3a-af2e-76ea10df1247', 'a2604cbd-0b75-4b3a-af2e-76ea10df1247', '{"sub": "a2604cbd-0b75-4b3a-af2e-76ea10df1247", "email": "admin@test.com", "email_verified": false, "phone_verified": false}', 'email', '2025-07-30 15:07:44.788298+00', '2025-07-30 15:07:44.788381+00', '2025-07-30 15:07:44.788381+00', 'e1a03496-a1af-44a4-9ec0-1015ebc0cc05');
+INSERT INTO auth.identities (provider_id, user_id, identity_data, provider, last_sign_in_at, created_at, updated_at, id) VALUES ('53fb6375-347d-4309-b298-8509435171eb', '53fb6375-347d-4309-b298-8509435171eb', '{"sub": "53fb6375-347d-4309-b298-8509435171eb", "email": "john@test.com", "email_verified": false, "phone_verified": false}', 'email', '2025-07-30 15:08:05.040772+00', '2025-07-30 15:08:05.040959+00', '2025-07-30 15:08:05.040959+00', '5dd6c959-2b7a-4336-8f99-744a4242fc90');
+INSERT INTO auth.identities (provider_id, user_id, identity_data, provider, last_sign_in_at, created_at, updated_at, id) VALUES ('7cfe5be9-c7aa-4e26-8217-f21fd17376f0', '7cfe5be9-c7aa-4e26-8217-f21fd17376f0', '{"sub": "7cfe5be9-c7aa-4e26-8217-f21fd17376f0", "email": "jane@test.com", "email_verified": false, "phone_verified": false}', 'email', '2025-07-30 15:08:23.767188+00', '2025-07-30 15:08:23.767468+00', '2025-07-30 15:08:23.767468+00', 'e8c52dd1-dc90-4bfb-8956-a2d3a6bc6f49');
+INSERT INTO auth.identities (provider_id, user_id, identity_data, provider, last_sign_in_at, created_at, updated_at, id) VALUES ('3cf90944-c126-4fde-a26a-b1d2078f98a4', '3cf90944-c126-4fde-a26a-b1d2078f98a4', '{"sub": "3cf90944-c126-4fde-a26a-b1d2078f98a4", "email": "james@test.com", "email_verified": false, "phone_verified": false}', 'email', '2025-07-30 15:08:45.970543+00', '2025-07-30 15:08:45.970683+00', '2025-07-30 15:08:45.970683+00', 'd66b238a-d4a5-448e-9f8f-7370f15440ed');
+
+/* -- 3. Update Members to link fk_auth_id
+UPDATE public.members p
+SET fk_auth_id = u.id
+FROM auth.users u
+WHERE p.email = u.email; */
+
+-- 4. Create Many-to-Many Relationships in profile_club_title
+INSERT INTO public.member_club_title (fk_member_id, fk_club_title_id)
+VALUES
+  (1, 1), (1, 9), -- Admin: CTO, FOUNDING_FATHER
+  (2, 2),         -- John: CFO
+  (3, 3),         -- Jane: WHIP
+  (5, 5), (5, 6), -- Peter: USURPER, EXECUTIONER
+  (6, 8);         -- Mary: HONORARY
