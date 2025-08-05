@@ -28,5 +28,5 @@
 		<BkIcon height={18} width={18} />
 		<span>© {new Date().getFullYear()} Boklubben, Inc.</span>
 	</footer>
-	<Toaster position="bottom-right" theme='system'/>
+	<Toaster position="bottom-right" theme="system" />
 </ThemeProvider>

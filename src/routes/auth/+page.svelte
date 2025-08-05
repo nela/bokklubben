@@ -1,4 +1,4 @@
-<script module lang="ts" >
+<script module lang="ts">
 	export type FormSuccessData = {
 		success: true;
 	};
@@ -33,15 +33,15 @@
 	const enhanceCallback: SubmitFunction<FormSuccessData, FormFailureData> = () => {
 		pending = true;
 
-		return async({ result, update }) => {
+		return async ({ result, update }) => {
 			if (result.type === 'failure' && result.data?.message) {
 				toast.error(result.data.message, { duration: 5000 });
 			}
 
 			pending = false;
 			update();
-		}
-	}
+		};
+	};
 </script>
 
 <div
@@ -52,7 +52,12 @@
 			<BkIcon size={150} />
 		</div>
 
-		<form method="POST" class="flex flex-col gap-4 px-4 pb-4 sm:px-16" action="?/supabase" use:enhance={enhanceCallback} >
+		<form
+			method="POST"
+			class="flex flex-col gap-4 px-4 pb-4 sm:px-16"
+			action="?/supabase"
+			use:enhance={enhanceCallback}
+		>
 			<div class="flex flex-col gap-2">
 				<Label for="email" class=" text-zinc-600 dark:text-zinc-400">Epost</Label>
 
@@ -70,12 +75,7 @@
 			<div class="flex flex-col gap-2">
 				<Label for="password" class="text-zinc-600 dark:text-zinc-400">Passord</Label>
 
-				<Input
-					id="password"
-					name="password"
-					class="text-md bg-muted md:text-sm"
-					type="password"
-				/>
+				<Input id="password" name="password" class="text-md bg-muted md:text-sm" type="password" />
 			</div>
 
 			<SubmitButton {disabled} {pending} {success}>Logg inn</SubmitButton>
@@ -83,7 +83,7 @@
 			<div class="inline-flex flex-col justify-center gap-2 py-2">
 				<hr class="h-px border-0 bg-gray-200 dark:bg-gray-700" />
 				<p
-					class="text-md absolute left-1/2 -translate-x-1/2 bg-background px-3 text-gray-500 md:text-sm dark:text-stone-400"
+					class="text-md bg-background absolute left-1/2 -translate-x-1/2 px-3 text-gray-500 md:text-sm dark:text-stone-400"
 				>
 					eller
 				</p>
@@ -95,7 +95,7 @@
 					formaction="?/provider"
 					name="provider"
 					value="google"
-					class="rounded-lg p-2 dark:shadow-zinc-600 hover:cursor-pointer hover:shadow-lg [&_svg]:transition-transform hover:[&_svg]:scale-105"
+					class="rounded-lg p-2 hover:cursor-pointer hover:shadow-lg dark:shadow-zinc-600 [&_svg]:transition-transform hover:[&_svg]:scale-105"
 				>
 					<GoogleIcon size={iconSize} />
 				</button>
@@ -105,7 +105,7 @@
 					formaction="?/provider"
 					name="provider"
 					value="microsoft"
-					class="rounded-lg p-2 dark:shadow-zinc-600 hover:cursor-pointer hover:shadow-lg [&_svg]:transition-transform hover:[&_svg]:scale-105"
+					class="rounded-lg p-2 hover:cursor-pointer hover:shadow-lg dark:shadow-zinc-600 [&_svg]:transition-transform hover:[&_svg]:scale-105"
 				>
 					<MicrosoftIcon size={iconSize} />
 				</button>
@@ -115,7 +115,7 @@
 					formaction="?/provider"
 					name="provider"
 					value="github"
-					class="rounded-lg p-2 dark:shadow-zinc-600 hover:cursor-pointer hover:shadow-md [&_svg]:transition-transform hover:[&_svg]:scale-105"
+					class="rounded-lg p-2 hover:cursor-pointer hover:shadow-md dark:shadow-zinc-600 [&_svg]:transition-transform hover:[&_svg]:scale-105"
 				>
 					<GithubIcon size={iconSize} />
 				</button>

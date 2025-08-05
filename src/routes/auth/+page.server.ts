@@ -4,11 +4,25 @@ import { err, fromPromise, ok, safeTry } from 'neverthrow';
 import { AuthInternalError } from '$lib/errors/auth';
 import type { Provider } from '@supabase/supabase-js';
 
+const emailSchema = /^(?!\.)(?!.*\.\.)([a-z0-9_'+\-\.]*)[a-z0-9_+-]@([a-z0-9][a-z0-9\-]*\.)+[a-z]{2,}$/i;
+
 export const actions: Actions = {
 	supabase: async ({ request, locals: { supabase } }) => {
 		const formData = await request.formData();
 		const email = formData.get('email') as string;
 		const password = formData.get('password') as string;
+
+		if (!email || !password) {
+			return fail(400, { status: false, message: "Bruker og logg inn nødvendig."})
+		}
+
+		if (emailSchema.test(email)) {
+			return fail(400, { status: false, message: "Ugyldig epost." });
+		}
+
+		if (password.length < 8) {
+			return fail(400, { status: false, message: "Passord må være minst 8 karakterer langt."});
+		}
 
 		const actionResult = safeTry(async function* () {
 			const isAllowed = yield* db.verifyUserAllowed(email);
