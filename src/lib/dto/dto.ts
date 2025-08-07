@@ -3,7 +3,7 @@ export enum ClubTitle {
 	CFO = 'CFO',
 	WHIP = 'Whip',
 	BUREAUCRAT = 'Byråkraten',
-	USURPER = 'USURPER',
+	USURPER = 'Tittel raner',
 	EXECUTIONER = 'Bøddel',
 	PROBATE = 'Prospekt',
 	HONORARY = 'Ærede Medlem',

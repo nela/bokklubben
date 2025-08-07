@@ -5,6 +5,13 @@
 	import { Menu, Moon, Sun } from '@lucide/svelte';
 	import * as Sheet from '$lib/components/ui/sheet';
 	import { Button, buttonVariants } from '$lib/components/ui/button';
+	import * as Sidebar from '$lib/components/ui/sidebar/index';
+	import { Provider } from '$lib/components/ui/tooltip';
+	import AppSidebar from '$lib/components/app-sidebar.svelte';
+	import Header from '$lib/components/header.svelte';
+	import { page } from '$app/state';
+	import { onDestroy, setContext } from 'svelte';
+	import { ClubTitle } from '$lib/dto/dto';
 
 	const navs = {
 		book: { name: 'Bøker', ref: '/book/list' },
@@ -18,128 +25,68 @@
 	const displayName = $derived(
 		member.username ? member.username : `${member.firstname} ${member.lastname}`
 	);
+
+	const pathConfigs = [
+		{
+			path: '/library',
+			key: 'library',
+			getValue: () => [
+				{ name: 'bok1', url: '#' },
+				{ name: 'bok2', url: '#' }
+			]
+		},
+		{
+			path: '/members',
+			key: 'members',
+			// Assuming `data` is available from `export let data`
+			getValue: () => {
+				if (!data?.allMembers) return [];
+				const titles = [...new Set(data.allMembers.flatMap((member) => member.titles))].map(
+					(t) => ({
+						name: ClubTitle[t as keyof typeof ClubTitle],
+						url: '#'
+					})
+				);
+				return titles;
+			}
+		},
+		{
+			path: '/somethingelse',
+			key: 'somethingelse',
+			getValue: () => []
+		}
+	];
+
+	const filterNav = $derived.by(() => {
+		const config = pathConfigs.find((c) => page.url.pathname.startsWith(c.path));
+
+		return config
+			? {
+					key: config.key,
+					value: config.getValue()
+				}
+			: { key: '', value: [] as Array<any> };
+	});
+
+	setContext('filter-nav', () => filterNav);
 </script>
 
-<header class="bg-background sticky top-0 z-10 flex h-16 items-center border-b px-4 md:px-6">
-	<!-- Desktop Header -->
-	<div class="hidden w-full items-center justify-between md:flex">
-		<!-- Left-aligned navigation -->
-		<div class="flex items-center gap-6">
-			<a href="/" class="flex items-center gap-2">
-				<BkIcon width={22} height={18} />
-				<span class="text-lg font-bold">Bokklubben</span>
-			</a>
-			<div class="bg-muted h-6 w-px"></div>
-			<nav class="flex items-center gap-6">
-				<NavigationMenu.Root>
-					<NavigationMenu.List>
-						<NavigationMenu.Item>
-							<NavigationMenu.Link href={navs.book.ref}>{navs.book.name}</NavigationMenu.Link>
-						</NavigationMenu.Item>
-						<NavigationMenu.Item>
-							<NavigationMenu.Link href={navs.member.ref}>{navs.member.name}</NavigationMenu.Link>
-						</NavigationMenu.Item>
-						<NavigationMenu.Item>
-							<NavigationMenu.Link href={navs.meet.ref}>{navs.meet.name}</NavigationMenu.Link>
-						</NavigationMenu.Item>
-						<NavigationMenu.Item>
-							<NavigationMenu.Link href={navs.protocol.ref}>{navs.protocol.name}</NavigationMenu.Link>
-						</NavigationMenu.Item>
-					</NavigationMenu.List>
-				</NavigationMenu.Root>
-			</nav>
+<div class="[--header-height:calc(--spacing(14))]">
+	<Sidebar.Provider class="flex flex-col">
+		<Header />
+		<div class="flex flex-1">
+			<AppSidebar />
+			<Sidebar.Inset>
+				{@render children?.()}
+				<!-- <div class="flex flex-1 flex-col gap-4 p-4"> -->
+				<!--   <div class="grid auto-rows-min gap-4 md:grid-cols-3"> -->
+				<!--     <div class="bg-muted/50 aspect-video rounded-xl"></div> -->
+				<!--     <div class="bg-muted/50 aspect-video rounded-xl"></div> -->
+				<!--     <div class="bg-muted/50 aspect-video rounded-xl"></div> -->
+				<!--   </div> -->
+				<!--   <div class="bg-muted/50 min-h-[100vh] flex-1 rounded-xl md:min-h-min"></div> -->
+				<!-- </div> -->
+			</Sidebar.Inset>
 		</div>
-
-		<!-- Right-aligned profile menu (Desktop) -->
-		<NavigationMenu.Root>
-			<NavigationMenu.List>
-				<NavigationMenu.Item>
-					<NavigationMenu.Trigger>{displayName}</NavigationMenu.Trigger>
-					<NavigationMenu.Content>
-						<ul class="w-[150px] p-2">
-							<li>
-								<button
-									class="hover:bg-accent flex w-full items-center justify-between rounded-md p-2 text-left"
-								>
-									<span>Toggle theme</span>
-									<div class="relative h-4 w-4">
-										<Sun
-											class="absolute h-full w-full scale-100 rotate-0 transition-all dark:scale-0 dark:-rotate-90"
-										/>
-										<Moon
-											class="absolute h-full w-full scale-0 rotate-90 transition-all dark:scale-100 dark:rotate-0"
-										/>
-									</div>
-								</button>
-							</li>
-							<li>
-								<a
-									href="/profile/details"
-									class="hover:bg-accent block w-full rounded-md p-2 text-left"
-								>
-									Detaljer
-								</a>
-							</li>
-							<li>
-								<form action="/logout" method="POST" class="w-full">
-									<button type="submit" class="hover:bg-accent w-full rounded-md p-2 text-left">
-										Logg ut
-									</button>
-								</form>
-							</li>
-						</ul>
-					</NavigationMenu.Content>
-				</NavigationMenu.Item>
-			</NavigationMenu.List>
-		</NavigationMenu.Root>
-	</div>
-
-	<!-- Mobile Header -->
-	<div class="relative flex w-full items-center justify-between md:hidden">
-		<!-- Hamburger Menu (Left) -->
-		<Sheet.Root>
-			<Sheet.Trigger class={buttonVariants({ variant: 'outline', size: 'icon' })}>
-				<Menu class="h-5 w-5" />
-				<span class="sr-only">Toggle navigation menu</span>
-			</Sheet.Trigger>
-			<Sheet.Content side="left" class="flex flex-col">
-				<Sheet.Header>
-					<Sheet.Title>Bokklubben</Sheet.Title>
-				</Sheet.Header>
-				<nav class="grid flex-1 gap-2 py-4 text-lg">
-					<a href={navs.book.ref} class="hover:bg-accent block rounded-md p-2">{navs.book.name}</a>
-					<a href={navs.member.ref} class="hover:bg-accent block rounded-md p-2">{navs.member.name}</a>
-					<a href={navs.meet.ref} class="hover:bg-accent block rounded-md p-2">{navs.protocol.name}</a>
-					<a href={navs.protocol.ref} class="hover:bg-accent block rounded-md p-2">{navs.protocol.name}</a>
-					<a href="/profile/details" class="hover:bg-accent block rounded-md p-2">Profil</a>
-				</nav>
-				<div class="mt-auto">
-					<form action="/logout" method="POST" class="w-full">
-						<button class="hover:bg-accent w-full rounded-md border p-2 text-left">Logg ut</button>
-					</form>
-				</div>
-			</Sheet.Content>
-		</Sheet.Root>
-
-		<!-- Logo (Center) -->
-		<a href="/" class="absolute left-1/2 -translate-x-1/2">
-			<BkIcon width={22} height={18} />
-		</a>
-
-		<!-- Theme Toggle (Right) -->
-		<button class={buttonVariants({ variant: 'outline', size: 'icon' })}>
-			<Sun
-				class="h-[1.2rem] w-[1.2rem] scale-100 rotate-0 transition-all dark:scale-0 dark:-rotate-90"
-			/>
-			<Moon
-				class="absolute h-[1.2rem] w-[1.2rem] scale-0 rotate-90 transition-all dark:scale-100 dark:rotate-0"
-			/>
-			<span class="sr-only">Toggle theme</span>
-		</button>
-	</div>
-</header>
-
-<main class="flex-1 p-6">
-	{@render children?.()}
-</main>
-
+	</Sidebar.Provider>
+</div>
