@@ -73,7 +73,7 @@ export const memberClubTitle = pgTable(
 export const meets = pgTable('meets', {
 	id: smallint('id')
 		.primaryKey()
-		.generatedAlwaysAsIdentity({ name: 'books_id_seq', startWith: 1, increment: 1 }),
+		.generatedAlwaysAsIdentity({ name: 'meets_id_seq', startWith: 1, increment: 1 }),
 	date: timestamp('date', { withTimezone: true }).notNull(),
 	place: varchar('place', { length: 256 }),
 	address: varchar('address', { length: 256 }),
@@ -110,7 +110,6 @@ export const books = pgTable('books', {
 	title: varchar('title', { length: 256 }).notNull(),
 	firstPublished: smallint('first_published').notNull(),
 	pages: smallint('pages').notNull(),
-	isbn: varchar('isbn', { length: 16 }).notNull(),
 	originalLanguage: varchar('original_language', { length: 16 }),
 	description: text('description')
 });

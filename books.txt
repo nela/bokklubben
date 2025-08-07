@@ -1,0 +1,32 @@
+title: Brave new world
+author: Aldous Huxley
+first_published: 1932
+pages: 288
+original_language: Engelsk
+awards: Le Monde's 100 Books of the Century
+genre: Science Fiction
+book_descrption:
+  Brave New World av Aldous Huxley er en dystopisk roman som tar leseren med til et framtidssamfunn der teknologi, vitenskap og masseproduksjon styrer alt. Her er menneskene genmanipulerte, delt inn i kaster fra fødselen, og oppdragelse, familie og tradisjonelle følelser er eliminert til fordel for kontroll og stabilitet. Individer blir holdt lykkelige med løfter om evig nytelse, narkotikaen "soma" og mekanisk tilfredsstillelse, men mangler personlig frihet, kjærlighet og kreativitet. I denne verdenen er opprør mot rammene en trussel mot samfunnets harmoni, og all tenkning som utfordrer systemet blir undertrykt.
+  Gjennom karakterene Bernard Marx, Lenina Crowne og den "ville" John, stiller Huxley spørsmål ved hvor mye menneskeheten bør ofre for lykke og stabilitet. Romanen tar opp temaer som tap av individualitet, farene ved teknologisk kontroll og betydningen av menneskelige følelser. "Brave New World" er ikke bare en kritikk av samtidens utvikling, men også en advarsel om hva som kan skje hvis vi gir fra oss friheten til fordel for lettvinte løsninger og materielle gleder. Romanen har siden utgivelsen i 1932 blitt stående som en viktig kommentar til moderne samfunn og etikk.
+author_description:
+  Aldous Huxley (1894–1963) var en britisk forfatter, filosof og samfunnskritiker kjent for sine dystopiske og satiriske verk. Han skrev en rekke romaner, noveller og essays som utforsker temaer som vitenskap, psykologi, religion og menneskelig bevissthet. Huxley hadde stor interesse for både vestlig og østlig filosofi, og hans senere verk omhandlet ofte mystikk og åndelighet. Hans innflytelse strekker seg langt utover skjønnlitteraturen, med betydelig påvirkning innen både litteratur og tenkning på 1900-tallet.
+read: ..
+
+title: Huden er det elastiske hylster der omgiver hele legemet
+author:  Bjørn Ramussen
+first_published: 2011
+pages: 96
+original_language: Dansk
+awards: Montanas Litteraturpris
+genre: Roman
+book_description:
+Huden er det elastiske hylster der omgiver hele kroppen er en intens og poetisk fortelling om identitet, begjær, skam og kroppslighet. Gjennom en dristig og ærlig prosastil følger vi en ung gutt, Bjørn, som vokser opp på landsbygda i Danmark. Han lever med en sterk lengsel etter nærhet og seksuell utfoldelse, men møter samtidig store indre konflikter knyttet til skam og skyldfølelse. Romanen utforsker grensene mellom smerte og nytelse, og benytter seg av et eksperimentelt språk som utfordrer leseren.
+
+Boken er en rå og sår beretning om skeiv kjærlighet, psykisk sårbarhet og forholdet mellom makt og avmakt. Gjennom hovedpersonens kjærlighetsforhold til ridelæreren sin, rulles det opp et portrett av et menneske som forsøker å finne seg selv i en verden som ikke alltid tilbyr forståelse eller trygghet. Med sin kompromissløse ærlighet og sitt intense kroppslige fokus har romanen blitt hyllet for sin litterære kraft og følsomhet.
+
+author_description:
+Bjørn Rasmussen er en dansk forfatter og dramatiker født i 1983. Han er kjent for sin særegne, eksperimentelle skrivestil og poetiske kraft. Rasmussen har mottatt flere litterære priser og blitt anerkjent for sin evne til å utforske temaer som identitet, seksualitet og kropp. Han skriver både romaner, dikt og scenetekster.
+
+
+
+

@@ -4,7 +4,7 @@ CREATE TABLE "meet_attendance" (
 );
 --> statement-breakpoint
 CREATE TABLE "meets" (
-	"id" smallint PRIMARY KEY GENERATED ALWAYS AS IDENTITY (sequence name "books_id_seq" INCREMENT BY 1 MINVALUE 1 MAXVALUE 32767 START WITH 1 CACHE 1),
+	"id" smallint PRIMARY KEY GENERATED ALWAYS AS IDENTITY (sequence name "meets_id_seq" INCREMENT BY 1 MINVALUE 1 MAXVALUE 32767 START WITH 1 CACHE 1),
 	"date" timestamp with time zone NOT NULL,
 	"place" varchar(256),
 	"address" varchar(256),

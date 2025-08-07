@@ -111,7 +111,7 @@
           "notNull": true,
           "identity": {
             "type": "always",
-            "name": "books_id_seq",
+            "name": "meets_id_seq",
             "schema": "public",
             "increment": "1",
             "startWith": "1",
