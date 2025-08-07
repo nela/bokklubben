@@ -13,13 +13,6 @@
 	import { onDestroy, setContext } from 'svelte';
 	import { ClubTitle } from '$lib/dto/dto';
 
-	const navs = {
-		book: { name: 'Bøker', ref: '/book/list' },
-		member: { name: 'Medlemmer', ref: '/member/list' },
-		meet: { name: 'Møter', ref: '/meet/list' },
-		protocol: { name: 'Protokoll', ref: '/protokoll' }
-	};
-
 	let { data, children }: LayoutProps = $props();
 	const member = data.member!;
 	const displayName = $derived(
@@ -73,10 +66,10 @@
 
 <div class="[--header-height:calc(--spacing(14))]">
 	<Sidebar.Provider class="flex flex-col">
-		<Header />
 		<div class="flex flex-1">
 			<AppSidebar />
 			<Sidebar.Inset>
+				<Header />
 				{@render children?.()}
 				<!-- <div class="flex flex-1 flex-col gap-4 p-4"> -->
 				<!--   <div class="grid auto-rows-min gap-4 md:grid-cols-3"> -->

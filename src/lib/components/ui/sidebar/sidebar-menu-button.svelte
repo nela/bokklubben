@@ -2,7 +2,7 @@
 	import { tv, type VariantProps } from "tailwind-variants";
 
 	export const sidebarMenuButtonVariants = tv({
-		base: "peer/menu-button outline-hidden ring-sidebar-ring hover:bg-sidebar-accent hover:text-sidebar-accent-foreground active:bg-sidebar-accent active:text-sidebar-accent-foreground group-has-data-[sidebar=menu-action]/menu-item:pr-8 data-[active=true]:bg-sidebar-accent data-[active=true]:text-sidebar-accent-foreground data-[state=open]:hover:bg-sidebar-accent data-[state=open]:hover:text-sidebar-accent-foreground group-data-[collapsible=icon]:size-8! group-data-[collapsible=icon]:p-2! flex w-full items-center gap-2 overflow-hidden rounded-md p-2 text-left text-sm transition-[width,height,padding] focus-visible:ring-2 disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-[active=true]:font-medium [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0",
+		base: "peer/menu-button outline-hidden ring-sidebar-ring hover:bg-sidebar-accent hover:text-sidebar-accent-foreground active:bg-sidebar-accent active:text-sidebar-accent-foreground group-has-data-[sidebar=menu-action]/menu-item:pr-8 data-[active=true]:bg-sidebar-accent data-[active=true]:text-sidebar-accent-foreground data-[state=open]:hover:bg-sidebar-accent data-[state=open]:hover:text-sidebar-accent-foreground group-data-[collapsible=icon]:size-8! group-data-[collapsible=icon]:p-2! items-center gap-2 overflow-hidden rounded-md p-2 text-left text-sm transition-[width,height,padding] focus-visible:ring-2 disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-[active=true]:font-medium [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0",
 		variants: {
 			variant: {
 				default: "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
@@ -12,12 +12,17 @@
 			size: {
 				default: "h-8 text-sm",
 				sm: "h-7 text-xs",
-				lg: "group-data-[collapsible=icon]:p-0! h-12 text-sm",
+				lg: "group-data-[collapsible=icon]:p-0! group-data-[collapsible=icon]:min-h-12 h-fit text-sm",
 			},
+			container: {
+				default: "flex w-full",
+				fit: "inline-flex"
+			}
 		},
 		defaultVariants: {
 			variant: "default",
 			size: "default",
+			container: "default",
 		},
 	});
 
@@ -25,6 +30,7 @@
 		typeof sidebarMenuButtonVariants
 	>["variant"];
 	export type SidebarMenuButtonSize = VariantProps<typeof sidebarMenuButtonVariants>["size"];
+	export type SidebarMenuButtonContainer = VariantProps<typeof sidebarMenuButtonVariants>["container"];
 </script>
 
 <script lang="ts">
@@ -42,6 +48,7 @@
 		child,
 		variant = "default",
 		size = "default",
+		container = "default",
 		isActive = false,
 		tooltipContent,
 		tooltipContentProps,
@@ -50,6 +57,7 @@
 		isActive?: boolean;
 		variant?: SidebarMenuButtonVariant;
 		size?: SidebarMenuButtonSize;
+		container?: SidebarMenuButtonContainer;
 		tooltipContent?: Snippet | string;
 		tooltipContentProps?: WithoutChildrenOrChild<ComponentProps<typeof Tooltip.Content>>;
 		child?: Snippet<[{ props: Record<string, unknown> }]>;
@@ -58,7 +66,7 @@
 	const sidebar = useSidebar();
 
 	const buttonProps = $derived({
-		class: cn(sidebarMenuButtonVariants({ variant, size }), className),
+		class: cn(sidebarMenuButtonVariants({ variant, size, container }), className),
 		"data-slot": "sidebar-menu-button",
 		"data-sidebar": "menu-button",
 		"data-size": size,

@@ -75,7 +75,7 @@ export const meets = pgTable('meets', {
 		.primaryKey()
 		.generatedAlwaysAsIdentity({ name: 'books_id_seq', startWith: 1, increment: 1 }),
 	date: timestamp('date', { withTimezone: true }).notNull(),
-	place: varchar('place', { length: 256 }),
+	location: varchar('location', { length: 256 }),
 	address: varchar('address', { length: 256 }),
 	notes: text('notes'),
 	summary: text('summary'),

@@ -22,11 +22,11 @@
 <ThemeProvider attribute="class" disableTransitionOnChange>
 	{@render children()}
 
-	<footer
+	<!-- <footer
 		class="text-muted-foreground absolute bottom-0 flex w-full items-center justify-center gap-3 p-6 text-xs"
 	>
 		<BkIcon height={18} width={18} />
 		<span>© {new Date().getFullYear()} Boklubben, Inc.</span>
-	</footer>
+	</footer> -->
 	<Toaster position="bottom-right" theme="system" />
 </ThemeProvider>

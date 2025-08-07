@@ -25,11 +25,11 @@
 	> = $props();
 </script>
 
+<!-- width={width ? width : size} -->
+<!-- height={height ? height : size * 1.15} -->
 <svg
-	width={width ? width : size}
-	height={height ? height : size * 1.15}
 	viewBox="0 0 88 101"
-	fill="none"
+	fill="currentColor"
 	bind:this={ref}
 	{...rest}
 	xmlns="http://www.w3.org/2000/svg"

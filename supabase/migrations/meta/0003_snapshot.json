@@ -127,8 +127,8 @@
           "primaryKey": false,
           "notNull": true
         },
-        "place": {
-          "name": "place",
+        "location": {
+          "name": "location",
           "type": "varchar(256)",
           "primaryKey": false,
           "notNull": false

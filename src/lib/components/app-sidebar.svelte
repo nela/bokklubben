@@ -1,65 +1,34 @@
 <script lang="ts" module>
 	import LifeBuoyIcon from '@lucide/svelte/icons/life-buoy';
 	import SendIcon from '@lucide/svelte/icons/send';
-	import FrameIcon from '@lucide/svelte/icons/frame';
-	import PieChartIcon from '@lucide/svelte/icons/pie-chart';
-	import MapIcon from '@lucide/svelte/icons/map';
-	import CommandIcon from '@lucide/svelte/icons/command';
 
-	// let { data, children }: LayoutProps = $props();
-
-	const navMain = {
-		user: {
-			name: 'shadcn',
-			email: 'm@example.com',
-			avatar: '/avatars/shadcn.jpg'
-		},
-		navMain: [
+	const navs: {
+		primary: Array<NavItem>,
+		secondary: Array<NavItem>
+	} = {
+		primary: [
 			{
 				title: 'Bibliotek',
 				url: '/library',
 				icon: BookIcon,
-				isActive: true,
-				items: []
 			},
 			{
 				title: 'Medlemmer',
 				url: '/members',
-				// icon: BotIcon,
 				icon: Users,
-				items: []
 			},
 			{
 				title: 'Møter',
 				url: '#',
 				icon: NotebookText,
-				items: []
 			},
 			{
 				title: 'Vedtekter',
 				url: '#',
 				icon: Scroll,
-				items: []
 			}
 		],
-		/* projects: [
-      {
-        name: "Design Engineering",
-        url: "#",
-        icon: FrameIcon,
-      },
-      {
-        name: "Sales & Marketing",
-        url: "#",
-        icon: PieChartIcon,
-      },
-      {
-        name: "Travel",
-        url: "#",
-        icon: MapIcon,
-      },
-    ], */
-		navSecondary: [
+		secondary: [
 			{
 				title: 'Support',
 				url: '#',
@@ -81,34 +50,24 @@
 	import { BookIcon, NotebookText, Scroll, Users } from '@lucide/svelte';
 	import NavBottom from './nav-bottom.svelte';
 	import NavFilter from './nav-filter.svelte';
+	import BkIcon from './icons/bk-icon.svelte';
+	import type { NavItem } from '$lib/model';
 
-	let {
-		ref = $bindable(null),
-		...restProps
-	}: ComponentProps<typeof Sidebar.Root>  = $props();
-  /* & {
-      filters: Array<{
-        name: string;
-        url: string;
-      }>;
-    } */
+	let { ref = $bindable(null), ...restProps }: ComponentProps<typeof Sidebar.Root> = $props();
 </script>
 
-<Sidebar.Root class="top-(--header-height) h-[calc(100svh-var(--header-height))]!" {...restProps}>
+<!-- <Sidebar.Root class="top-(--header-height) h-[calc(100svh-var(--header-height))]!" {...restProps}> -->
+<Sidebar.Root {...restProps}>
 	<Sidebar.Header>
 		<Sidebar.Menu>
 			<Sidebar.MenuItem>
-				<Sidebar.MenuButton size="lg">
+				<Sidebar.MenuButton size="lg" container="fit" class="mb-4">
 					{#snippet child({ props })}
 						<a href="##" {...props}>
 							<div
-								class="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg"
+								class="text-sidebar-primary-foreground inline-flex items-center justify-center rounded-lg"
 							>
-								<CommandIcon class="size-4" />
-							</div>
-							<div class="grid flex-1 text-left text-sm leading-tight">
-								<span class="truncate font-medium">Acme Inc</span>
-								<span class="truncate text-xs">Enterprise</span>
+								<BkIcon class="text-primary-600 h-auto w-[clamp(2rem,8vw,5rem)]" />
 							</div>
 						</a>
 					{/snippet}
@@ -117,14 +76,15 @@
 		</Sidebar.Menu>
 	</Sidebar.Header>
 	<Sidebar.Content>
-		<NavMain items={navMain.navMain} />
+		<NavMain items={navs.primary} />
 
+		<!-- divider -->
 		<div class="inline-flex flex-col justify-center gap-2 px-4 py-2">
 			<hr class="h-px border-0 bg-gray-200 dark:bg-gray-700" />
 		</div>
 
 		<NavFilter />
-		<NavBottom items={navMain.navSecondary} class="mt-auto" />
+		<NavBottom items={navs.secondary} class="mt-auto" />
 	</Sidebar.Content>
 	<Sidebar.Footer>
 		Footer

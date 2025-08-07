@@ -1,30 +1,23 @@
 <script lang="ts">
-	import type { Component } from 'svelte';
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
+	import { page } from '$app/state';
+	import type { NavItem } from '$lib/model';
 
 	let {
 		items
 	}: {
-		items: {
-			title: string;
-			url: string;
-			icon: Component;
-			isActive?: boolean;
-			items?: {
-				title: string;
-				url: string;
-			}[];
-		}[];
+		items: Array<NavItem>
 	} = $props();
+
 </script>
 
 <Sidebar.Group>
-	<Sidebar.GroupLabel>Platform</Sidebar.GroupLabel>
+	<Sidebar.GroupLabel>Bokklubben</Sidebar.GroupLabel>
 	<Sidebar.GroupContent>
 		<Sidebar.Menu>
 			{#each items as item (item.title)}
 				<Sidebar.MenuItem>
-					<Sidebar.MenuButton tooltipContent={item.title}>
+					<Sidebar.MenuButton isActive={page.url.pathname.startsWith(item.url)} tooltipContent={item.title}>
 						{#snippet child({ props })}
 						<a href={item.url} {...props}>
 						  <item.icon />
@@ -32,10 +25,6 @@
 						</a>
 						{/snippet}
 					</Sidebar.MenuButton>
-					{#if item.items?.length}
-						<Sidebar.MenuAction class="data-:rotate-90">
-						</Sidebar.MenuAction>
-					{/if}
 				</Sidebar.MenuItem>
 			{/each}
 		</Sidebar.Menu>
