@@ -4,25 +4,33 @@
 	import type { NavItem } from '$lib/model';
 
 	let {
+		label,
 		items
 	}: {
-		items: Array<NavItem>
+		label?: string;
+		items: Array<NavItem>;
 	} = $props();
-
 </script>
 
 <Sidebar.Group>
-	<Sidebar.GroupLabel>Bokklubben</Sidebar.GroupLabel>
+	{#if label}
+		<Sidebar.GroupLabel>{label}</Sidebar.GroupLabel>
+	{/if}
 	<Sidebar.GroupContent>
 		<Sidebar.Menu>
 			{#each items as item (item.title)}
 				<Sidebar.MenuItem>
-					<Sidebar.MenuButton isActive={page.url.pathname.startsWith(item.url)} tooltipContent={item.title}>
+					<Sidebar.MenuButton
+						isActive={page.url.pathname.includes(item.pathname)}
+						tooltipContent={item.title}
+					>
 						{#snippet child({ props })}
-						<a href={item.url} {...props}>
-						  <item.icon />
-						  <span>{item.title}</span>
-						</a>
+							<a href={item.pathname === '/library' ? '/library/books' : item.pathname} {...props}>
+								{#if 'icon' in item}
+									<item.icon />
+								{/if}
+								<span>{item.title}</span>
+							</a>
 						{/snippet}
 					</Sidebar.MenuButton>
 				</Sidebar.MenuItem>
