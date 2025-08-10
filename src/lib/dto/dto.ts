@@ -21,6 +21,7 @@ export interface Member {
 	memberTo?: Date | null;
 	appRole: AppRole;
 	titles: Array<ClubTitle>;
+	imageUrl: string;
 };
 
 export interface PublicMember {

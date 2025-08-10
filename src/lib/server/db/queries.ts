@@ -13,8 +13,8 @@ import { authUsers } from 'drizzle-orm/supabase';
 const client = postgres(POSTGRES_URL, { prepare: false });
 const db = drizzle(client);
 
-export function mapMember(profile: MemberDbDto, titles: Array<ClubTitle>): Member {
-	const { id, fkAuthId, ...dto } = profile;
+export function mapMember(member: MemberDbDto, titles: Array<ClubTitle>): Member {
+	const { id, fkAuthId, ...dto } = member;
 	return {
 		...dto,
 		titles: titles
