@@ -23,7 +23,7 @@ CREATE TABLE "books" (
 	"description" text,
 	"genre" varchar(64) NOT NULL,
 	"read" varchar(256) NOT NULL,
-	"image_url" varchar(256) NOT NULL,
+	"image_url" varchar(2048) NOT NULL,
 	"goodreads_rating" numeric NOT NULL
 );
 --> statement-breakpoint

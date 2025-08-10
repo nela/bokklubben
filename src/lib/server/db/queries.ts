@@ -153,7 +153,8 @@ export function fetchMembers(): ResultAsync<Array<PublicMember>, DbError> {
 				username: members.username,
 				memberSince: members.memberSince,
 				memberTo: members.memberTo,
-				clubTitle: clubTitles.name
+				imageUrl: members.imageUrl,
+				clubTitle: clubTitles.name,
 			})
 			.from(members)
 			.leftJoin(memberClubTitle, eq(memberClubTitle.fkMemberId, members.id))

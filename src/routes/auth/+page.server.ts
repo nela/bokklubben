@@ -16,7 +16,7 @@ export const actions: Actions = {
 			return fail(400, { status: false, message: "Bruker og logg inn nødvendig."})
 		}
 
-		if (emailSchema.test(email)) {
+		if (!emailSchema.test(email)) {
 			return fail(400, { status: false, message: "Ugyldig epost." });
 		}
 

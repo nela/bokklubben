@@ -31,4 +31,5 @@ export interface PublicMember {
 	memberSince: Date;
 	memberTo?: Date | null;
 	titles: Array<ClubTitle>;
+	imageUrl: string;
 };

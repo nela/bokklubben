@@ -1,6 +1,6 @@
 {
-  "id": "d71d18f2-4017-48b5-b4f1-2db99e23694e",
-  "prevId": "436d6440-2f76-4cb7-8d9e-54aab5f8ca42",
+  "id": "0377deca-180a-4c5c-aa5f-853a85878d73",
+  "prevId": "92308c77-b55f-49f5-96ba-8e9824bb8447",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -188,7 +188,7 @@
         },
         "image_url": {
           "name": "image_url",
-          "type": "varchar(256)",
+          "type": "varchar(2048)",
           "primaryKey": false,
           "notNull": true
         },
@@ -495,7 +495,7 @@
         },
         "image_url": {
           "name": "image_url",
-          "type": "varchar(256)",
+          "type": "varchar(2048)",
           "primaryKey": false,
           "notNull": true
         }

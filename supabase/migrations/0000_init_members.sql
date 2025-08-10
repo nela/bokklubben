@@ -22,7 +22,7 @@ CREATE TABLE "members" (
 	"member_since" timestamp with time zone DEFAULT now() NOT NULL,
 	"member_to" timestamp with time zone,
 	"app_role" "app_role" DEFAULT 'regular' NOT NULL,
-	"image_url" varchar(256) NOT NULL,
+	"image_url" varchar(2048) NOT NULL,
 	CONSTRAINT "uq_member_email_key" UNIQUE("email")
 );
 --> statement-breakpoint

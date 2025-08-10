@@ -28,7 +28,7 @@ export const members = pgTable(
 		memberSince: timestamp('member_since', { withTimezone: true }).defaultNow().notNull(),
 		memberTo: timestamp('member_to', { withTimezone: true }),
 		appRole: appRole('app_role').notNull().default('regular'),
-		imageUrl: varchar('image_url', { length: 256 }).notNull()
+		imageUrl: varchar('image_url', { length: 2048 }).notNull()
 	},
 	(t) => [
 		foreignKey({
@@ -126,7 +126,7 @@ export const books = pgTable('books', {
 	description: text('description'),
 	genre: varchar('genre', { length: 64 }).notNull(),
 	read: varchar('read', { length: 256 }).notNull(),
-	imageUrl: varchar('image_url', { length: 256 }).notNull(),
+	imageUrl: varchar('image_url', { length: 2048 }).notNull(),
 	oodreadsRating: decimal('goodreads_rating').notNull()
 });
 
