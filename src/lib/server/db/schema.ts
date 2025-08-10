@@ -1,3 +1,4 @@
+import { float } from 'drizzle-orm/mysql-core';
 import {
 	pgTable,
 	foreignKey,
@@ -7,7 +8,8 @@ import {
 	smallint,
 	pgEnum,
 	timestamp,
-	text
+	text,
+    decimal
 } from 'drizzle-orm/pg-core';
 import { authUsers } from 'drizzle-orm/supabase';
 
@@ -26,7 +28,8 @@ export const members = pgTable(
 		email: varchar('email', { length: 256 }).notNull(),
 		memberSince: timestamp('member_since', { withTimezone: true }).defaultNow().notNull(),
 		memberTo: timestamp('member_to', { withTimezone: true }),
-		appRole: appRole('app_role').notNull().default('regular')
+		appRole: appRole('app_role').notNull().default('regular'),
+		imageUrl: varchar('image_url', { length: 256 }).notNull()
 	},
 	(t) => [
 		foreignKey({
@@ -73,7 +76,7 @@ export const memberClubTitle = pgTable(
 export const meets = pgTable('meets', {
 	id: smallint('id')
 		.primaryKey()
-		.generatedAlwaysAsIdentity({ name: 'books_id_seq', startWith: 1, increment: 1 }),
+		.generatedAlwaysAsIdentity({ name: 'meets_id_seq', startWith: 1, increment: 1 }),
 	date: timestamp('date', { withTimezone: true }).notNull(),
 	location: varchar('location', { length: 256 }),
 	address: varchar('address', { length: 256 }),
@@ -102,17 +105,30 @@ export const meetAttendance = pgTable(
 	]
 );
 
+export const authors = pgTable('authors', {
+	id: smallint('id')
+		.primaryKey()
+		.generatedAlwaysAsIdentity({ name: 'authors_id_seq', startWith: 1, increment: 1 }),
+	name: varchar('name', { length: 256 }).notNull(),
+	description: text('description').notNull(),
+	imageUrl: varchar('image_url', { length: 256 }).notNull()
+});
+
 export const books = pgTable('books', {
 	id: smallint('id')
 		.primaryKey()
 		.generatedAlwaysAsIdentity({ name: 'books_id_seq', startWith: 1, increment: 1 }),
-	author: varchar('author', { length: 256 }).notNull(),
+	fkAuthorId: smallint('fk_author_id').notNull(),
 	title: varchar('title', { length: 256 }).notNull(),
 	firstPublished: smallint('first_published').notNull(),
 	pages: smallint('pages').notNull(),
-	isbn: varchar('isbn', { length: 16 }).notNull(),
+	awards: varchar('awards', { length: 512 }).notNull(),
 	originalLanguage: varchar('original_language', { length: 16 }),
-	description: text('description')
+	description: text('description'),
+	genre: varchar('genre', { length: 64 }).notNull(),
+	read: varchar('read', { length: 256 }).notNull(),
+	imageUrl: varchar('image_url', { length: 256 }).notNull(),
+	oodreadsRating: decimal('goodreads_rating').notNull()
 });
 
 export const bookStatus = pgEnum('book_status', ['elected', 'pitched']);

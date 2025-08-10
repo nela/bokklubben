@@ -1,0 +1,91 @@
+23.08.2025,
+location: Oslo, Ole Bentsens Casa,
+book: Brave New World
+
+29.03.2025,
+location: Kristiansand, Hos Odd
+book: Huden er det elastiske hylster der omgiver hele kroppen
+
+18.01.2025,
+location: Oslo, Vålerenga
+book: Ekko
+
+28.09.2024
+location: Hovden
+book: Dune Messiah
+
+
+01.06.2024
+location: Oslo, Hos Marius
+book: Blood Meridian
+
+02.12.2023
+location: Kristiansand, Hos Erik
+book: The Gunslinger
+
+
+25.03.2023
+location: Kristiansand, Hos Odd
+book: Neuromancer (Sataniske Vers)
+
+03.09.2022
+location: Oslo, hos Alex H
+book: Paradis
+
+04.06.2022
+location: Oslo, Hos Ruben
+book: Dune
+
+05.03.2022
+location: Oslo, Hos Jokke
+book: Mythos
+
+10.09.2021
+location: Oslo, Hos Nemanja
+book: The Name of the wind
+
+
+
+21.12.2019
+location: Kristiansand, Hos Jokke
+book: The Coddling of the American Mind
+
+
+
+27.07.2019
+book: Hitchikers Guide to Galazy
+location: Kristiansand, Hos foreldrene til Ole B
+
+30.03.2019
+book: Fluenes Herre
+location: Kristiansand, St. Joseph, Kongens Gate
+
+
+
+
+01.01.2018
+book: Fear: Trump in the White House
+
+01.01.2018
+book: Physics of the Future
+
+01.01.207
+book: Nomad
+
+01.01.2017
+book: Children of Hurin
+
+01.01.2017
+book: On the Road
+
+01.01.2016
+book:  1984
+
+01.01.2016
+book: The Spy Who Came in from the Cold
+
+01.01.2016
+Book: The Day of the Jackal
+
+01.01.2016
+book: The Prince
