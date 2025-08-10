@@ -1,6 +1,6 @@
 CREATE TYPE "public"."app_role" AS ENUM('admin', 'regular');--> statement-breakpoint
 CREATE TABLE "club_titles" (
-	"id" smallint PRIMARY KEY GENERATED ALWAYS AS IDENTITY (sequence name "club_title_id_seq" INCREMENT BY 1 MINVALUE 1 MAXVALUE 32767 START WITH 1 CACHE 1),
+	"id" smallint PRIMARY KEY GENERATED ALWAYS AS IDENTITY (sequence name "club_titles_id_seq" INCREMENT BY 1 MINVALUE 1 MAXVALUE 32767 START WITH 1 CACHE 1),
 	"name" varchar(32) NOT NULL,
 	CONSTRAINT "uq_club_title_name_key" UNIQUE("name")
 );
@@ -22,6 +22,7 @@ CREATE TABLE "members" (
 	"member_since" timestamp with time zone DEFAULT now() NOT NULL,
 	"member_to" timestamp with time zone,
 	"app_role" "app_role" DEFAULT 'regular' NOT NULL,
+	"image_url" varchar(256) NOT NULL,
 	CONSTRAINT "uq_member_email_key" UNIQUE("email")
 );
 --> statement-breakpoint

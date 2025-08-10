@@ -1,5 +1,3 @@
--- Custom SQL migration file, put your code below! --
-
 -- Function to check for a valid invitation before a user is created.
 -- Throws an error if no matching and unclaimed invitation is found.
 create or replace function public.verify_authorization()

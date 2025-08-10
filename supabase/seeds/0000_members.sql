@@ -1,13 +1,15 @@
 
 -- 1. Create Members with fk_auth_id as NULL
-INSERT INTO public.members (fk_auth_id, firstname, lastname, username, email, app_role)
+--
+
+INSERT INTO public.members (fk_auth_id, firstname, lastname, username, email, app_role, image_url)
 VALUES
-    (NULL, 'Admin', 'User', 'admin_user', 'admin@test.com', 'admin'),
-    (NULL, 'John', 'Doe', 'johndoe', 'john@test.com', 'regular'),
-    (NULL, 'Jane', 'Smith', 'janesmith', 'jane@test.com', 'regular'),
-    (NULL, 'James', 'Bond', 'jbond', 'james@test.com', 'regular'),
-    (NULL, 'Peter', 'Jones', 'peterjones', 'peter@test.com', 'regular'),
-    (NULL, 'Mary', 'Jane', 'maryjane', 'mary@test.com', 'regular');
+    (NULL, 'Admin', 'User', 'admin_user', 'admin@test.com', 'admin', '/Users/nela/dev/bokklubben/assets/2025-08-10-19-34-12.png'),
+    (NULL, 'John', 'Doe', 'johndoe', 'john@test.com', 'regular', '/Users/nela/dev/bokklubben/assets/2025-08-10-19-34-12.png'),
+    (NULL, 'Jane', 'Smith', 'janesmith', 'jane@test.com', 'regular', '/Users/nela/dev/bokklubben/assets/2025-08-10-19-34-12.png'),
+    (NULL, 'James', 'Bond', 'jbond', 'james@test.com', 'regular', '/Users/nela/dev/bokklubben/assets/2025-08-10-19-34-12.png'),
+    (NULL, 'Peter', 'Jones', 'peterjones', 'peter@test.com', 'regular', '/Users/nela/dev/bokklubben/assets/2025-08-10-19-34-12.png'),
+    (NULL, 'Mary', 'Jane', 'maryjane', 'mary@test.com', 'regular', '/Users/nela/dev/bokklubben/assets/2025-08-10-19-34-12.png');
 
 INSERT INTO auth.users (instance_id, id, aud, role, email, encrypted_password, email_confirmed_at, invited_at, confirmation_token, confirmation_sent_at, recovery_token, recovery_sent_at, email_change_token_new, email_change, email_change_sent_at, last_sign_in_at, raw_app_meta_data, raw_user_meta_data, is_super_admin, created_at, updated_at, phone, phone_confirmed_at, phone_change, phone_change_token, phone_change_sent_at, email_change_token_current, email_change_confirm_status, banned_until, reauthentication_token, reauthentication_sent_at, is_sso_user, deleted_at, is_anonymous) VALUES ('00000000-0000-0000-0000-000000000000', 'a2604cbd-0b75-4b3a-af2e-76ea10df1247', 'authenticated', 'authenticated', 'admin@test.com', '$2a$10$zhwXD6u5g3x46W1kGlW5guQHzYIpYzCKqGGDj6nh/MwLwAmo1Ppzi', '2025-07-30 15:07:44.801261+00', NULL, '', NULL, '', NULL, '', '', NULL, NULL, '{"provider": "email", "providers": ["email"]}', '{"email_verified": true}', NULL, '2025-07-30 15:07:44.75853+00', '2025-07-30 15:07:44.809039+00', NULL, NULL, '', '', NULL, '', 0, NULL, '', NULL, false, NULL, false);
 INSERT INTO auth.users (instance_id, id, aud, role, email, encrypted_password, email_confirmed_at, invited_at, confirmation_token, confirmation_sent_at, recovery_token, recovery_sent_at, email_change_token_new, email_change, email_change_sent_at, last_sign_in_at, raw_app_meta_data, raw_user_meta_data, is_super_admin, created_at, updated_at, phone, phone_confirmed_at, phone_change, phone_change_token, phone_change_sent_at, email_change_token_current, email_change_confirm_status, banned_until, reauthentication_token, reauthentication_sent_at, is_sso_user, deleted_at, is_anonymous) VALUES ('00000000-0000-0000-0000-000000000000', '53fb6375-347d-4309-b298-8509435171eb', 'authenticated', 'authenticated', 'john@test.com', '$2a$10$qUl6RhdCZtwwK5e.mxdAreOslPB6rYyxUayMSGc1t/1/qZGcWqMj.', '2025-07-30 15:08:05.057618+00', NULL, '', NULL, '', NULL, '', '', NULL, NULL, '{"provider": "email", "providers": ["email"]}', '{"email_verified": true}', NULL, '2025-07-30 15:08:05.036328+00', '2025-07-30 15:08:05.061757+00', NULL, NULL, '', '', NULL, '', 0, NULL, '', NULL, false, NULL, false);

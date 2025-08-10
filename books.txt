@@ -438,7 +438,7 @@ description:
 
 Swallow har fått ros for sin evne til å skape troverdige karakterer og realistiske miljøer, og "Nomad" har blitt sammenlignet med klassikere innen spion- og actionlitteratur. Boken er første del i en serie og passer for lesere som liker spenningsromaner med globale perspektiver og moderne problemstillinger.
 
-title: Children of Hurin
+title: The Children of Húrin
 author: J.R.R. Tolkien
 first_published: 2007
 read: 01.01.2017
@@ -448,7 +448,7 @@ goodreads_rating: 4.1
 awards: Mythopoeic Fantasy Award (nominasjon)
 original_language: Engelsk
 description:
-"Children of Hurin" er en episk fantasyroman satt til Tolkiens Midgard, og forteller den tragiske historien om Túrin Turambar og hans familie. Boken bygger på mytiske og heroiske motiver, og utforsker temaer som skjebne, stolthet og tap. Tolkiens rike språk og detaljerte verden gir fortellingen dybde og atmosfære.
+"The Children of Húrin" er en episk fantasyroman satt til Tolkiens Midgard, og forteller den tragiske historien om Túrin Turambar og hans familie. Boken bygger på mytiske og heroiske motiver, og utforsker temaer som skjebne, stolthet og tap. Tolkiens rike språk og detaljerte verden gir fortellingen dybde og atmosfære.
 
 Romanen er basert på tekster fra "Silmarillion" og "Unfinished Tales", og ble redigert og utgitt av Christopher Tolkien. "Hurins barn" gir et mørkere og mer alvorlig bilde av Midgard enn "Ringenes Herre", og har fått ros for sin litterære kvalitet og dybde. Boken er en viktig del av Tolkiens univers.
 

@@ -1,4 +1,3 @@
-import { float } from 'drizzle-orm/mysql-core';
 import {
 	pgTable,
 	foreignKey,
@@ -133,8 +132,8 @@ export const books = pgTable('books', {
 
 export const bookStatus = pgEnum('book_status', ['elected', 'pitched']);
 
-export const bookState = pgTable(
-	'book_status',
+export const bookMeet = pgTable(
+	'book_meet',
 	{
 		status: bookStatus('book_status').notNull(),
 		fkBookId: smallint('fk_book_id').notNull(),
