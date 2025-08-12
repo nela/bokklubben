@@ -40,6 +40,7 @@
 									<Crown class="text-muted-foreground h-5 w-5 flex-shrink-0" />
 									<div class="flex flex-wrap items-center gap-2">
 										{#each member.titles as title}
+											{@const href='/members'}
 											<Badge href={href} variant="outline">{title}</Badge>
 										{/each}
 									</div>

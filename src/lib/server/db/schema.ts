@@ -8,9 +8,10 @@ import {
 	pgEnum,
 	timestamp,
 	text,
-    decimal
+	numeric
 } from 'drizzle-orm/pg-core';
 import { authUsers } from 'drizzle-orm/supabase';
+import { customTypeNumeric } from './types';
 
 export const appRole = pgEnum('app_role', ['admin', 'regular']);
 
@@ -82,7 +83,7 @@ export const meets = pgTable('meets', {
 	notes: text('notes'),
 	summary: text('summary'),
 	highlights: text('highlights')
-});
+}).enableRLS();
 
 export const meetAttendance = pgTable(
 	'meet_attendance',
@@ -102,7 +103,7 @@ export const meetAttendance = pgTable(
 			name: 'fk_meet_id_meets_id'
 		})
 	]
-);
+).enableRLS();
 
 export const authors = pgTable('authors', {
 	id: smallint('id')
@@ -111,24 +112,44 @@ export const authors = pgTable('authors', {
 	name: varchar('name', { length: 256 }).notNull(),
 	description: text('description').notNull(),
 	imageUrl: varchar('image_url', { length: 256 }).notNull()
-});
+}).enableRLS();
 
 export const books = pgTable('books', {
 	id: smallint('id')
 		.primaryKey()
 		.generatedAlwaysAsIdentity({ name: 'books_id_seq', startWith: 1, increment: 1 }),
-	fkAuthorId: smallint('fk_author_id').notNull(),
 	title: varchar('title', { length: 256 }).notNull(),
 	firstPublished: smallint('first_published').notNull(),
 	pages: smallint('pages').notNull(),
-	awards: varchar('awards', { length: 512 }).notNull(),
-	originalLanguage: varchar('original_language', { length: 16 }),
-	description: text('description'),
+	awards: varchar('awards', { length: 512 }),
+	originalLanguage: varchar('original_language', { length: 16 }).notNull(),
+	description: text('description').notNull(),
 	genre: varchar('genre', { length: 64 }).notNull(),
 	read: varchar('read', { length: 256 }).notNull(),
 	imageUrl: varchar('image_url', { length: 2048 }).notNull(),
-	oodreadsRating: decimal('goodreads_rating').notNull()
-});
+	goodreadsRating: customTypeNumeric('goodreads_rating', { precision: 4, scale: 2 }).notNull()
+}).enableRLS();
+
+export const bookAuthor = pgTable(
+	'book_author',
+	{
+		fkBookId: smallint('fk_book_id').notNull(),
+		fkAuthorId: smallint('fk_author_id').notNull()
+	},
+	(t) =>
+		[
+			foreignKey({
+				columns: [t.fkBookId],
+				foreignColumns: [books.id],
+				name: 'fk_book_id_books_id'
+			}).onDelete('cascade'),
+			foreignKey({
+				columns: [t.fkAuthorId],
+				foreignColumns: [authors.id],
+				name: 'fk_author_id_authors_id'
+			}).onDelete('cascade')
+		]
+).enableRLS();
 
 export const bookStatus = pgEnum('book_status', ['elected', 'pitched']);
 
@@ -144,11 +165,11 @@ export const bookMeet = pgTable(
 			columns: [t.fkBookId],
 			foreignColumns: [books.id],
 			name: 'fk_book_id_books_id'
-		}),
+		}).onDelete('cascade'),
 		foreignKey({
 			columns: [t.fkMeetId],
 			foreignColumns: [meets.id],
 			name: 'fk_meet_id_meets_id'
-		})
+		}).onDelete('cascade')
 	]
-);
+).enableRLS();

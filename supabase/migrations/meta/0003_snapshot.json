@@ -1,5 +1,5 @@
 {
-  "id": "92308c77-b55f-49f5-96ba-8e9824bb8447",
+  "id": "ff0f895b-d8e8-4073-89f4-888b330f4b83",
   "prevId": "2bff03db-0b18-4528-a633-ac4fdc722187",
   "version": "7",
   "dialect": "postgresql",
@@ -98,7 +98,7 @@
       "uniqueConstraints": {},
       "policies": {},
       "checkConstraints": {},
-      "isRLSEnabled": false
+      "isRLSEnabled": true
     },
     "public.meets": {
       "name": "meets",
@@ -164,7 +164,7 @@
       "uniqueConstraints": {},
       "policies": {},
       "checkConstraints": {},
-      "isRLSEnabled": false
+      "isRLSEnabled": true
     },
     "public.member_club_title": {
       "name": "member_club_title",

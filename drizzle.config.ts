@@ -8,7 +8,7 @@ export default defineConfig({
 	out: './supabase/migrations',
 	dialect: 'postgresql',
 	dbCredentials: {
-		url: process.env.VITE_DATABASE_URL!
+		url: process.env.POSTGRES_URL!
 	},
 	schemaFilter: ['public'],
 	casing: 'snake_case'

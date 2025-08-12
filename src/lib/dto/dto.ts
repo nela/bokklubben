@@ -33,3 +33,23 @@ export interface PublicMember {
 	titles: Array<ClubTitle>;
 	imageUrl: string;
 };
+
+export interface Author {
+	name: string;
+	description: string
+	imageUrl: string;
+};
+
+export interface Book {
+	title: string;
+	firstPublished: number;
+	pages: number;
+	awards: string | null;
+	originalLanguage: string;
+	genre: string;
+	read: Date;
+	goodreadsRating: number;
+	description: string;
+	authors: Array<string>
+	imageUrl: string;
+}

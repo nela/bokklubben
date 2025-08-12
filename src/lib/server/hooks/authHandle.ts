@@ -66,13 +66,30 @@ export const authGuard: Handle = async ({ event, resolve }) => {
 	const member = await event.locals.fetchMember(user.id);
 	if (!member) {
 		await event.locals.supabase.auth.signOut();
+		event.locals.member = null;
 		throw redirect(303, '/auth?error=unauthorized');
 	}
+
+	event.locals.member = member;
 
 	if (member.appRole !== 'admin' && event.url.pathname.startsWith('/admin')) {
 		throw redirect(303, '/');
 	}
 
-	event.locals.member = member;
 	return resolve(event);
 };
+
+export const permissionGuard: Handle = async ({ event, resolve }) => {
+	event.locals.member = event.locals.user ? await event.locals.fetchMember(event.locals.user.id) : null;
+
+	if (!event.locals.member) {
+		await event.locals.supabase.auth.signOut();
+		throw redirect(303, '/auth?error=unauthorized');
+	}
+
+	if (event.locals.member.appRole !== 'admin' && event.url.pathname.startsWith('/admin')) {
+		throw redirect(303, '/');
+	}
+
+	return resolve(event);
+}

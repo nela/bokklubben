@@ -82,10 +82,22 @@ Golding mottok Nobelprisen i litteratur i 1983 for sitt bidrag til verdenslitter
 
 ---
 
-author: Greg Lukianoff og Jonathan Haidt
-description: Greg Lukianoff er en amerikansk jurist, forfatter og leder for Foundation for Individual Rights in Education (FIRE). Han har spesialisert seg på ytringsfrihet og akademisk frihet, og har skrevet flere bøker om disse temaene. Jonathan Haidt er en amerikansk sosialpsykolog, professor og forfatter, kjent for sin forskning på moral, politikk og samfunn.
+author: Greg Lukianoff
+description:
+Greg Lukianoff er en amerikansk jurist og forkjemper for ytringsfrihet. Han er kjent for sitt mangeårige lederskap i FIRE (Foundation for Individual Rights and Expression), som arbeider for å beskytte ytringsfrihet i og utenfor akademia.
+Han har skrevet Unlearning Liberty og Freedom From Speech, og var medforfatter av bestselgeren The Coddling of the American Mind (2018) sammen med Jonathan Haidt. Senere var han medforfatter av The Canceling of the American Mind (2023) med Rikki Schlott.
+Lukianoff har juridisk grad (J.D.) fra Stanford Law School og studiebakgrunn fra American University.
+Erfaringer med kognitiv atferdsterapi har påvirket analysene hans av “safetyism” og kognitive forvrengninger i samtiden.
 
-Sammen har de skrevet "The Coddling of the American Mind", hvor de analyserer hvordan overbeskyttelse og polarisering påvirker unge mennesker og utdanningssystemet i USA. Boken har fått stor oppmerksomhet og har bidratt til debatten om psykisk helse, ytringsfrihet og samfunnsutvikling. Lukianoff og Haidt kombinerer forskning, analyse og samfunnsengasjement i sitt arbeid.
+
+---
+author: Jonathan Haidt
+description:
+Jonathan Haidt er en amerikansk sosialpsykolog, født i 1963, kjent for forskning på moral- og politisk psykologi.Han er professor i etikk og ledelse ved NYU Stern School of Business. Tidligere var han professor ved University of Virginia.
+Sammen med kolleger utviklet han Moral Foundations Theory, som forklarer hvordan ulike intuitive moralske verdier former politiske og kulturelle uenigheter.
+
+Han er forfatter av The Happiness Hypothesis (2006) og The Righteous Mind (2012). Sammen med Greg Lukianoff skrev han bestselgeren The Coddling of the American Mind (2018). I The Anxious Generation (2024) analyserer han hvordan smarttelefoner og sosiale medier henger sammen med økende psykiske plager blant unge.
+Haidt var også medstifter av Heterodox Academy, som arbeider for synsmangfold og åpenhet i akademia.
 
 ---
 

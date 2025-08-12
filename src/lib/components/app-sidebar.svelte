@@ -63,10 +63,10 @@
 		]
 	};
 
-	const navItems: Record<NavItemPrimaryKey, NavItemPrimary> = {
+	/* const navItems: Record<NavItemPrimaryKey, NavItemPrimary> = {
 		[NavItemPrimaryKey.LIBRARY]: library,
 		[NavItemPrimaryKey.MEMBERS]: members
-	};
+	}; */
 
 	const navItemsPrimary = [library, members];
 	const navItemsBottom = [
@@ -81,27 +81,6 @@
 			icon: SendIcon
 		}
 	];
-
-	/* const activePrimaryItem = $derived(
-		navItemsPrimary.find((item) => page.url.pathname.startsWith(item.pathname))
-	) */
-
-	function togglePath(item: NavItemBase) {
-		if (page.url.pathname !== item.pathname) {
-			item.isActive = true;
-			// TODO set other items as inactive? Maybe I dont need active?
-			// TODO set parents as active
-			goto(item.pathname);
-		}
-
-		// go to parent
-
-		const paths = page.url.pathname.split('/');
-		console.log('paths', paths);
-		paths.pop();
-		const newPath = paths.reduce((acc, curr) => `${acc}/${curr}`, '/');
-		console.log(newPath);
-	}
 </script>
 
 <script lang="ts">
@@ -183,30 +162,8 @@
 			<div class="inline-flex flex-col justify-center gap-2 px-4 py-2">
 				<hr class="h-px border-0 bg-gray-200 dark:bg-gray-700" />
 			</div>
-			<!-- {#key key} -->
-			<!-- <div -->
-			<!--   in:fly={{ x: -10, duration: baseDuration, delay: baseDuration * (delayIn) }} -->
-			<!--   out:fly={{ x: -10, duration: baseDuration, delay: baseDuration * (delayOut) }} -->
-			<!-- > -->
-			<NavItemGroup
-				transitionKey={key ?? ''}
-				delayMultiplierIn={delayIn}
-				delayMultiplierOut={delayOut}
-				{items}
-			/>
-			<!-- </div> -->
-			<!-- {/key} -->
+			<NavItemGroup {items} />
 		{/each}
-
-		<!-- {/if} -->
-
-		<!-- Block for Tertiary Items (Second level of sub-items) -->
-		<!-- {#if tertiaryItems.length}
-			<div class="inline-flex flex-col justify-center gap-2 px-4 py-2">
-				<hr class="h-px border-0 bg-gray-200 dark:bg-gray-700" />
-			</div>
-			<NavItemGroup items={tertiaryItems} />
-		{/if} -->
 
 		<NavBottom items={navItemsBottom} class="mt-auto" />
 	</Sidebar.Content>

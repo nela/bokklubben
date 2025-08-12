@@ -1,12 +1,12 @@
 import { POSTGRES_URL } from '$env/static/private';
 import { drizzle } from 'drizzle-orm/postgres-js';
 import postgres from 'postgres';
-import { clubTitles, memberClubTitle, members } from './schema';
+import { authors, bookAuthor, books, clubTitles, memberClubTitle, members } from './schema';
 import { err, fromPromise, ok, ResultAsync, safeTry } from 'neverthrow';
 import { DbInternalError, DbTooManyRowsError, type DbError } from '$lib/errors/db';
 import { unwrapSingleQueryResult } from './utils';
 import { count, eq, inArray } from 'drizzle-orm';
-import { ClubTitle, type Member, type PublicMember } from '$lib/dto/dto';
+import { ClubTitle, type Author, type Book, type Member, type PublicMember } from '$lib/dto/dto';
 import type { MemberDbDto } from './model';
 import { authUsers } from 'drizzle-orm/supabase';
 
@@ -154,7 +154,7 @@ export function fetchMembers(): ResultAsync<Array<PublicMember>, DbError> {
 				memberSince: members.memberSince,
 				memberTo: members.memberTo,
 				imageUrl: members.imageUrl,
-				clubTitle: clubTitles.name,
+				clubTitle: clubTitles.name
 			})
 			.from(members)
 			.leftJoin(memberClubTitle, eq(memberClubTitle.fkMemberId, members.id))
@@ -173,5 +173,48 @@ export function fetchMembers(): ResultAsync<Array<PublicMember>, DbError> {
 				};
 			})
 			.toArray()
+	);
+}
+
+export function fetchAuthors(): ResultAsync<Array<Author>, DbError> {
+	return fromPromise(db.select().from(authors), (e) => new DbInternalError({ cause: e })).map(
+		(authors) =>
+			authors.map((author) => ({
+				name: author.name,
+				description: author.description,
+				imageUrl: author.imageUrl
+			}))
+	);
+}
+
+export function fetchBooks(): ResultAsync<Array<Book>, DbError> {
+	return fromPromise(
+		db
+			.select({
+				bookId: books.id,
+				title: books.title,
+				firstPublished: books.firstPublished,
+				pages: books.pages,
+				awards: books.awards,
+				originalLanguage: books.originalLanguage,
+				genre: books.genre,
+				read: books.read,
+				goodreadsRating: books.goodreadsRating,
+				description: books.description,
+				imageUrl: books.imageUrl,
+				author: authors.name
+			})
+			.from(books)
+			.leftJoin(bookAuthor, eq(bookAuthor.fkAuthorId, books.id))
+			.leftJoin(authors, eq(authors.id, bookAuthor.fkAuthorId)),
+		(e) => new DbInternalError({ cause: e })
+	).map((res) => Map.groupBy(res, ({ bookId }) => bookId).values().map((bookResults) => {
+			const { bookId, read, author,  ...first } = bookResults[0];
+			return {
+				...first,
+				read: new Date(read),
+				authors: bookResults.map((b) => b.author).filter((a) => a !== null)
+			}
+		}).toArray()
 	);
 }

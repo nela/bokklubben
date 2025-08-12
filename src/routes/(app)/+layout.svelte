@@ -15,9 +15,9 @@
 
 	let { data, children }: LayoutProps = $props();
 	const member = data.member!;
-	const displayName = $derived(
-		member.username ? member.username : `${member.firstname} ${member.lastname}`
-	);
+	// const displayName = $derived(
+	// 	member.username ? member.username : `${member.firstname} ${member.lastname}`
+	// );
 
 	const pathConfigs = [
 		{
@@ -62,6 +62,10 @@
 	});
 
 	setContext('filter-nav', () => filterNav);
+
+	const members = {
+
+	}
 </script>
 
 <div class="[--header-height:calc(--spacing(14))]">
