@@ -29,7 +29,7 @@ CREATE TABLE "books" (
 	"original_language" varchar(16) NOT NULL,
 	"description" text NOT NULL,
 	"genre" varchar(64) NOT NULL,
-	"read" varchar(256) NOT NULL,
+	"read" date NOT NULL,
 	"image_url" varchar(2048) NOT NULL,
 	"goodreads_rating" numeric(4, 2) NOT NULL
 );

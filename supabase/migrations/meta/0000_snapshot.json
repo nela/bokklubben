@@ -1,5 +1,5 @@
 {
-  "id": "59964cdc-8355-4560-90c6-8ac4129bb8a5",
+  "id": "10bc3270-731d-42d5-939a-7b85f538835d",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -153,14 +153,14 @@
         },
         "member_since": {
           "name": "member_since",
-          "type": "timestamp with time zone",
+          "type": "date",
           "primaryKey": false,
           "notNull": true,
           "default": "now()"
         },
         "member_to": {
           "name": "member_to",
-          "type": "timestamp with time zone",
+          "type": "date",
           "primaryKey": false,
           "notNull": false
         },

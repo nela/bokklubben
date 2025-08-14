@@ -5,36 +5,36 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1754851100849,
+      "when": 1755171912457,
       "tag": "0000_init_members",
       "breakpoints": true
     },
     {
       "idx": 1,
       "version": "7",
-      "when": 1754851109876,
+      "when": 1755171928381,
       "tag": "0001_insert_club_titles",
       "breakpoints": true
     },
     {
       "idx": 2,
       "version": "7",
-      "when": 1754851130522,
+      "when": 1755171934921,
       "tag": "0002_restrict_signup",
       "breakpoints": true
     },
     {
       "idx": 3,
       "version": "7",
-      "when": 1754934570568,
+      "when": 1755172134490,
       "tag": "0003_init_meets",
       "breakpoints": true
     },
     {
       "idx": 4,
       "version": "7",
-      "when": 1754939157715,
-      "tag": "0004_init_books_authors",
+      "when": 1755172146376,
+      "tag": "0004_init_authors_books",
       "breakpoints": true
     }
   ]

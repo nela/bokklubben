@@ -6,7 +6,7 @@ CREATE TABLE "meet_attendance" (
 ALTER TABLE "meet_attendance" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
 CREATE TABLE "meets" (
 	"id" smallint PRIMARY KEY GENERATED ALWAYS AS IDENTITY (sequence name "meets_id_seq" INCREMENT BY 1 MINVALUE 1 MAXVALUE 32767 START WITH 1 CACHE 1),
-	"date" timestamp with time zone NOT NULL,
+	"datetime" timestamp with time zone NOT NULL,
 	"location" varchar(256),
 	"address" varchar(256),
 	"notes" text,

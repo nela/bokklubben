@@ -19,8 +19,8 @@ CREATE TABLE "members" (
 	"lastname" varchar(256) NOT NULL,
 	"username" varchar(256),
 	"email" varchar(256) NOT NULL,
-	"member_since" timestamp with time zone DEFAULT now() NOT NULL,
-	"member_to" timestamp with time zone,
+	"member_since" date DEFAULT now() NOT NULL,
+	"member_to" date,
 	"app_role" "app_role" DEFAULT 'regular' NOT NULL,
 	"image_url" varchar(2048) NOT NULL,
 	CONSTRAINT "uq_member_email_key" UNIQUE("email")

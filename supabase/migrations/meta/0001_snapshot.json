@@ -1,6 +1,6 @@
 {
-  "id": "ed2950b4-e1a2-4f9f-98de-b5925735de84",
-  "prevId": "59964cdc-8355-4560-90c6-8ac4129bb8a5",
+  "id": "8e123ec7-e31d-4b3c-b1f1-acf56c931b81",
+  "prevId": "10bc3270-731d-42d5-939a-7b85f538835d",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -153,14 +153,14 @@
         },
         "member_since": {
           "name": "member_since",
-          "type": "timestamp with time zone",
+          "type": "date",
           "primaryKey": false,
           "notNull": true,
           "default": "now()"
         },
         "member_to": {
           "name": "member_to",
-          "type": "timestamp with time zone",
+          "type": "date",
           "primaryKey": false,
           "notNull": false
         },

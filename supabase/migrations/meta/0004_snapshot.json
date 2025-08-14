@@ -1,6 +1,6 @@
 {
-  "id": "53b57217-868c-4f40-ae0e-23ebb0c945b0",
-  "prevId": "ff0f895b-d8e8-4073-89f4-888b330f4b83",
+  "id": "0b81ecdc-492b-4b95-9ff4-0942b07573eb",
+  "prevId": "948a1b7f-fb01-4845-b46d-17fb6acdfcb8",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -228,7 +228,7 @@
         },
         "read": {
           "name": "read",
-          "type": "varchar(256)",
+          "type": "date",
           "primaryKey": false,
           "notNull": true
         },
@@ -370,8 +370,8 @@
             "cycle": false
           }
         },
-        "date": {
-          "name": "date",
+        "datetime": {
+          "name": "datetime",
           "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": true
@@ -520,14 +520,14 @@
         },
         "member_since": {
           "name": "member_since",
-          "type": "timestamp with time zone",
+          "type": "date",
           "primaryKey": false,
           "notNull": true,
           "default": "now()"
         },
         "member_to": {
           "name": "member_to",
-          "type": "timestamp with time zone",
+          "type": "date",
           "primaryKey": false,
           "notNull": false
         },

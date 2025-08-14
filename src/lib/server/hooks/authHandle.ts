@@ -37,10 +37,7 @@ export const supabaseHandle: Handle = async ({ event, resolve }) => {
 	};
 
 	event.locals.fetchMember = async (uuid: string) => {
-		return fetchMemberByUuid(uuid).match(
-			(m) => m,
-			(_) => null
-		);
+		return fetchMemberByUuid(uuid).unwrapOr(null);
 	};
 
 	return resolve(event, {
@@ -63,23 +60,20 @@ export const authGuard: Handle = async ({ event, resolve }) => {
 		throw redirect(303, '/');
 	}
 
-	const member = await event.locals.fetchMember(user.id);
-	if (!member) {
+	event.locals.member = await event.locals.fetchMember(user.id);
+	if (!event.locals.member) {
 		await event.locals.supabase.auth.signOut();
-		event.locals.member = null;
 		throw redirect(303, '/auth?error=unauthorized');
 	}
 
-	event.locals.member = member;
-
-	if (member.appRole !== 'admin' && event.url.pathname.startsWith('/admin')) {
+	if (event.locals.member.appRole !== 'admin' && event.url.pathname.startsWith('/admin')) {
 		throw redirect(303, '/');
 	}
 
 	return resolve(event);
 };
 
-export const permissionGuard: Handle = async ({ event, resolve }) => {
+/* export const permissionGuard: Handle = async ({ event, resolve }) => {
 	event.locals.member = event.locals.user ? await event.locals.fetchMember(event.locals.user.id) : null;
 
 	if (!event.locals.member) {
@@ -92,4 +86,4 @@ export const permissionGuard: Handle = async ({ event, resolve }) => {
 	}
 
 	return resolve(event);
-}
+} */

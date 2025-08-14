@@ -8,7 +8,8 @@ import {
 	pgEnum,
 	timestamp,
 	text,
-	numeric
+	numeric,
+    date
 } from 'drizzle-orm/pg-core';
 import { authUsers } from 'drizzle-orm/supabase';
 import { customTypeNumeric } from './types';
@@ -26,8 +27,8 @@ export const members = pgTable(
 		lastname: varchar('lastname', { length: 256 }).notNull(),
 		username: varchar('username', { length: 256 }),
 		email: varchar('email', { length: 256 }).notNull(),
-		memberSince: timestamp('member_since', { withTimezone: true }).defaultNow().notNull(),
-		memberTo: timestamp('member_to', { withTimezone: true }),
+		memberSince: date('member_since').defaultNow().notNull(),
+		memberTo: date('member_to'),
 		appRole: appRole('app_role').notNull().default('regular'),
 		imageUrl: varchar('image_url', { length: 2048 }).notNull()
 	},
@@ -77,7 +78,7 @@ export const meets = pgTable('meets', {
 	id: smallint('id')
 		.primaryKey()
 		.generatedAlwaysAsIdentity({ name: 'meets_id_seq', startWith: 1, increment: 1 }),
-	date: timestamp('date', { withTimezone: true }).notNull(),
+	datetime: timestamp('datetime', { withTimezone: true }).notNull(),
 	location: varchar('location', { length: 256 }),
 	address: varchar('address', { length: 256 }),
 	notes: text('notes'),
@@ -125,7 +126,7 @@ export const books = pgTable('books', {
 	originalLanguage: varchar('original_language', { length: 16 }).notNull(),
 	description: text('description').notNull(),
 	genre: varchar('genre', { length: 64 }).notNull(),
-	read: varchar('read', { length: 256 }).notNull(),
+	read: date('read').notNull(),
 	imageUrl: varchar('image_url', { length: 2048 }).notNull(),
 	goodreadsRating: customTypeNumeric('goodreads_rating', { precision: 4, scale: 2 }).notNull()
 }).enableRLS();
