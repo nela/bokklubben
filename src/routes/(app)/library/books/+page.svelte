@@ -1,2 +1,0 @@
-
-<p> Displaying books! </p>

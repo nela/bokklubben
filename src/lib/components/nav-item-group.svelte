@@ -25,7 +25,7 @@
 						tooltipContent={item.title}
 					>
 						{#snippet child({ props })}
-							<a href={item.pathname === '/library' ? '/library/books' : item.pathname} {...props}>
+							<a class="font-montserrat" href={item.pathname} {...props}>
 								{#if 'icon' in item}
 									<item.icon />
 								{/if}

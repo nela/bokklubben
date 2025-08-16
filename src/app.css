@@ -2,6 +2,12 @@
 
 @import 'tw-animate-css';
 
+@import '@fontsource-variable/inter';
+@import '@fontsource-variable/montserrat';
+@import '@fontsource-variable/unbounded';
+@import '@fontsource-variable/caveat';
+@import '@fontsource/shadows-into-light';
+
 @custom-variant dark (&:is(.dark *));
 /* @custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *)); */
 
@@ -132,6 +138,14 @@
 	--color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
 	--color-sidebar-border: var(--sidebar-border);
 	--color-sidebar-ring: var(--sidebar-ring);
+
+	/* Custom Fonts */
+	--font-caveat: 'Caveat Variable', cursive;
+	--font-qwitcher: 'Qwitcher Grypen', cursive;
+	--font-shadows: 'Shadows Into Light', cursive;
+	--font-unbounded: 'Unbounded Variable', sans-serif;
+	--font-montserrat: 'Montserrat Variable', sans-serif;
+	--font-sans: 'Inter Variable', sans-serif;
 }
 
 @layer base {

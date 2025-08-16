@@ -1,12 +1,10 @@
 <script lang="ts">
 	import type { WithElementRef } from '$lib/utils/types';
-	import { getTheme } from '@sejohnson/svelte-themes';
+	import { mode } from 'mode-watcher';
 	import type { SVGAttributes } from 'svelte/elements';
 
-	const theme = getTheme();
-
 	let {
-		color = theme.resolvedTheme === 'dark' ? 'light' : 'dark',
+		color = mode.current === 'dark' ? 'light' : 'dark',
 		size = 50,
 		type = 'bold',
 		width = $bindable(null),
@@ -25,8 +23,6 @@
 	> = $props();
 </script>
 
-<!-- width={width ? width : size} -->
-<!-- height={height ? height : size * 1.15} -->
 <svg
 	viewBox="0 0 88 101"
 	fill="currentColor"

@@ -1,3 +1,5 @@
+import type { Author } from "$lib/dto/dto";
+
 export const validators = {
 	parseEmail: (email: string) => {
 		const emailRegex =
@@ -13,9 +15,29 @@ export function parseNonNullable<T extends object>(obj: T): NonNullable<T> {
 		.reduce((acc, [key, value]) => ({ ...acc, [key]: value }), {} as NonNullable<T>);
 }
 
-export function firstToUpperRestToLowerCase(name: string) {
-	return name
-		.split(' ')
-		.map((s) => s[0].toUpperCase() + s.slice(1).toLowerCase())
-		.join(' ');
-}
+export const createSlug = (name: string) => {
+	return (
+		name
+			.toLowerCase()
+			// Manually replace characters that don't decompose well
+			.replace(/å/g, 'a')
+			.replace(/æ/g, 'ae')
+			.replace(/ø/g, 'o')
+			// Decompose accented characters into base characters and combining marks
+			.normalize('NFD')
+			// Remove the combining marks (diacritics)
+			.replace(/[\u0300-\u036f]/g, '')
+			// Replace whitespace with hyphens
+			.replace(/\s+/g, '-')
+			// Remove any remaining characters that are not alphanumeric or hyphens
+			.replace(/[^\w-]+/g, '')
+			// Replace multiple hyphens with a single one
+			.replace(/--+/g, '-')
+	);
+};
+
+export const getLifetime = (author: Author) => {
+	const bornYear = new Date(author.born).getFullYear();
+	const diedYear = author.died ? new Date(author.died).getFullYear() : null;
+	return diedYear ? `${bornYear}–${diedYear}` : `f. ${bornYear}`;
+};

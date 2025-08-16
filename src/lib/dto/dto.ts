@@ -37,7 +37,16 @@ export interface PublicMember {
 export interface Author {
 	name: string;
 	description: string
+	awards: string | null,
+	born: Date,
+	died: Date | null,
 	imageUrl: string;
+	books: Array<{
+		title: string;
+		imageUrl: string;
+		awards: string | null;
+		genre: string;
+	}>
 };
 
 export interface Book {
@@ -52,4 +61,19 @@ export interface Book {
 	description: string;
 	authors: Array<string>
 	imageUrl: string;
+}
+
+export interface Meet {
+	datetime: Date;
+	location: string | null;
+	host: {
+		firstname: string; lastname: string;
+	} | null; // firstname lastname
+	address: string | null;
+	notes: string | null;
+	highlights: string | null;
+	book: {
+		title: string;
+		authors: Array<string>;
+	}
 }

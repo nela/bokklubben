@@ -8,8 +8,7 @@ import {
 	pgEnum,
 	timestamp,
 	text,
-	numeric,
-    date
+	date
 } from 'drizzle-orm/pg-core';
 import { authUsers } from 'drizzle-orm/supabase';
 import { customTypeNumeric } from './types';
@@ -27,8 +26,8 @@ export const members = pgTable(
 		lastname: varchar('lastname', { length: 256 }).notNull(),
 		username: varchar('username', { length: 256 }),
 		email: varchar('email', { length: 256 }).notNull(),
-		memberSince: date('member_since').defaultNow().notNull(),
-		memberTo: date('member_to'),
+		memberSince: date('member_since', { mode: 'date' }).defaultNow().notNull(),
+		memberTo: date('member_to', { mode: 'date' }),
 		appRole: appRole('app_role').notNull().default('regular'),
 		imageUrl: varchar('image_url', { length: 2048 }).notNull()
 	},
@@ -38,7 +37,6 @@ export const members = pgTable(
 			foreignColumns: [authUsers.id],
 			name: 'fk_auth_id_auth_id'
 		}).onDelete('cascade'),
-		// unique('uq_fk_auth_id_key').on(t.fkAuthId),
 		unique('uq_member_email_key').on(t.email)
 	]
 ).enableRLS();
@@ -80,11 +78,17 @@ export const meets = pgTable('meets', {
 		.generatedAlwaysAsIdentity({ name: 'meets_id_seq', startWith: 1, increment: 1 }),
 	datetime: timestamp('datetime', { withTimezone: true }).notNull(),
 	location: varchar('location', { length: 256 }),
+	fkMemberId: smallint('fkMemberId'),
 	address: varchar('address', { length: 256 }),
 	notes: text('notes'),
-	summary: text('summary'),
 	highlights: text('highlights')
-}).enableRLS();
+}, (t) => [
+		foreignKey({
+			columns: [t.fkMemberId],
+			foreignColumns: [members.id],
+			name: 'fk_member_id_members_id'
+		})
+	]).enableRLS();
 
 export const meetAttendance = pgTable(
 	'meet_attendance',
@@ -112,6 +116,9 @@ export const authors = pgTable('authors', {
 		.generatedAlwaysAsIdentity({ name: 'authors_id_seq', startWith: 1, increment: 1 }),
 	name: varchar('name', { length: 256 }).notNull(),
 	description: text('description').notNull(),
+	awards: varchar('awards', { length: 2048 }),
+	born: date('born', { mode: 'date' }).notNull(),
+	died: date('died', { mode: 'date' }),
 	imageUrl: varchar('image_url', { length: 256 }).notNull()
 }).enableRLS();
 
@@ -126,7 +133,7 @@ export const books = pgTable('books', {
 	originalLanguage: varchar('original_language', { length: 16 }).notNull(),
 	description: text('description').notNull(),
 	genre: varchar('genre', { length: 64 }).notNull(),
-	read: date('read').notNull(),
+	read: date('read', { mode: 'date' }).notNull(),
 	imageUrl: varchar('image_url', { length: 2048 }).notNull(),
 	goodreadsRating: customTypeNumeric('goodreads_rating', { precision: 4, scale: 2 }).notNull()
 }).enableRLS();
@@ -137,22 +144,21 @@ export const bookAuthor = pgTable(
 		fkBookId: smallint('fk_book_id').notNull(),
 		fkAuthorId: smallint('fk_author_id').notNull()
 	},
-	(t) =>
-		[
-			foreignKey({
-				columns: [t.fkBookId],
-				foreignColumns: [books.id],
-				name: 'fk_book_id_books_id'
-			}).onDelete('cascade'),
-			foreignKey({
-				columns: [t.fkAuthorId],
-				foreignColumns: [authors.id],
-				name: 'fk_author_id_authors_id'
-			}).onDelete('cascade')
-		]
+	(t) => [
+		foreignKey({
+			columns: [t.fkBookId],
+			foreignColumns: [books.id],
+			name: 'fk_book_id_books_id'
+		}).onDelete('cascade'),
+		foreignKey({
+			columns: [t.fkAuthorId],
+			foreignColumns: [authors.id],
+			name: 'fk_author_id_authors_id'
+		}).onDelete('cascade')
+	]
 ).enableRLS();
 
-export const bookStatus = pgEnum('book_status', ['elected', 'pitched']);
+export const bookStatus = pgEnum('book_status', ['elected', 'pitched', 'read']);
 
 export const bookMeet = pgTable(
 	'book_meet',

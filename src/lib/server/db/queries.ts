@@ -1,12 +1,12 @@
 import { POSTGRES_URL } from '$env/static/private';
 import { drizzle } from 'drizzle-orm/postgres-js';
 import postgres from 'postgres';
-import { authors, bookAuthor, books, clubTitles, memberClubTitle, members } from './schema';
+import { authors, bookAuthor, bookMeet, books, clubTitles, meets, memberClubTitle, members } from './schema';
 import { err, fromPromise, ok, ResultAsync, safeTry } from 'neverthrow';
-import { DbInternalError, DbTooManyRowsError, type DbError } from '$lib/errors/db';
+import { DbEntityNotFoundError, DbInternalError, DbTooManyRowsError, type DbError } from '$lib/errors/db';
 import { unwrapSingleQueryResult } from './utils';
 import { count, eq, inArray } from 'drizzle-orm';
-import { ClubTitle, type Author, type Book, type Member, type PublicMember } from '$lib/dto/dto';
+import { ClubTitle, type Author, type Book, type Meet, type Member, type PublicMember } from '$lib/dto/dto';
 import type { MemberDbDto } from './model';
 import { authUsers } from 'drizzle-orm/supabase';
 
@@ -14,9 +14,11 @@ const client = postgres(POSTGRES_URL, { prepare: false });
 const db = drizzle(client);
 
 export function mapMember(member: MemberDbDto, titles: Array<ClubTitle>): Member {
-	const { id, fkAuthId, ...dto } = member;
+	const { id, fkAuthId, memberTo, memberSince, ...dto } = member;
 	return {
 		...dto,
+		memberSince: new Date(memberSince),
+		memberTo: memberTo ? new Date(memberTo) : null,
 		titles: titles
 	};
 }
@@ -56,11 +58,18 @@ export function verifyUserAllowed(
 }
 
 function createMember(newMember: Member): ResultAsync<void, DbError> {
-	const { titles, ...rest } = newMember;
+	const { titles, memberTo, memberSince, ...rest } = newMember;
 
 	return safeTry(async function* () {
 		const memberResult = yield* fromPromise(
-			db.insert(members).values(rest).returning({ id: members.id }),
+			db
+				.insert(members)
+				.values({
+					memberTo: null,
+					memberSince: memberSince,
+					...rest
+				})
+				.returning({ id: members.id }),
 			(e) => new DbInternalError({ cause: e })
 		);
 
@@ -164,9 +173,11 @@ export function fetchMembers(): ResultAsync<Array<PublicMember>, DbError> {
 		Map.groupBy(res, ({ memberId }) => memberId)
 			.values()
 			.map((m) => {
-				const { memberId, clubTitle, ...first } = m[0];
+				const { memberId, clubTitle, memberSince, memberTo, ...first } = m[0];
 				return {
 					...first,
+					memberSince: new Date(memberSince),
+					memberTo: memberTo ? new Date(memberTo) : null,
 					titles: m
 						.map((e) => (e.clubTitle ? (e.clubTitle as ClubTitle) : null))
 						.filter((ct) => ct !== null)
@@ -177,13 +188,49 @@ export function fetchMembers(): ResultAsync<Array<PublicMember>, DbError> {
 }
 
 export function fetchAuthors(): ResultAsync<Array<Author>, DbError> {
-	return fromPromise(db.select().from(authors), (e) => new DbInternalError({ cause: e })).map(
-		(authors) =>
-			authors.map((author) => ({
-				name: author.name,
-				description: author.description,
-				imageUrl: author.imageUrl
-			}))
+	return fromPromise(
+		db
+			.select({
+				authorId: authors.id,
+				authorName: authors.name,
+				authorBorn: authors.born,
+				authorDied: authors.died,
+				authorDescription: authors.description,
+				authorImageUrl: authors.imageUrl,
+				authorAwards: authors.awards,
+				bookTitle: books.title,
+				bookImageUrl: books.imageUrl,
+				bookAwards: books.awards,
+				bookGenre: books.genre
+			})
+			.from(authors)
+			.leftJoin(bookAuthor, eq(bookAuthor.fkAuthorId, authors.id))
+			.leftJoin(books, eq(books.id, bookAuthor.fkBookId)),
+		(e) => new DbInternalError({ cause: e })
+	).map((res) =>
+		Map.groupBy(res, ({ authorId }) => authorId)
+			.values()
+			.map((byAuthor) => {
+				const author = byAuthor[0];
+
+				return {
+					name: author.authorName,
+					description: author.authorDescription,
+					born: new Date(author.authorBorn),
+					died: author.authorDied ? new Date(author.authorDied) : null,
+					awards: author.authorAwards,
+					imageUrl: author.authorImageUrl,
+					books: byAuthor
+					.filter((b) => b.bookTitle && b.bookImageUrl && b.bookGenre)
+					.map((b) => ({
+						title: b.bookTitle!,
+						imageUrl: b.bookImageUrl!,
+						awards: b.bookAwards,
+						genre: b.bookGenre!
+					}))
+				};
+			})
+			.toArray()
 	);
 }
 
@@ -205,16 +252,73 @@ export function fetchBooks(): ResultAsync<Array<Book>, DbError> {
 				author: authors.name
 			})
 			.from(books)
-			.leftJoin(bookAuthor, eq(bookAuthor.fkAuthorId, books.id))
+			.leftJoin(bookAuthor, eq(bookAuthor.fkBookId, books.id))
 			.leftJoin(authors, eq(authors.id, bookAuthor.fkAuthorId)),
 		(e) => new DbInternalError({ cause: e })
-	).map((res) => Map.groupBy(res, ({ bookId }) => bookId).values().map((bookResults) => {
-			const { bookId, read, author,  ...first } = bookResults[0];
-			return {
-				...first,
-				read: new Date(read),
-				authors: bookResults.map((b) => b.author).filter((a) => a !== null)
-			}
-		}).toArray()
+	).map((res) =>
+		Map.groupBy(res, ({ bookId }) => bookId)
+			.values()
+			.map((bookResults) => {
+				const { bookId, read, author, ...first } = bookResults[0];
+				return {
+					...first,
+					read: new Date(read),
+					authors: bookResults.map((b) => b.author).filter((a) => a !== null)
+				};
+			})
+			.toArray()
 	);
+}
+
+export function fetchNextMeet(): ResultAsync<Meet, DbError> {
+	return safeTry(async function* () {
+		const results = yield* fromPromise(
+			db.select()
+				.from(meets)
+				.leftJoin(bookMeet, eq(bookMeet.fkMeetId, meets.id))
+				.leftJoin(books, eq(books.id, bookMeet.fkBookId))
+				.leftJoin(members, eq(members.id, meets.fkMemberId))
+				.leftJoin(bookAuthor, eq(bookAuthor.fkBookId, books.id))
+				.leftJoin(authors, eq(authors.id, bookAuthor.fkAuthorId))
+				.where(eq(bookMeet.status, 'elected'))
+				.orderBy(meets.datetime)
+				.limit(1),
+			(e) => new DbInternalError({ cause: e })
+		);
+
+		for (const r of results) {
+			if (r.books === null) {
+				return err(new DbEntityNotFoundError('', 'books'))
+			}
+
+			if (r.authors === null) {
+				return err(new DbEntityNotFoundError('', 'authours'))
+			}
+		}
+
+		const bookIds: Array<number> = [...new Set(results.map((r) => r.books!.id))];
+
+		if (bookIds.length > 1) {
+			return err(new DbTooManyRowsError(bookIds.join(', '), 'Books in meets'))
+		};
+
+		const first = results.length > 1 ? [results[0]] : results;
+		const firstUnwrapped = yield* unwrapSingleQueryResult(first, '', 'Books/Meets');
+
+		return ok({
+			datetime: firstUnwrapped.meets.datetime,
+			location: firstUnwrapped.meets.location,
+			host: firstUnwrapped.members ? {
+				firstname: firstUnwrapped.members.firstname,
+				lastname: firstUnwrapped.members.lastname,
+			} : null,
+			address: firstUnwrapped.meets.address,
+			notes: firstUnwrapped.meets.notes,
+			highlights: firstUnwrapped.meets.highlights,
+			book: {
+				title: firstUnwrapped.books!.title,
+				authors: results.map((r) => r.authors!.name)
+			}
+		});
+	})
 }

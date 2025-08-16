@@ -1,5 +1,5 @@
 {
-  "id": "948a1b7f-fb01-4845-b46d-17fb6acdfcb8",
+  "id": "fe56f015-d414-459d-8fcf-2c6b104536ef",
   "prevId": "87283b9d-3102-4495-b13f-94deba9b4db8",
   "version": "7",
   "dialect": "postgresql",
@@ -133,6 +133,12 @@
           "primaryKey": false,
           "notNull": false
         },
+        "fkMemberId": {
+          "name": "fkMemberId",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": false
+        },
         "address": {
           "name": "address",
           "type": "varchar(256)",
@@ -145,12 +151,6 @@
           "primaryKey": false,
           "notNull": false
         },
-        "summary": {
-          "name": "summary",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
         "highlights": {
           "name": "highlights",
           "type": "text",
@@ -159,7 +159,21 @@
         }
       },
       "indexes": {},
-      "foreignKeys": {},
+      "foreignKeys": {
+        "fk_member_id_members_id": {
+          "name": "fk_member_id_members_id",
+          "tableFrom": "meets",
+          "tableTo": "members",
+          "columnsFrom": [
+            "fkMemberId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
       "policies": {},

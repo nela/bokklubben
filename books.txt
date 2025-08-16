@@ -1,10 +1,19 @@
 --- AUTHORS ---
 author: Aldous Huxley
 description: Aldous Huxley (1894–1963) var en britisk forfatter, filosof og samfunnskritiker kjent for sine dystopiske og satiriske verk. Han skrev en rekke romaner, noveller og essays som utforsker temaer som vitenskap, psykologi, religion og menneskelig bevissthet. Huxley hadde stor interesse for både vestlig og østlig filosofi, og hans senere verk omhandlet ofte mystikk og åndelighet. Hans innflytelse strekker seg langt utover skjønnlitteraturen, med betydelig påvirkning innen både litteratur og tenkning på 1900-tallet.
+born:
+26. juli 1894
+died: 22. november 1963
+award: Companion of Literature (Royal Society of Literature), nominasjon til Nobelprisen i litteratur (flere ganger)
+
 
 %%
 author: Bjørn Rasmussen
 description: Bjørn Rasmussen (f. 1983) er en dansk forfatter og dramatiker. Han er kjent for sin særegne, eksperimentelle skrivestil og poetiske kraft. Rasmussen har mottatt flere litterære priser og blitt anerkjent for sin evne til å utforske temaer som identitet, seksualitet og kropp. Han skriver både romaner, dikt og scenetekster.
+
+born: 10. januar 1983
+died:
+award: Montanas Litteraturpris, EU's Litteraturpris, nominasjon til Nordisk Råds Litteraturpris
 
 %%
 author: Cormac McCarthy
@@ -12,11 +21,19 @@ description: Cormac McCarthy (1933–2023) var en amerikansk forfatter kjent for
 
 McCarthy mottok flere priser gjennom karrieren, inkludert National Book Award for Alle de fine hester og Pulitzerprisen for Veien. Han ble også tildelt National Book Critics Circle Award og ble nominert til flere andre litterære æresbevisninger. Selv om han var tilbakeholden med offentlighet, regnes han som en av de største amerikanske forfatterne på 1900- og 2000-tallet. Hans siste roman, The Passenger, ble utgitt posthumt i 2022.
 
+
+
+born: 20. juli 1933
+died: 13. juni 2023
+award: Pulitzerprisen for skjønnlitteratur, National Book Award, MacArthur Fellowship
+
 %%
 
 author: Lena Lindgren
 description: Lena Lindgren (f. 1969) bor i Oslo. Hun er til daglig politisk kommentator i Morgenbladet. Ekko. Et essay om algoritmer og begjær er hennes første bok.
-
+born: 30.07.1969
+died:
+award: Brageprisen
 %%
 
 author: Frank Herbert
@@ -24,18 +41,29 @@ description: Frank Herbert (1920–1986) var en amerikansk science fiction-forfa
 
 I tillegg til Dune-serien skrev Herbert flere andre science fiction-romaner, blant annet The Dosadi Experiment og The White Plague. Han mottok både Hugo- og Nebula-prisen for Dune, og hans arbeid har inspirert generasjoner av forfattere og filmskapere. Herberts litteratur skiller seg ut ved sin intellektuelle dybde og samfunnskritiske perspektiver, noe som gjør ham til en av de mest betydningsfulle science fiction-forfatterne gjennom tidene.
 
+born: 8. oktober 1920
+died: 11. februar 1986
+award: Nebula Award (Grand Master), Hugo Award (posthumt for livsverk)
+
 %%
 
 author: Stephen King
 description: Stephen King (f. 1947) er en amerikansk forfatter og en av verdens mest innflytelsesrike skribenter innen skrekk, thriller og fantastisk litteratur. Med over 60 romaner og 200 noveller har han skapt ikoniske verk som The Shining, It og Misery, som har blitt filmatisert og feiret verden over. Hans evne til å blande hverdagsrealisme med overnaturlige elementer har gjort ham til en mester i å gripe leserne.
 
 Blant Kings mest ambisiøse prosjekter er The Dark Tower-serien, en episk fortelling som blander fantasy, western og skrekk. Serien følger pistolmannen Roland Deschain på hans søken etter det mytiske Dark Tower, men den står i skyggen av Kings mer kjente enestående romaner. King har mottatt flere priser, inkludert Bram Stoker Award og National Medal of Arts, og hans verk har satt et uutslettelig preg på populærkulturen.
+born: 21. september 1947
+died:
+award: National Book Foundation Medal for Distinguished Contribution to American Letters, Bram Stoker Award, World Fantasy Award, Edgar Award
 
 %%
 author: William Gibson
 description: William Gibson (f. 1948) er en amerikansk-kanadisk science fiction-forfatter og en av pionerene innen cyberpunk-sjangeren. Han ble verdensberømt med debutromanen Neuromancer (1984), som revolusjonerte science fiction med sitt dystopiske fremtidsbilde av virtuell virkelighet, kunstig intelligens og globale megakorporasjoner. Boken vant både Nebula-, Hugo- og Philip K. Dick-prisen, og ble starten på Sprawl-trilogien.
 
 Gibson er kjent for sin skarpe samfunnskritikk, teknologiske innsikt og stilistiske presisjon. Hans senere verk, som Bridge-trilogien og Blue Ant-serien, utforsker ofte hvordan teknologi former menneskelige relasjoner og maktstrukturer. Selv om han ikke lenger skriver ren cyberpunk, regnes han fortsatt som en av de mest innflytelsesrike forfatterne innen moderne science fiction.
+
+born: 17. mars 1948
+died:
+award: Hugo Award, Nebula Award, Philip K. Dick Award, Ditmar Award
 
 
 %%
@@ -44,12 +72,20 @@ description: Salman Rushdie (f. 1947) er en britisk-indisk forfatter kjent for s
 
 Tross truslene har Rushdie fortsatt å skrive, og hans verk utforsker ofte temaer som identitet, migrasjon og kulturelle konflikter. Han har mottatt tallrike priser, inkludert Booker of Bookers, og ble i 2007 adlet av dronning Elizabeth II. Etter et knivangrep i 2022, hvor han mistet synet i ett øye og deler av bruk av en hånd, har han fortsatt å skrive og holde foredrag, og står som et symbol på ytringsfrihetens betydning.
 
+born: 19. juni 1947
+died:
+award: Booker Prize, Golden PEN Award, Whitbread Prize for Best Novel
+
 %%
 
 author: Abdulrazak Gurnah
-description: Abdulrazak Gurnah (f.1948) er en britisk-tanzaniansk forfatter og akademiker, født på Zanzibar, som i dag er en del av Tanzania[1][2][3][4][5]. Han flyktet til Storbritannia som tenåring etter den blodige revolusjonen på Zanzibar i 1964, og har siden skrevet ti kritikerroste romaner på engelsk. Gurnahs forfatterskap er sterkt preget av hans personlige erfaringer med flukt, tap og det å leve mellom kulturer, og han har en doktorgrad i postkolonial litteratur fra University of Kent[1][2].
+description: Abdulrazak Gurnah (f.1948) er en britisk-tanzaniansk forfatter og akademiker, født på Zanzibar, som i dag er en del av Tanzania. Han flyktet til Storbritannia som tenåring etter den blodige revolusjonen på Zanzibar i 1964, og har siden skrevet ti kritikerroste romaner på engelsk. Gurnahs forfatterskap er sterkt preget av hans personlige erfaringer med flukt, tap og det å leve mellom kulturer, og han har en doktorgrad i postkolonial litteratur fra University of Kent.
 
-Gurnah er særlig kjent for sin kompromissløse og medfølende utforskning av kolonialismens konsekvenser og flyktningers skjebne, ofte med referanser til sin egen bakgrunn[3][4][5]. Hans romaner, som "Paradise" og "By the Sea", skildrer et kulturelt mangfoldig Øst-Afrika og gir stemme til de som lever i eksil og mellom ulike verdener. I 2021 mottok han Nobelprisen i litteratur for sitt bidrag til å belyse disse temaene med stor sannhetssøken og empati[4][5].
+Gurnah er særlig kjent for sin kompromissløse og medfølende utforskning av kolonialismens konsekvenser og flyktningers skjebne, ofte med referanser til sin egen bakgrunn. Hans romaner, som "Paradise" og "By the Sea", skildrer et kulturelt mangfoldig Øst-Afrika og gir stemme til de som lever i eksil og mellom ulike verdener. I 2021 mottok han Nobelprisen i litteratur for sitt bidrag til å belyse disse temaene med stor sannhetssøken og empati.
+
+born: 20. desember 1948
+died:
+award: Nobelprisen i litteratur
 
 %%
 
@@ -58,13 +94,20 @@ description: Stephen Fry (f. 1957) er en britisk forfatter, skuespiller, komiker
 
 Fry har også vært åpen om sine personlige utfordringer, blant annet med psykisk helse, og har engasjert seg i samfunnsdebatt og veldedighetsarbeid. Hans evne til å kombinere humor med innsikt har gjort ham til en populær formidler og en viktig stemme i britisk kulturliv. Han har mottatt flere priser for sitt arbeid både som forfatter og entertainer.
 
+born: 24. august 1957
+died:
+awards: British Book Awards Author of the Year, BAFTA Special Award
+
+
 %%
 
 author: Patrick Rothfuss
 description: Patrick Rothfuss (f. 1973) er en amerikansk fantasyforfatter, best kjent for serien "The Kingkiller Chronicle". Han debuterte med "The Name of the Wind" i 2007, som raskt ble en internasjonal bestselger og har fått kultstatus blant fantasy-lesere. Rothfuss’ bøker utmerker seg med poetisk språk, kompleks verdensbygging og dyptgående karakterutvikling.
 
 Rothfuss har også engasjert seg i veldedighetsarbeid, blant annet gjennom organisasjonen Worldbuilders, som samler inn penger til humanitære formål. Han har vunnet flere priser for sitt forfatterskap og regnes som en av de mest innflytelsesrike moderne fantasyforfatterne. Hans evne til å kombinere klassiske eventyrmotiver med nyskapende fortellerteknikk har gitt ham en stor og lojal leserskare.
-
+born: 6. juni 1973
+died:
+award: Quill Award, David Gemmell Legend Award (nominasjon)
 %%
 
 author: Ryan North
@@ -72,6 +115,9 @@ description:
 Ryan North (f. 1980) er en kanadisk forfatter, tegneserieskaper og dataprogrammerer. Han er kjent for sin innovative og humoristiske tilnærming til både sakprosa og skjønnlitteratur, og har skrevet flere populære bøker og webserier, blant annet "Dinosaur Comics". North har en bakgrunn innen informatikk og bruker ofte vitenskapelige og teknologiske temaer i sitt arbeid.
 
 Med boken "How to Invent Everything" har North fått ros for sin evne til å gjøre komplekse vitenskapelige emner tilgjengelige og underholdende. Han har vunnet flere priser for sitt arbeid innen tegneserier og litteratur, og er kjent for sin kreative bruk av språk og form. Norths bøker appellerer til både unge og voksne lesere med interesse for vitenskap, teknologi og humor.
+born: 20. oktober 1980
+died:
+award: Eisner Award, Harvey Award
 
 ---
 
@@ -79,6 +125,10 @@ author: William Golding
 description: William Golding (1911-1993) var en britisk forfatter og nobelprisvinner. Han er mest kjent for romanen "Fluenes Herre", som har blitt en klassiker innen moderne litteratur. Goldings forfatterskap utforsker menneskets natur, moral og samfunnets sårbarhet, ofte gjennom allegoriske og dystopiske fortellinger.
 
 Golding mottok Nobelprisen i litteratur i 1983 for sitt bidrag til verdenslitteraturen. Hans bøker har blitt studert og diskutert i generasjoner, og han regnes som en av de viktigste britiske forfatterne i det 20. århundre. Goldings evne til å skildre menneskets mørke sider og etiske dilemmaer har gjort hans verk tidløse og relevante.
+
+born: 19.09.1911
+died: 19.06.1993
+awards: Nobelprisen i litteratur, Booker Prize
 
 ---
 
@@ -88,7 +138,10 @@ Greg Lukianoff er en amerikansk jurist og forkjemper for ytringsfrihet. Han er k
 Han har skrevet Unlearning Liberty og Freedom From Speech, og var medforfatter av bestselgeren The Coddling of the American Mind (2018) sammen med Jonathan Haidt. Senere var han medforfatter av The Canceling of the American Mind (2023) med Rikki Schlott.
 Lukianoff har juridisk grad (J.D.) fra Stanford Law School og studiebakgrunn fra American University.
 Erfaringer med kognitiv atferdsterapi har påvirket analysene hans av “safetyism” og kognitive forvrengninger i samtiden.
-
+author: Greg Lukianoff
+born: 16.09.1974
+died:
+awards: Hugh M. Hefner First Amendment Award
 
 ---
 author: Jonathan Haidt
@@ -99,13 +152,19 @@ Sammen med kolleger utviklet han Moral Foundations Theory, som forklarer hvordan
 Han er forfatter av The Happiness Hypothesis (2006) og The Righteous Mind (2012). Sammen med Greg Lukianoff skrev han bestselgeren The Coddling of the American Mind (2018). I The Anxious Generation (2024) analyserer han hvordan smarttelefoner og sosiale medier henger sammen med økende psykiske plager blant unge.
 Haidt var også medstifter av Heterodox Academy, som arbeider for synsmangfold og åpenhet i akademia.
 
+born: 19.10.1963
+died:
+awards: American Psychological Association’s Award for Distinguished Scientific Early Career Contributions to Psychology
+
 ---
 
 author: Douglas Adams
 description: Douglas Adams (1952 - 2001) var en britisk forfatter og humorist. Han er mest kjent for "The Hitchhiker's Guide to the Galaxy", en science fiction-serie som har oppnådd kultstatus og blitt tilpasset for radio, TV og film. Adams’ bøker kjennetegnes av absurd humor, kreativitet og satirisk samfunnskritikk.
 
 Adams har også skrevet sakprosa og jobbet med miljøvern, blant annet i boken "Last Chance to See". Hans unike stil og evne til å kombinere vitenskap, filosofi og humor har gjort ham til en av de mest elskede britiske forfatterne. Adams’ verk har inspirert generasjoner av lesere og forfattere innen både science fiction og humor.
-
+born: 11.03.1952
+died: 11.05.2001
+awards: Golden Pan Award, British Science Fiction Association Award
 ---
 
 author: Bob Woodward
@@ -113,26 +172,36 @@ description: Bob Woodward (f. 1943) er en amerikansk journalist og forfatter. Ha
 
 Woodwards bøker, som "Fear: Trump in the White House", bygger på grundig research og intervjuer med sentrale aktører. Han har mottatt flere priser for sitt arbeid, inkludert Pulitzer-prisen. Woodwards evne til å avdekke maktens mekanismer og presentere komplekse politiske prosesser har gjort ham til en viktig stemme i amerikansk offentlighet.
 
+born: 26.03.1943
+died:
+awards: Pulitzerprisen, George Polk Award
 ---
 
 author: Michio Kaku
 description: Michio Kaku (f. 1947) er en amerikansk fysiker, forfatter og vitenskapsformidler. Han er professor i teoretisk fysikk ved City College of New York og har skrevet flere bestselgende bøker om vitenskap og fremtidsteknologi. Kaku er kjent for sin evne til å forklare avanserte vitenskapelige konsepter på en forståelig og engasjerende måte.
 
 Kaku har deltatt i en rekke TV-programmer og dokumentarer, og har vært en aktiv debattant om teknologiens rolle i samfunnet. Hans bøker, som "Physics of the Future", kombinerer forskning, visjon og samfunnsanalyse. Kaku har inspirert mange til å interessere seg for naturvitenskap og fremtidens muligheter.
-
+born: 24.01.1947
+died:
+awards: Klumpke-Roberts Award
 ---
 
 author: James Swallow
 description: James Swallow (f. 1974) er en britisk forfatter og manusforfatter. Han har skrevet både romaner, noveller og manus til dataspill og TV-serier, og er særlig kjent for spenningsserien om Marc Dane, som starter med "Nomad". Swallow har også bidratt til universer som "Doctor Who" og "Star Trek".
 
 Swallow har fått ros for sin evne til å skape actionfylte og troverdige historier med globale perspektiver. Han kombinerer spionasje, teknologi og moderne problemstillinger i sine bøker, og har opparbeidet seg en stor leserskare. Swallow er en produktiv og allsidig forfatter innen thriller- og science fiction-sjangeren.
-
+born: 06.05.1970
+died:
+awards:
 ---
 
 author: J.R.R. Tolkien
 description: J.R.R. Tolkien (1892-1973) var en britisk forfatter, filolog og professor. Han er mest kjent for sine fantasyverk "Ringenes Herre", "Hobbiten" og "Silmarillion", som har definert moderne fantasy og skapt et rikt og detaljert univers, Midgard. Tolkien var professor i engelsk språk og litteratur ved University of Oxford.
 
 Tolkien kombinerte sin kunnskap om språk, mytologi og historie for å skape komplekse fortellinger med dyptgående temaer om tap, håp og mot. Hans bøker har inspirert utallige forfattere og lesere, og har blitt tilpasset for film, teater og spill. Tolkien regnes som en av de viktigste og mest innflytelsesrike fantasyforfatterne i litteraturhistorien.
+born: 03.01.1892
+died: 02.09.1973
+awards: International Fantasy Award, Commander of the Order of the British Empire
 
 ---
 
@@ -140,6 +209,9 @@ author: Jack Kerouac
 description: Jack Kerouac (1922-1969) var en amerikansk forfatter og poet. Han er mest kjent for romanen "On the Road", som regnes som et hovedverk innen beat-generasjonen. Kerouacs spontane og energiske skrivestil, inspirert av jazz og reiser, har hatt stor innflytelse på amerikansk litteratur og kultur.
 
 Kerouac utforsket temaer som frihet, opprør og søken etter mening, og hans bøker gir et levende bilde av etterkrigstidens USA. Han var en sentral figur i beat-bevegelsen, sammen med forfattere som Allen Ginsberg og William S. Burroughs. Kerouacs verk har inspirert generasjoner av kunstnere og lesere.
+born: 12.03.1922
+died: 21.10.1969
+awards: American Academy of Arts and Letters Award
 
 ---
 
@@ -147,7 +219,9 @@ author: George Orwell
 description: George Orwell (1903-1950) var en britisk forfatter, journalist og samfunnskritiker. Han er mest kjent for de dystopiske romanene "1984" og "Animal Farm", som har hatt stor innflytelse på politisk tenkning og populærkultur. Orwell var en skarp kritiker av totalitære regimer, sensur og maktmisbruk.
 
 Orwell kombinerte litterær kvalitet med politisk engasjement, og hans bøker utforsker temaer som frihet, sannhet og rettferdighet. Han har inspirert debatt om demokrati og menneskerettigheter, og hans begreper som "Big Brother" og "newspeak" har blitt en del av dagligtalen. Orwell regnes som en av de viktigste samfunnskritiske forfatterne i det 20. århundre.
-
+born: 25.06.1903
+died: 21.01.1950
+awards: Prometheus Hall of Fame Award, Retro Hugo Award
 ---
 
 author: John le Carré
@@ -155,13 +229,18 @@ description:
 John le Carré (1932-2020), egentlig David Cornwell, var en britisk forfatter og tidligere etterretningsagent. Han er kjent for sine realistiske og psykologisk komplekse spionromaner, blant annet "The Spy Who Came in from the Cold" og "Tinker Tailor Soldier Spy". Le Carré har satt standarden for moderne spionlitteratur.
 
 Le Carrés bøker utforsker temaer som lojalitet, svik og moral, og gir et nyansert bilde av den kalde krigens etterretningsverden. Han har mottatt flere priser for sitt forfatterskap og har inspirert både lesere og filmskapere. Le Carré regnes som en av de fremste forfatterne innen spennings- og spionlitteratur.
-
+born: 19. oktober 1931
+died: 12. desember 2020
+awards: Goethe Medal, Dagger of Daggers, Olof Palme-prisen
 ---
 
 author: Frederick Forsyth
 description: Frederick Forsyth (f. 1938) er en britisk forfatter og tidligere journalist. Han er mest kjent for thrilleren "The Day of the Jackal", som har blitt en klassiker innen sjangeren. Forsyths bøker kjennetegnes av grundig research, realistiske plot og høyt tempo, og han har skrevet flere bestselgere innen spionasje og politisk thriller.
 
 Forsyth har hatt stor innflytelse på thrillerlitteraturen og har mottatt flere priser for sitt arbeid. Han har også jobbet som krigsreporter og har brukt sine erfaringer til å skape troverdige og spennende fortellinger. Forsyths evne til å kombinere fakta og fiksjon har gjort ham til en av de mest leste thrillerforfatterne i verden.
+born: 08.25.1938
+died: 09.06.2025
+awards: Edgar Award, Crime Writers' Association Diamond Dagger
 
 ---
 
@@ -169,6 +248,9 @@ author: Niccolò Machiavelli
 description: Niccolò Machiavelli (1469-1527) var en italiensk diplomat, filosof og forfatter. Han er mest kjent for "Prinsen", en håndbok i makt og ledelse som har vært kontroversiell og diskutert i århundrer. Machiavelli regnes som grunnleggeren av moderne politisk teori, og hans analyser av maktens mekanismer har hatt stor innflytelse.
 
 Machiavelli arbeidet som diplomat i Firenze og skrev flere verk om politikk, historie og krig. Hans syn på politikk som et pragmatisk og ofte kynisk spill har gitt opphav til begrepet "machiavellisk". "Prinsen" er fortsatt relevant for studier av ledelse og samfunn, og Machiavelli regnes som en av de viktigste tenkerne i europeisk idéhistorie.
+born: 03.05.1469
+died: 21.06.1527
+awards:
 
 
 ---- BOOKS ---
@@ -320,9 +402,9 @@ goodreads_rating: 3.7
 awards: Booker Prize (shortlist), Whitbread Prize (shortlist)
 original_language: Engelsk
 description:
-"Paradis" er en gripende oppvekstroman satt til Øst-Afrika på begynnelsen av 1900-tallet, hvor den unge Yusuf blir solgt av sin far for å betale en gjeld. Gjennom Yusufs øyne skildres et samfunn i endring, preget av kolonialismens fremmarsj og de komplekse relasjonene mellom ulike folkegrupper, handelsmenn og makthavere[1][4][5]. Boken kombinerer en lyrisk, mytisk fortellerstil med en realistisk fremstilling av regionens historie og Yusuf som en tragisk figur fanget mellom barndommens uskyld og voksenlivets harde realiteter[2][3].
+"Paradis" er en gripende oppvekstroman satt til Øst-Afrika på begynnelsen av 1900-tallet, hvor den unge Yusuf blir solgt av sin far for å betale en gjeld. Gjennom Yusufs øyne skildres et samfunn i endring, preget av kolonialismens fremmarsj og de komplekse relasjonene mellom ulike folkegrupper, handelsmenn og makthavere. Boken kombinerer en lyrisk, mytisk fortellerstil med en realistisk fremstilling av regionens historie og Yusuf som en tragisk figur fanget mellom barndommens uskyld og voksenlivets harde realiteter.
 
-Romanen utforsker temaer som frihet, identitet og tap, og bruker Yusufs skjebne som et bilde på Øst-Afrikas møte med imperialistiske krefter. Gurnah vever inn elementer fra Koranen og lokale myter, og gir et nyansert bilde av et samfunn der tradisjoner brytes ned av ytre press. "Paradis" ble nominert til både Booker- og Whitbread-prisen, og regnes som Gurnahs gjennombruddsverk, med en kraftfull skildring av kolonialismens konsekvenser for enkeltmennesket og kulturen[1][4][5].
+Romanen utforsker temaer som frihet, identitet og tap, og bruker Yusufs skjebne som et bilde på Øst-Afrikas møte med imperialistiske krefter. Gurnah vever inn elementer fra Koranen og lokale myter, og gir et nyansert bilde av et samfunn der tradisjoner brytes ned av ytre press. "Paradis" ble nominert til både Booker- og Whitbread-prisen, og regnes som Gurnahs gjennombruddsverk, med en kraftfull skildring av kolonialismens konsekvenser for enkeltmennesket og kulturen.
 
 title: Mythos
 author: Stephen Fry

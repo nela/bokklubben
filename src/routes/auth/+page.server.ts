@@ -81,7 +81,6 @@ export const actions: Actions = {
 
 		return actionResult.match(
 			(data) => {
-				console.log(data);
 				return redirect(303, data.url);
 			},
 			(e) => {

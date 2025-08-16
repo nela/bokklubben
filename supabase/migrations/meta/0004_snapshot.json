@@ -1,6 +1,6 @@
 {
-  "id": "0b81ecdc-492b-4b95-9ff4-0942b07573eb",
-  "prevId": "948a1b7f-fb01-4845-b46d-17fb6acdfcb8",
+  "id": "7bbf9b90-7b52-4056-afb2-e935a6235ab4",
+  "prevId": "fe56f015-d414-459d-8fcf-2c6b104536ef",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -36,6 +36,24 @@
           "type": "text",
           "primaryKey": false,
           "notNull": true
+        },
+        "awards": {
+          "name": "awards",
+          "type": "varchar(2048)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "born": {
+          "name": "born",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "died": {
+          "name": "died",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": false
         },
         "image_url": {
           "name": "image_url",
@@ -382,6 +400,12 @@
           "primaryKey": false,
           "notNull": false
         },
+        "fkMemberId": {
+          "name": "fkMemberId",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": false
+        },
         "address": {
           "name": "address",
           "type": "varchar(256)",
@@ -394,12 +418,6 @@
           "primaryKey": false,
           "notNull": false
         },
-        "summary": {
-          "name": "summary",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
         "highlights": {
           "name": "highlights",
           "type": "text",
@@ -408,7 +426,21 @@
         }
       },
       "indexes": {},
-      "foreignKeys": {},
+      "foreignKeys": {
+        "fk_member_id_members_id": {
+          "name": "fk_member_id_members_id",
+          "tableFrom": "meets",
+          "tableTo": "members",
+          "columnsFrom": [
+            "fkMemberId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
       "policies": {},
@@ -592,7 +624,8 @@
       "schema": "public",
       "values": [
         "elected",
-        "pitched"
+        "pitched",
+        "read"
       ]
     }
   },

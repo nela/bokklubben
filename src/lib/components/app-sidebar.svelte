@@ -1,174 +1,94 @@
-<script lang="ts" module>
-	import LifeBuoyIcon from '@lucide/svelte/icons/life-buoy';
-	import SendIcon from '@lucide/svelte/icons/send';
-
-	const library: NavItemPrimary = {
-		title: 'Bibliotek',
-		pathname: '/library',
-		type: 'primary',
-		icon: BookIcon,
-		isActive: false,
-		items: [
-			{
-				title: 'Bøker',
-				type: 'secondary',
-				pathname: '/library/books',
-				isActive: false,
-				items: [
-					{
-						title: '2016',
-						type: 'tertiary',
-						pathname: '/library/books/2016',
-						isActive: false
-					},
-					{
-						title: '2017',
-						type: 'tertiary',
-						pathname: '/library/books/2017',
-						isActive: false
-					}
-				]
-			},
-			{
-				title: 'Forfattere',
-				pathname: '/library/authors',
-				type: 'secondary',
-				isActive: false,
-				items: []
-			}
-		]
-	};
-
-	const members: NavItemPrimary = {
-		title: 'Medlemmer',
-		pathname: '/members',
-		type: 'primary',
-		icon: Users,
-		isActive: false,
-		items: [
-			{
-				title: 'cto',
-				type: 'secondary',
-				pathname: '/members/cto',
-				isActive: false,
-				items: []
-			},
-			{
-				title: 'cfo',
-				type: 'secondary',
-				pathname: '/members/cfo',
-				isActive: false,
-				items: []
-			}
-		]
-	};
-
-	/* const navItems: Record<NavItemPrimaryKey, NavItemPrimary> = {
-		[NavItemPrimaryKey.LIBRARY]: library,
-		[NavItemPrimaryKey.MEMBERS]: members
-	}; */
-
-	const navItemsPrimary = [library, members];
-	const navItemsBottom = [
-		{
-			title: 'Support',
-			url: '#',
-			icon: LifeBuoyIcon
-		},
-		{
-			title: 'Feedback',
-			url: '#',
-			icon: SendIcon
-		}
-	];
-</script>
-
 <script lang="ts">
 	import type { ComponentProps } from 'svelte';
+	import { Separator } from '$lib/components/ui/separator';
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
-	import { BookIcon, NotebookText, Scroll, Users } from '@lucide/svelte';
-	import NavBottom from './nav-bottom.svelte';
-	import BkIcon from './icons/bk-icon.svelte';
-	import { NavItemPrimaryKey, type NavItemBase, type NavItemPrimary } from '$lib/model';
-	import { page } from '$app/state';
-	import { goto } from '$app/navigation';
+	import type { NavItemPrimary } from '$lib/model';
 	import NavItemGroup from './nav-item-group.svelte';
-	import { fly, type TransitionConfig } from 'svelte/transition';
+	import LifeBuoyIcon from '@lucide/svelte/icons/life-buoy';
+	import BkIcon from './icons/bk-icon.svelte';
+	import { Routes } from '$lib/routes';
+	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
+	import { ChevronUp } from '@lucide/svelte';
+	import type { Member } from '$lib/dto/dto';
+	import { toggleMode } from 'mode-watcher';
 
-	const activePrimaryItem = $derived(
-		navItemsPrimary.find((item) => page.url.pathname.startsWith(item.pathname))
-	);
+	let {
+		ref = $bindable(null),
+		primaryItems,
+		activePrimary,
+		member,
+		...restProps
+	}: ComponentProps<typeof Sidebar.Root> & {
+		activePrimary: NavItemPrimary | undefined;
+		primaryItems: Array<NavItemPrimary>;
+		member: Member;
+	} = $props();
 
-	const secondaryItems = $derived(activePrimaryItem?.items ?? []);
-	const activeSecondaryItem = $derived(
-		secondaryItems.find((i) => page.url.pathname.startsWith(i.pathname))
-	);
-	const tertiaryItems = $derived(activeSecondaryItem?.items ?? []);
+	const secondaryItems = $derived(activePrimary?.items.filter((i) => !i.hideFromSidebar) ?? []);
 
-	const subitems = $derived(
-		[
-			{ key: activePrimaryItem?.pathname, items: secondaryItems },
-			{ key: activeSecondaryItem?.pathname, items: tertiaryItems }
-		].filter((s) => s.items.length)
-	);
-
-	let { ref = $bindable(null), ...restProps }: ComponentProps<typeof Sidebar.Root> = $props();
-
-	let subitemPrevCount: number | undefined = undefined;
-
-	$effect(() => {
-		const curr = subitems.length;
-
-		// logic
-
-		subitemPrevCount = curr;
-	});
-
-	import { onMount } from 'svelte';
-
-	const offset = $derived(page.url.pathname.startsWith('/lib') ? 2.5 : 1);
+	const signOut = async () => {
+		await fetch('/auth/signout');
+	};
 </script>
 
-<!-- <Sidebar.Root class="top-(--header-height) h-[calc(100svh-var(--header-height))]!" {...restProps}> -->
-<Sidebar.Root {...restProps}>
-	<Sidebar.Header>
+<Sidebar.Root collapsible="offcanvas" {...restProps}>
+	<Sidebar.Header class="mt-1 mb-4">
 		<Sidebar.Menu>
 			<Sidebar.MenuItem>
 				<Sidebar.MenuButton size="lg" class="mb-4">
 					{#snippet child({ props })}
-						<a href="/" {...props}>
-							<div
-								class="text-sidebar-primary-foreground inline-flex items-center justify-center rounded-lg"
-							>
-								<BkIcon class="text-primary-600 h-auto w-[clamp(2rem,8vw,5rem)]" />
-							</div>
-						</a>
+						<p {...props}>
+							<a href={Routes.DASHBOARD} class="group/bkicon inline-flex items-center gap-3">
+								<BkIcon
+									class="zinc-400 h-10 w-10 transition-transform duration-300 ease-in-out group-hover/bkicon:-rotate-90"
+								/>
+								<span
+									class="font-unbounded from-zing-900 bg-gradient-to-br to-zinc-600 bg-clip-text text-lg font-semibold text-transparent drop-shadow-sm dark:from-zinc-400 dark:to-zinc-300"
+								>
+									Bokklubben
+								</span>
+							</a>
+						</p>
 					{/snippet}
 				</Sidebar.MenuButton>
 			</Sidebar.MenuItem>
 		</Sidebar.Menu>
 	</Sidebar.Header>
 	<Sidebar.Content>
-		<NavItemGroup label="Bokklubben" items={navItemsPrimary} />
-		<!-- {#if secondaryItems.length} -->
-		{#each subitems as { key, items }, idx (key)}
-			{@const delayIn = idx + offset}
-			{@const delayOut = subitems.length - 1 - idx}
-			{@const baseDuration = 200}
-			<!-- {@const delayIn = idx + (page.url.pathname.startsWith('/library') ? 2 : 0)} -->
-			{delayIn}
-			{delayOut}
-			{offset}
-			<div class="inline-flex flex-col justify-center gap-2 px-4 py-2">
-				<hr class="h-px border-0 bg-gray-200 dark:bg-gray-700" />
-			</div>
-			<NavItemGroup {items} />
-		{/each}
-
-		<NavBottom items={navItemsBottom} class="mt-auto" />
+		<NavItemGroup items={primaryItems} />
+		{#if secondaryItems.length > 0}
+			<Separator orientation="horizontal" />
+			<NavItemGroup items={secondaryItems} />
+		{/if}
 	</Sidebar.Content>
 	<Sidebar.Footer>
-		Footer
-		<!-- <NavUser user={data.user} /> -->
+      <Sidebar.Menu>
+        <Sidebar.MenuItem>
+          <DropdownMenu.Root>
+            <DropdownMenu.Trigger>
+              {#snippet child({ props })}
+                <Sidebar.MenuButton
+                  {...props}
+                  class="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+                >
+									{member.firstname}
+                  <ChevronUp class="ml-auto" />
+                </Sidebar.MenuButton>
+              {/snippet}
+            </DropdownMenu.Trigger>
+            <DropdownMenu.Content
+              side="top"
+              class="w-(--bits-dropdown-menu-anchor-width)"
+            >
+              <DropdownMenu.Item>
+                <button onclick={toggleMode} aria-label="Toggle mode">Toggle mode</button>
+              </DropdownMenu.Item>
+              <DropdownMenu.Item>
+                <button onclick={() => signOut()}>Logg ut</button>
+              </DropdownMenu.Item>
+            </DropdownMenu.Content>
+          </DropdownMenu.Root>
+        </Sidebar.MenuItem>
+      </Sidebar.Menu>
 	</Sidebar.Footer>
 </Sidebar.Root>

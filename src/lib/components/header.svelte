@@ -1,33 +1,57 @@
-
 <script lang="ts">
-  import SidebarIcon from "@lucide/svelte/icons/sidebar";
-  // import SearchForm from "./search-form.svelte";
-  import * as Breadcrumb from "$lib/components/ui/breadcrumb/index.js";
-  import { Button } from "$lib/components/ui/button/index.js";
-  import { Separator } from "$lib/components/ui/separator/index.js";
-  import * as Sidebar from "$lib/components/ui/sidebar/index.js";
+	import * as Sidebar from '$lib/components/ui/sidebar';
+	import { Separator } from '$lib/components/ui/separator';
+	import * as Breadcrumb from '$lib/components/ui/breadcrumb';
+	import { Button } from '$lib/components/ui/button/';
+	import GithubIcon from './icons/github-icon.svelte';
+	import type { Member } from '$lib/dto/dto';
 
-  const sidebar = Sidebar.useSidebar();
+	let {
+		breadcrumbs,
+		member
+	}: {
+		breadcrumbs: Array<{ crumb: string; pathname: string }>;
+		member: Member;
+	} = $props();
+
 </script>
 
-<header class="bg-background sticky top-0 z-50 flex w-full items-center border-b">
-  <div class="h-(--header-height) flex w-full items-center gap-2 px-4">
-    <Button class="size-8" variant="ghost" size="icon" onclick={sidebar.toggle}>
-      <SidebarIcon />
-    </Button>
-    <Separator orientation="vertical" class="mr-2 h-4" />
-    <Breadcrumb.Root class="hidden sm:block">
-      <Breadcrumb.List>
-        <Breadcrumb.Item>
-          <Breadcrumb.Link href="#">Building Your Application</Breadcrumb.Link>
-        </Breadcrumb.Item>
-        <Breadcrumb.Separator />
-        <Breadcrumb.Item>
-          <Breadcrumb.Page>Data Fetching</Breadcrumb.Page>
-        </Breadcrumb.Item>
-      </Breadcrumb.List>
-    </Breadcrumb.Root>
-    <!-- <SearchForm class="w-full sm:ml-auto sm:w-auto" /> -->
-  </div>
+<header
+	class="transition-width,height flex h-(--header-height) shrink-0 items-center gap-2 border-b ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-(--header-height)"
+>
+	<div class="flex w-full items-center gap-1 px-4 lg:gap-2 lg:px-6">
+		<Sidebar.Trigger class="-ml-1" />
+		<Separator orientation="vertical" class="mx-2 data-[orientation=vertical]:h-4" />
+		<Breadcrumb.Root class="hidden sm:block">
+			{#if breadcrumbs.length > 0}
+				<Breadcrumb.List>
+					{#each breadcrumbs as { crumb, pathname }, idx (pathname)}
+						{@const hasChildren = breadcrumbs.length !== idx + 1}
+						<Breadcrumb.Item>
+							{#if hasChildren}
+								<Breadcrumb.Link href={pathname}>{crumb}</Breadcrumb.Link>
+							{:else}
+								<Breadcrumb.Page>{crumb}</Breadcrumb.Page>
+							{/if}
+						</Breadcrumb.Item>
+						{#if hasChildren}
+							<Breadcrumb.Separator />
+						{/if}
+					{/each}
+				</Breadcrumb.List>
+			{/if}
+		</Breadcrumb.Root>
+		<div class="ml-auto flex items-center gap-2">
+			<Button
+				href="https://github.com/nela/bokklubben.git"
+				variant="ghost"
+				size="lg"
+				class="dark:text-foreground hidden sm:flex mr-8"
+				target="_blank"
+				rel="noopener noreferrer"
+			>
+				<GithubIcon />
+			</Button>
+		</div>
+	</div>
 </header>
-

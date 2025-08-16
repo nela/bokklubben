@@ -12,6 +12,7 @@ book: Ekko
 
 28.09.2024
 location: Hovden
+host: Jokke
 book: Dune Messiah
 
 
@@ -44,13 +45,9 @@ book: Mythos
 location: Oslo, Hos Nemanja
 book: The Name of the wind
 
-
-
 21.12.2019
 location: Kristiansand, Hos Jokke
 book: The Coddling of the American Mind
-
-
 
 27.07.2019
 book: Hitchikers Guide to Galazy
@@ -59,8 +56,7 @@ location: Kristiansand, Hos foreldrene til Ole B
 30.03.2019
 book: Fluenes Herre
 location: Kristiansand, St. Joseph, Kongens Gate
-
-
+host: Jokke, Marius
 
 
 01.01.2018

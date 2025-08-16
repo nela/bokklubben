@@ -10,10 +10,10 @@
 	const {
 		members,
 		layout = 'grid'
-	} = $props<{
-		members: PublicMember[];
+	}: {
+		members: Array<PublicMember>;
 		layout?: Layout;
-	}>();
+	} = $props();
 
 	const getDisplayName = (m: PublicMember) =>
 		m.username ? `${m.firstname} '${m.username}' ${m.lastname}` : `${m.firstname} ${m.lastname}`;
@@ -26,7 +26,7 @@
 </script>
 
 <div class={containerClasses}>
-	{#each members as member (member.id)}
+	{#each members as member (member.firstname + member.lastname)}
 		{@const displayName = getDisplayName(member)}
 		<Card.Root>
 			<div class="flex items-center gap-6 p-4">

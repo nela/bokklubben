@@ -1,8 +1,11 @@
-CREATE TYPE "public"."book_status" AS ENUM('elected', 'pitched');--> statement-breakpoint
+CREATE TYPE "public"."book_status" AS ENUM('elected', 'pitched', 'read');--> statement-breakpoint
 CREATE TABLE "authors" (
 	"id" smallint PRIMARY KEY GENERATED ALWAYS AS IDENTITY (sequence name "authors_id_seq" INCREMENT BY 1 MINVALUE 1 MAXVALUE 32767 START WITH 1 CACHE 1),
 	"name" varchar(256) NOT NULL,
 	"description" text NOT NULL,
+	"awards" varchar(2048),
+	"born" date NOT NULL,
+	"died" date,
 	"image_url" varchar(256) NOT NULL
 );
 --> statement-breakpoint
