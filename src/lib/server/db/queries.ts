@@ -280,7 +280,7 @@ export function fetchNextMeet(): ResultAsync<Meet, DbError> {
 				.leftJoin(members, eq(members.id, meets.fkMemberId))
 				.leftJoin(bookAuthor, eq(bookAuthor.fkBookId, books.id))
 				.leftJoin(authors, eq(authors.id, bookAuthor.fkAuthorId))
-				.where(eq(bookMeet.status, 'elected'))
+				.where(eq(bookMeet.status, 'read'))
 				.orderBy(meets.datetime)
 				.limit(1),
 			(e) => new DbInternalError({ cause: e })
@@ -321,4 +321,11 @@ export function fetchNextMeet(): ResultAsync<Meet, DbError> {
 			}
 		});
 	})
+}
+
+export function fetchMemberEmails() {
+	return fromPromise(
+		db.select({ email: members.email }).from(members),
+		(e) => new DbInternalError({ cause :e })
+	).map((res) => res.map((m) => m.email));
 }

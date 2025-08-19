@@ -1,6 +1,7 @@
 import { fromPromise } from 'neverthrow';
-import { NO_REPLY_EMAIL, SENDGRID_TOKEN, SENDGRID_URL } from './config';
 import { EmailInternalError } from '$lib/errors/mail';
+import { SMTP2GO_URL, SMTP2GO_API_KEY, SOURCE_EMAIL } from '$env/static/private';
+import { json } from '@sveltejs/kit';
 
 export interface EmailContent {
 	value: string;
@@ -16,29 +17,48 @@ export function createHtmlString(head: string, body: string) {
 	);
 }
 
+/* curl --request POST \
+     --url https://api.smtp2go.com/v3/email/send \
+     --header 'Content-Type: application/json' \
+     --header 'X-Smtp2go-Api-Key: api-xxxxxxxxxxxxxxxxxx' \
+     --header 'accept: application/json' \
+     --data '
+{
+  "sender": "email@example.com",
+  "to": [
+    "friend@example.com"
+  ],
+  "subject": "My First Email",
+  "text_body": "Hello from the other side."
+}
+' */
+
 export function sendEmail(
-	recepients: string | Array<string>,
+	recipients: string | Array<string>,
 	subject: string,
 	content: EmailContent
 ) {
+
 	return fromPromise(
-		fetch(SENDGRID_URL, {
+		fetch(SMTP2GO_URL, {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json',
-				Authorization: `Bearer ${SENDGRID_TOKEN}`
+				'accept': 'application/json',
+				'X-Smtp2go-Api-Key': SMTP2GO_API_KEY
+				// Authorization: `Bearer ${SENDGRID_TOKEN}`
 			},
 			body: JSON.stringify({
-				from: {
-					email: NO_REPLY_EMAIL
-				},
+				sender: SOURCE_EMAIL,
 				subject: subject,
-				content: [content],
-				personalizations: (Array.isArray(recepients) ? recepients : [recepients]).map((e) => ({
-					to: [{ email: e }]
-				}))
+				html_body: content.value,
+				// content: [content],
+				to: Array.isArray(recipients) ? recipients : [recipients]
+				// personalizations: (Array.isArray(recipients) ? recipients : [recipients]).map((e) => ({
+				// 	to: [{ email: e }]
+				// }))
 			})
 		}),
 		(e) => new EmailInternalError({ cause: e })
-	);
+	)
 }

@@ -12,7 +12,8 @@ CREATE TABLE "authors" (
 ALTER TABLE "authors" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
 CREATE TABLE "book_author" (
 	"fk_book_id" smallint NOT NULL,
-	"fk_author_id" smallint NOT NULL
+	"fk_author_id" smallint NOT NULL,
+	CONSTRAINT "book_author_fk_book_id_fk_author_id_pk" PRIMARY KEY("fk_book_id","fk_author_id")
 );
 --> statement-breakpoint
 ALTER TABLE "book_author" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
@@ -41,4 +42,7 @@ ALTER TABLE "books" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
 ALTER TABLE "book_author" ADD CONSTRAINT "fk_book_id_books_id" FOREIGN KEY ("fk_book_id") REFERENCES "public"."books"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "book_author" ADD CONSTRAINT "fk_author_id_authors_id" FOREIGN KEY ("fk_author_id") REFERENCES "public"."authors"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "book_meet" ADD CONSTRAINT "fk_book_id_books_id" FOREIGN KEY ("fk_book_id") REFERENCES "public"."books"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "book_meet" ADD CONSTRAINT "fk_meet_id_meets_id" FOREIGN KEY ("fk_meet_id") REFERENCES "public"."meets"("id") ON DELETE cascade ON UPDATE no action;
+ALTER TABLE "book_meet" ADD CONSTRAINT "fk_meet_id_meets_id" FOREIGN KEY ("fk_meet_id") REFERENCES "public"."meets"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+CREATE INDEX "book_author_fk_book_id_idx" ON "book_author" USING btree ("fk_book_id");--> statement-breakpoint
+CREATE INDEX "book_author_fk_author_id_idx" ON "book_author" USING btree ("fk_author_id");--> statement-breakpoint
+CREATE INDEX "book_meet_fk_book_id_idx" ON "book_meet" USING btree ("fk_book_id");

@@ -6,10 +6,12 @@
 	import StarRating from '$lib/components/star-rating.svelte';
 	import AnimatedUnderline from '$lib/components/animated-underline.svelte';
 	import { Routes } from '$lib/routes';
+	import AuthorCard from '$lib/components/author-card.svelte';
 
 	const { data, params }: PageProps = $props();
 
 	const book = $derived(data.books.find((b) => createSlug(b.title.toLowerCase()) === params.title));
+	const authors = $derived(data.authors.filter((a) => (book?.authors ?? []).includes(a.name)));
 
 	function formatDate(date: Date) {
 		return new Date(date).toLocaleDateString('no-NB', {
@@ -86,6 +88,17 @@
 				</div>
 			</div>
 		</div>
+
+		{#if authors.length > 0}
+			<div class="mt-12">
+				<h2 class="mb-6 text-2xl font-bold">Forfatter{ authors.length > 1 ? 'e:' : ':'}</h2>
+				<div class="grid grid-cols-1 gap-4 sm:grid-cols-2 ">
+					{#each authors as author (author.name)}
+						<AuthorCard {author}/>
+					{/each}
+				</div>
+			</div>
+		{/if}
 	</div>
 {:else}
 	<div class="flex h-full items-center justify-center p-10">

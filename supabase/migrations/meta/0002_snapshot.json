@@ -1,6 +1,6 @@
 {
-  "id": "87283b9d-3102-4495-b13f-94deba9b4db8",
-  "prevId": "8e123ec7-e31d-4b3c-b1f1-acf56c931b81",
+  "id": "fff34a65-691a-45d9-be3f-b2586328a3fc",
+  "prevId": "b742dd50-cae8-4d09-9837-2ec1d785a5dd",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -14,15 +14,15 @@
           "primaryKey": true,
           "notNull": true,
           "identity": {
+            "type": "always",
             "name": "club_titles_id_seq",
+            "schema": "public",
             "increment": "1",
+            "startWith": "1",
             "minValue": "1",
             "maxValue": "32767",
-            "startWith": "1",
             "cache": "1",
-            "cycle": false,
-            "schema": "public",
-            "type": "always"
+            "cycle": false
           }
         },
         "name": {
@@ -38,12 +38,183 @@
       "uniqueConstraints": {
         "uq_club_title_name_key": {
           "name": "uq_club_title_name_key",
+          "nullsNotDistinct": false,
           "columns": [
             "name"
-          ],
-          "nullsNotDistinct": false
+          ]
         }
       },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": true
+    },
+    "public.meet_attendance": {
+      "name": "meet_attendance",
+      "schema": "",
+      "columns": {
+        "fk_meet_id": {
+          "name": "fk_meet_id",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "fk_member_id": {
+          "name": "fk_member_id",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {
+        "meet_attendance_fk_member_id_idx": {
+          "name": "meet_attendance_fk_member_id_idx",
+          "columns": [
+            {
+              "expression": "fk_member_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "meet_attendance_fk_meet_id_idx": {
+          "name": "meet_attendance_fk_meet_id_idx",
+          "columns": [
+            {
+              "expression": "fk_meet_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "fk_member_id_members_id": {
+          "name": "fk_member_id_members_id",
+          "tableFrom": "meet_attendance",
+          "tableTo": "members",
+          "columnsFrom": [
+            "fk_member_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "fk_meet_id_meets_id": {
+          "name": "fk_meet_id_meets_id",
+          "tableFrom": "meet_attendance",
+          "tableTo": "meets",
+          "columnsFrom": [
+            "fk_meet_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "meet_attendance_fk_member_id_fk_meet_id_pk": {
+          "name": "meet_attendance_fk_member_id_fk_meet_id_pk",
+          "columns": [
+            "fk_member_id",
+            "fk_meet_id"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": true
+    },
+    "public.meets": {
+      "name": "meets",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "smallint",
+          "primaryKey": true,
+          "notNull": true,
+          "identity": {
+            "type": "always",
+            "name": "meets_id_seq",
+            "schema": "public",
+            "increment": "1",
+            "startWith": "1",
+            "minValue": "1",
+            "maxValue": "32767",
+            "cache": "1",
+            "cycle": false
+          }
+        },
+        "datetime": {
+          "name": "datetime",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "location": {
+          "name": "location",
+          "type": "varchar(256)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fkMemberId": {
+          "name": "fkMemberId",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "address": {
+          "name": "address",
+          "type": "varchar(256)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "notes": {
+          "name": "notes",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "highlights": {
+          "name": "highlights",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "fk_member_id_members_id": {
+          "name": "fk_member_id_members_id",
+          "tableFrom": "meets",
+          "tableTo": "members",
+          "columnsFrom": [
+            "fkMemberId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": true
@@ -65,36 +236,75 @@
           "notNull": true
         }
       },
-      "indexes": {},
+      "indexes": {
+        "member_club_title_fk_member_id_idx": {
+          "name": "member_club_title_fk_member_id_idx",
+          "columns": [
+            {
+              "expression": "fk_member_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "member_club_title_fk_club_title_id_idx": {
+          "name": "member_club_title_fk_club_title_id_idx",
+          "columns": [
+            {
+              "expression": "fk_club_title_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {
         "fk_member_id_members_id": {
           "name": "fk_member_id_members_id",
           "tableFrom": "member_club_title",
+          "tableTo": "members",
           "columnsFrom": [
             "fk_member_id"
           ],
-          "tableTo": "members",
           "columnsTo": [
             "id"
           ],
-          "onUpdate": "no action",
-          "onDelete": "cascade"
+          "onDelete": "cascade",
+          "onUpdate": "no action"
         },
         "fk_bk_title_id_bk_titles_it": {
           "name": "fk_bk_title_id_bk_titles_it",
           "tableFrom": "member_club_title",
+          "tableTo": "club_titles",
           "columnsFrom": [
             "fk_club_title_id"
           ],
-          "tableTo": "club_titles",
           "columnsTo": [
             "id"
           ],
-          "onUpdate": "no action",
-          "onDelete": "cascade"
+          "onDelete": "cascade",
+          "onUpdate": "no action"
         }
       },
-      "compositePrimaryKeys": {},
+      "compositePrimaryKeys": {
+        "member_club_title_fk_member_id_fk_club_title_id_pk": {
+          "name": "member_club_title_fk_member_id_fk_club_title_id_pk",
+          "columns": [
+            "fk_member_id",
+            "fk_club_title_id"
+          ]
+        }
+      },
       "uniqueConstraints": {},
       "policies": {},
       "checkConstraints": {},
@@ -110,15 +320,15 @@
           "primaryKey": true,
           "notNull": true,
           "identity": {
+            "type": "always",
             "name": "members_id_seq",
+            "schema": "public",
             "increment": "1",
+            "startWith": "1",
             "minValue": "1",
             "maxValue": "32767",
-            "startWith": "1",
             "cache": "1",
-            "cycle": false,
-            "schema": "public",
-            "type": "always"
+            "cycle": false
           }
         },
         "fk_auth_id": {
@@ -172,6 +382,12 @@
           "notNull": true,
           "default": "'regular'"
         },
+        "last_updated": {
+          "name": "last_updated",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
         "image_url": {
           "name": "image_url",
           "type": "varchar(2048)",
@@ -179,31 +395,47 @@
           "notNull": true
         }
       },
-      "indexes": {},
+      "indexes": {
+        "uq_members_email_idx": {
+          "name": "uq_members_email_idx",
+          "columns": [
+            {
+              "expression": "email",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {
         "fk_auth_id_auth_id": {
           "name": "fk_auth_id_auth_id",
           "tableFrom": "members",
+          "tableTo": "users",
+          "schemaTo": "auth",
           "columnsFrom": [
             "fk_auth_id"
           ],
-          "tableTo": "users",
-          "schemaTo": "auth",
           "columnsTo": [
             "id"
           ],
-          "onUpdate": "no action",
-          "onDelete": "cascade"
+          "onDelete": "cascade",
+          "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
         "uq_member_email_key": {
           "name": "uq_member_email_key",
+          "nullsNotDistinct": false,
           "columns": [
             "email"
-          ],
-          "nullsNotDistinct": false
+          ]
         }
       },
       "policies": {},
@@ -222,10 +454,10 @@
     }
   },
   "schemas": {},
-  "views": {},
   "sequences": {},
   "roles": {},
   "policies": {},
+  "views": {},
   "_meta": {
     "columns": {},
     "schemas": {},

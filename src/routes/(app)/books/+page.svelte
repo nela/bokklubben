@@ -4,8 +4,7 @@
 	const { books } = data;
 </script>
 
-<div class="p-4"
->
+<div class="p-4">
 	{#if books && books.length > 0}
 		<BookList {books} />
 	{:else}

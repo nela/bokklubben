@@ -1,15 +1,18 @@
 <script lang="ts">
-	import type { Author } from '$lib/dto/dto';
 	import * as Card from '$lib/components/ui/card/index.js';
 	import type { PageProps } from './$types';
 	import { createSlug, getLifetime } from '$lib/utils/helpers';
 	import { Separator } from '$lib/components/ui/separator/index.js';
 	import { Routes } from '$lib/routes';
+	import BookCard from '$lib/components/book-card.svelte';
 
 	const { data, params }: PageProps = $props();
 
 	const author = $derived(
 		data.authors.find((a) => createSlug(a.name.toLowerCase()) === params.author)
+	);
+	const books = $derived(
+		data.books.filter((b) => author?.books.map((ab) => ab.title).includes(b.title)) ?? []
 	);
 </script>
 
@@ -32,11 +35,7 @@
 
 				<Separator orientation="horizontal" />
 
-				<!-- <div>
-					<p class="text-base leading-relaxed">{author.description}</p>
-				</div> -->
 				<div>
-					<!-- <h2 class="text-xl font-semibold">Om Forfatteren</h2> -->
 					{#each author.description.split('\n').filter(p => p) as paragraph}
 						<p class="text-base leading-relaxed mb-4">{paragraph}</p>
 					{/each}
@@ -56,20 +55,12 @@
 		</div>
 
 		<!-- Book List Section -->
-		{#if author.books && author.books.length > 0}
+		{#if books.length > 0}
 			<div class="mt-12">
 				<h2 class="mb-6 text-2xl font-bold">Bøker av {author.name}</h2>
-				<div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-					{#each author.books as book (book.title)}
-						{@const bookHref = `${Routes.BOOKS}/${createSlug(book.title)}`}
-						<a href={bookHref}>
-							<Card.Root class="p-4">
-								<img src={book.imageUrl} alt={book.title} class="mb-4 w-full rounded-md" />
-								<Card.Header class="p-0">
-									<Card.Title class="text-lg">{book.title}</Card.Title>
-								</Card.Header>
-							</Card.Root>
-						</a>
+				<div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+					{#each books as book (book.title)}
+						<BookCard {book} />
 					{/each}
 				</div>
 			</div>

@@ -1,11 +1,10 @@
 <script lang="ts">
 	import AnimatedUnderline from '$lib/components/animated-underline.svelte';
+	import MemberCard from '$lib/components/member-card.svelte';
 	import StarRating from '$lib/components/star-rating.svelte';
 	import * as Card from '$lib/components/ui/card';
-	import { Separator } from '$lib/components/ui/separator';
 	import { Routes } from '$lib/routes';
 	import { createSlug, getLifetime } from '$lib/utils/helpers';
-	import { MapPin, UserCircle } from '@lucide/svelte';
 
 	const { data } = $props();
 	const { allMembers, nextMeet, books, authors } = data;
@@ -24,156 +23,152 @@
 		nextMeet ? authors.filter((a) => nextMeet.book.authors.includes(a.name)) : []
 	);
 
+	const host = $derived(
+		nextMeet?.host
+			? allMembers.find(
+					(m) => m.firstname === nextMeet.host!.firstname && m.lastname === nextMeet.host!.lastname
+				)
+			: undefined
+	);
+
 	function formatMeetDate(date: Date) {
-		return new Date(date).toLocaleDateString('no-NB', {
+		const datestring = new Date(date).toLocaleDateString('no-NB', {
 			weekday: 'long',
-			year: 'numeric',
 			month: 'long',
-			day: 'numeric',
-			hour: '2-digit',
-			minute: '2-digit'
+			day: 'numeric'
 		});
+
+		return datestring.charAt(0).toUpperCase() + datestring.slice(1);
 	}
+
+	const timeFmt = new Intl.DateTimeFormat('nb-NO', {
+		hour: '2-digit',
+		minute: '2-digit',
+		hour12: false,
+		timeZone: 'Europe/Oslo'
+	});
 </script>
 
 <div class="space-y-12 p-4">
+	<h1 class="font-unbounded mb-16 text-3xl font-bold">Kommende bokklubb</h1>
 	{#if nextMeet}
-		<section>
-			<h1 class="mb-4 text-3xl font-bold">Neste Treff</h1>
-			<Card.Root class="p-6">
-				<Card.Header class="mb-4 p-0">
-					<Card.Title class="text-2xl">
-						{formatMeetDate(nextMeet.datetime)}
-					</Card.Title>
-				</Card.Header>
-				<Card.Content class="space-y-3 p-0">
-					<div class="flex items-center gap-3 text-lg">
-						<MapPin class="text-muted-foreground h-5 w-5" />
-						<span>{nextMeet.location}</span>
-					</div>
-					{#if nextMeet.host}
-						<div class="flex items-center gap-3 text-lg">
-							<UserCircle class="text-muted-foreground h-5 w-5" />
-							<span>Vert: {nextMeet.host.firstname} {nextMeet.host.lastname}</span>
+		<div class="grid grid-cols-1 items-stretch gap-8 {host ? 'md:grid-cols-2' : ''}">
+			<section class="flex flex-col">
+				<h2 class="font-montserrat mb-4 text-xl font-bold">Oppmøte</h2>
+				<Card.Root class="flex-grow p-6">
+					<div class="space-y-2 text-lg">
+						<div class="flex items-center gap-2">
+							<p class="font-bold">Dato:</p>
+							<p>{formatMeetDate(nextMeet.datetime)}</p>
 						</div>
-					{/if}
-				</Card.Content>
-			</Card.Root>
-		</section>
+						<div class="flex items-center gap-2">
+							<p class="font-bold">Klokkeslett:</p>
+							<p>{timeFmt.format(nextMeet.datetime)}</p>
+						</div>
+						<div class="flex items-center gap-2">
+							<p class="font-bold">Sted:</p>
+							<p>{nextMeet.location}</p>
+						</div>
+						{#if nextMeet.address}
+							<div class="flex items-center gap-2">
+								<p class="font-bold">Adresse:</p>
+								<p>{nextMeet.address}</p>
+							</div>
+						{/if}
+					</div>
+				</Card.Root>
+			</section>
+
+			{#if host}
+				<section class="flex flex-col">
+					<h2 class="font-montserrat mb-4 text-xl font-bold">Host</h2>
+					<MemberCard variant="short" member={host} className="flex-grow" />
+				</section>
+			{/if}
+		</div>
 	{/if}
 
-	{#if relatedBook}
-		{@const bookHref = `${Routes.BOOKS}/${createSlug(relatedBook.title)}`}
-		<section>
-			<h2 class="mb-4 text-3xl font-bold">Bok</h2>
-			<Card.Root class="flex flex-col gap-6 p-4 md:flex-row">
-				<a href={bookHref} class="w-full flex-shrink-0 md:w-48">
-					<img
-						src={relatedBook.imageUrl}
-						alt={relatedBook.title}
-						class="h-auto w-full rounded-md shadow-lg"
-					/>
-				</a>
+	<div class="grid grid-cols-1 items-stretch gap-8 md:grid-cols-2">
+		{#if relatedBook}
+			{@const bookHref = `${Routes.BOOKS}/${createSlug(relatedBook.title)}`}
+			<section>
+				<h2 class="font-montserrat mb-4 text-xl font-bold">Bok</h2>
+				<Card.Root class="flex flex-col gap-4 p-4 md:flex-row">
+					<a href={bookHref} class="w-full flex-shrink-0 md:w-48">
+						<img
+							src={relatedBook.imageUrl}
+							alt={relatedBook.title}
+							class="h-72 w-full rounded-md object-cover shadow-lg"
+						/>
+					</a>
 
-				<div class="flex flex-1 flex-col">
-					<Card.Header class="p-0">
-						<Card.Title>
-							<AnimatedUnderline
-								href={bookHref}
-								text={relatedBook.title}
-								className="font-montserrat text-2xl font-semibold"
-							/>
-						</Card.Title>
-						<Card.Description class="text-lg">
-							<span class="font-montserrat text-muted-foreground mr-1">av</span>
-							{#each relatedBook.authors as author, i (author)}
-								{@const authorHref = `${Routes.AUTHORS}/${createSlug(author)}`}
-								<AnimatedUnderline className="font-montserrat" href={authorHref} text={author} />
-								{#if i < relatedBook.authors.length - 1},&nbsp;{/if}
-							{/each}
-						</Card.Description>
-					</Card.Header>
+					<div class="flex flex-1 flex-col">
+						<Card.Header class="p-0">
+							<Card.Title>
+								<AnimatedUnderline
+									href={bookHref}
+									text={relatedBook.title}
+									className="font-montserrat text-xl font-semibold bg-gradient-to-r from-current to-current bg-no-repeat [background-position:0_100%] [background-size:0_1px] transition-[background-size] duration-300 hover:[background-size:100%_1px] "
+								/>
+							</Card.Title>
+						</Card.Header>
 
-					<Card.Content class="flex flex-col gap-4 px-0 pt-6">
-						{#each relatedBook.description.split('\n').filter((p) => p) as paragraph}
-							<p class="text-base leading-relaxed">{paragraph}</p>
-						{/each}
-
-						<Separator orientation="horizontal" class="my-2" />
-
-						<div class="grid grid-cols-1 gap-x-4 gap-y-2 text-base sm:grid-cols-2">
-							<p><span class="font-semibold">Utgivelsesår:</span> {relatedBook.firstPublished}</p>
-							<p><span class="font-semibold">Sider:</span> {relatedBook.pages}</p>
-							<p><span class="font-semibold">Språk:</span> {relatedBook.originalLanguage}</p>
-							<p class="flex items-center gap-2">
-								<span class="font-semibold">Goodreads:</span>
-								<StarRating value={relatedBook.goodreadsRating} />
-							</p>
-							<p>
-								<span class="font-semibold">Sjanger:</span>
-								{relatedBook.genre}
-								<!-- <Badge variant="outline">{relatedBook.genre}</Badge> -->
-							</p>
-							<p>
-								<span class="font-semibold">Lest:</span>
-								{new Date(relatedBook.read).toLocaleDateString()}
+						<Card.Content class="flex flex-col gap-2 px-0 py-4 pt-6">
+							<p class="text-base">
+								<span class="font-semibold">Utgivelsesår: </span>
+								{relatedBook.firstPublished}
 							</p>
 
 							{#if relatedBook.awards}
-								{@const awards = relatedBook.awards.split(', ')}
-								<div class="col-span-full">
-									<span class="font-semibold">Priser:</span>
-									{#if awards.length > 1}
-										<ul class="list-inside list-disc">
-											{#each awards as award}
-												<li>{award}</li>
-											{/each}
-										</ul>
-									{:else}
-										<span class="ml-1">{awards[0]}</span>
-									{/if}
-								</div>
+								<p class="text-base">
+									<span class="font-semibold">Priser: </span>
+									{relatedBook.awards}
+								</p>
 							{/if}
-						</div>
-					</Card.Content>
-				</div>
-			</Card.Root>
-		</section>
-	{/if}
 
-	{#if relatedAuthors.length > 0}
-		<section>
-			<h2 class="mb-4 text-3xl font-bold">Forfatter{relatedAuthors.length > 1 ? 'e' : ''}</h2>
-			<div class="space-y-6">
+							<p class="text-base">
+								<span class="font-semibold">Sjanger: </span>
+								{relatedBook.genre}
+							</p>
+
+							<div class="flex items-center gap-1" role="img">
+								<span class="font-semibold">Goodreads rating:</span>
+								<StarRating value={relatedBook.goodreadsRating} />
+							</div>
+						</Card.Content>
+					</div>
+				</Card.Root>
+			</section>
+		{/if}
+
+		{#if relatedAuthors.length > 0}
+			<section>
+				<h2 class="mb-4 text-xl font-bold">Forfatter{relatedAuthors.length > 1 ? 'e' : ''}</h2>
 				{#each relatedAuthors as author (author.name)}
-					{@const authorHref = `${Routes.AUTHORS}/${createSlug(author.name)}`}
-					<Card.Root class="flex flex-col gap-6 p-4 md:flex-row">
+					{@const authorHref = `${Routes.BOOKS}/${createSlug(author.name)}`}
+					{@const lifetime = getLifetime(author)}
+					<Card.Root class="flex flex-col gap-4 p-4 md:flex-row">
 						<a href={authorHref} class="w-full flex-shrink-0 md:w-48">
 							<img
 								src={author.imageUrl}
 								alt={author.name}
-								class="h-auto w-full rounded-md object-cover object-top shadow-lg"
+								class="h-72 w-full rounded-md object-cover object-top shadow-lg"
 							/>
 						</a>
+
 						<div class="flex flex-1 flex-col">
 							<Card.Header class="p-0">
 								<Card.Title>
 									<AnimatedUnderline
-										className="font-montserrat text-2xl font-semibold"
+										className="font-montserrat text-xl"
 										href={authorHref}
 										text={author.name}
 									/>
 								</Card.Title>
-								<Card.Description class="text-muted-foreground text-lg">
-									{getLifetime(author)}
-								</Card.Description>
+								<Card.Description>{lifetime}</Card.Description>
 							</Card.Header>
 
-							<Card.Content class="flex flex-col gap-4 px-0 pt-6">
-								{#each author.description.split('\n').filter((p) => p) as paragraph}
-									<p class="text-base leading-relaxed">{paragraph}</p>
-								{/each}
-
+							<Card.Content class="flex flex-col gap-4 px-0 py-4 pt-6">
 								{#if author.awards}
 									<div>
 										<h3 class="text-md mb-2 font-semibold">Priser</h3>
@@ -188,7 +183,7 @@
 						</div>
 					</Card.Root>
 				{/each}
-			</div>
-		</section>
-	{/if}
+			</section>
+		{/if}
+	</div>
 </div>

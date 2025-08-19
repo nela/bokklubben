@@ -4,14 +4,11 @@
 	import * as Breadcrumb from '$lib/components/ui/breadcrumb';
 	import { Button } from '$lib/components/ui/button/';
 	import GithubIcon from './icons/github-icon.svelte';
-	import type { Member } from '$lib/dto/dto';
 
 	let {
-		breadcrumbs,
-		member
+		breadcrumbs
 	}: {
 		breadcrumbs: Array<{ crumb: string; pathname: string }>;
-		member: Member;
 	} = $props();
 
 </script>
@@ -46,7 +43,7 @@
 				href="https://github.com/nela/bokklubben.git"
 				variant="ghost"
 				size="lg"
-				class="dark:text-foreground hidden sm:flex mr-8"
+				class="dark:text-foreground hidden sm:flex"
 				target="_blank"
 				rel="noopener noreferrer"
 			>

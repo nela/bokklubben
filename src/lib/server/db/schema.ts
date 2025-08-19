@@ -1,5 +1,6 @@
 import {
 	pgTable,
+	primaryKey,
 	foreignKey,
 	unique,
 	uuid,
@@ -8,7 +9,9 @@ import {
 	pgEnum,
 	timestamp,
 	text,
-	date
+	date,
+    uniqueIndex,
+    index
 } from 'drizzle-orm/pg-core';
 import { authUsers } from 'drizzle-orm/supabase';
 import { customTypeNumeric } from './types';
@@ -29,6 +32,7 @@ export const members = pgTable(
 		memberSince: date('member_since', { mode: 'date' }).defaultNow().notNull(),
 		memberTo: date('member_to', { mode: 'date' }),
 		appRole: appRole('app_role').notNull().default('regular'),
+		lastUpdated: timestamp('last_updated', { withTimezone: true }),
 		imageUrl: varchar('image_url', { length: 2048 }).notNull()
 	},
 	(t) => [
@@ -37,7 +41,8 @@ export const members = pgTable(
 			foreignColumns: [authUsers.id],
 			name: 'fk_auth_id_auth_id'
 		}).onDelete('cascade'),
-		unique('uq_member_email_key').on(t.email)
+		unique('uq_member_email_key').on(t.email),
+		uniqueIndex('uq_members_email_idx').on(t.email)
 	]
 ).enableRLS();
 
@@ -68,7 +73,10 @@ export const memberClubTitle = pgTable(
 			columns: [t.fkClubTitleId],
 			foreignColumns: [clubTitles.id],
 			name: 'fk_bk_title_id_bk_titles_it'
-		}).onDelete('cascade')
+		}).onDelete('cascade'),
+		primaryKey({ columns: [t.fkMemberId, t.fkClubTitleId ]}),
+		index('member_club_title_fk_member_id_idx').on(t.fkMemberId),
+		index('member_club_title_fk_club_title_id_idx').on(t.fkClubTitleId)
 	]
 ).enableRLS();
 
@@ -106,7 +114,10 @@ export const meetAttendance = pgTable(
 			columns: [t.fkMeetId],
 			foreignColumns: [meets.id],
 			name: 'fk_meet_id_meets_id'
-		})
+		}),
+		index('meet_attendance_fk_member_id_idx').on(t.fkMemberId),
+		index('meet_attendance_fk_meet_id_idx').on(t.fkMeetId),
+		primaryKey({ columns: [t.fkMemberId, t.fkMeetId ]})
 	]
 ).enableRLS();
 
@@ -154,7 +165,10 @@ export const bookAuthor = pgTable(
 			columns: [t.fkAuthorId],
 			foreignColumns: [authors.id],
 			name: 'fk_author_id_authors_id'
-		}).onDelete('cascade')
+		}).onDelete('cascade'),
+		index('book_author_fk_book_id_idx').on(t.fkBookId),
+		index('book_author_fk_author_id_idx').on(t.fkAuthorId),
+		primaryKey({ columns: [t.fkBookId, t.fkAuthorId] })
 	]
 ).enableRLS();
 
@@ -177,6 +191,7 @@ export const bookMeet = pgTable(
 			columns: [t.fkMeetId],
 			foreignColumns: [meets.id],
 			name: 'fk_meet_id_meets_id'
-		}).onDelete('cascade')
+		}).onDelete('cascade'),
+		index('book_meet_fk_book_id_idx').on(t.fkBookId)
 	]
 ).enableRLS();

@@ -10,7 +10,7 @@
 	export type FormData = FormSuccessData | FormFailureData;
 </script>
 
-<script>
+<script lang="ts">
 	import SubmitButton from '$lib/components/submit-button.svelte';
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';

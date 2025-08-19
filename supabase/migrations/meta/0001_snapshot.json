@@ -1,6 +1,6 @@
 {
-  "id": "8e123ec7-e31d-4b3c-b1f1-acf56c931b81",
-  "prevId": "10bc3270-731d-42d5-939a-7b85f538835d",
+  "id": "b742dd50-cae8-4d09-9837-2ec1d785a5dd",
+  "prevId": "d475cb84-570e-49e4-9d98-b89c3107e9b6",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -65,7 +65,38 @@
           "notNull": true
         }
       },
-      "indexes": {},
+      "indexes": {
+        "member_club_title_fk_member_id_idx": {
+          "name": "member_club_title_fk_member_id_idx",
+          "columns": [
+            {
+              "expression": "fk_member_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "with": {},
+          "method": "btree",
+          "concurrently": false
+        },
+        "member_club_title_fk_club_title_id_idx": {
+          "name": "member_club_title_fk_club_title_id_idx",
+          "columns": [
+            {
+              "expression": "fk_club_title_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "with": {},
+          "method": "btree",
+          "concurrently": false
+        }
+      },
       "foreignKeys": {
         "fk_member_id_members_id": {
           "name": "fk_member_id_members_id",
@@ -94,7 +125,15 @@
           "onDelete": "cascade"
         }
       },
-      "compositePrimaryKeys": {},
+      "compositePrimaryKeys": {
+        "member_club_title_fk_member_id_fk_club_title_id_pk": {
+          "name": "member_club_title_fk_member_id_fk_club_title_id_pk",
+          "columns": [
+            "fk_member_id",
+            "fk_club_title_id"
+          ]
+        }
+      },
       "uniqueConstraints": {},
       "policies": {},
       "checkConstraints": {},
@@ -172,6 +211,12 @@
           "notNull": true,
           "default": "'regular'"
         },
+        "last_updated": {
+          "name": "last_updated",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
         "image_url": {
           "name": "image_url",
           "type": "varchar(2048)",
@@ -179,7 +224,23 @@
           "notNull": true
         }
       },
-      "indexes": {},
+      "indexes": {
+        "uq_members_email_idx": {
+          "name": "uq_members_email_idx",
+          "columns": [
+            {
+              "expression": "email",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "with": {},
+          "method": "btree",
+          "concurrently": false
+        }
+      },
       "foreignKeys": {
         "fk_auth_id_auth_id": {
           "name": "fk_auth_id_auth_id",

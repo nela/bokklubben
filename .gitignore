@@ -101,3 +101,10 @@ node_modules/
 
 # dataconnect generated files
 .dataconnect
+
+# postgreslsp
+postgrestools.jsonc
+
+# codebooklsp
+codebook.toml
+realseeds/

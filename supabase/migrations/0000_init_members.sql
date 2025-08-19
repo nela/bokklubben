@@ -8,7 +8,8 @@ CREATE TABLE "club_titles" (
 ALTER TABLE "club_titles" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
 CREATE TABLE "member_club_title" (
 	"fk_member_id" smallint NOT NULL,
-	"fk_club_title_id" smallint NOT NULL
+	"fk_club_title_id" smallint NOT NULL,
+	CONSTRAINT "member_club_title_fk_member_id_fk_club_title_id_pk" PRIMARY KEY("fk_member_id","fk_club_title_id")
 );
 --> statement-breakpoint
 ALTER TABLE "member_club_title" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
@@ -22,6 +23,7 @@ CREATE TABLE "members" (
 	"member_since" date DEFAULT now() NOT NULL,
 	"member_to" date,
 	"app_role" "app_role" DEFAULT 'regular' NOT NULL,
+	"last_updated" timestamp with time zone,
 	"image_url" varchar(2048) NOT NULL,
 	CONSTRAINT "uq_member_email_key" UNIQUE("email")
 );
@@ -29,4 +31,7 @@ CREATE TABLE "members" (
 ALTER TABLE "members" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
 ALTER TABLE "member_club_title" ADD CONSTRAINT "fk_member_id_members_id" FOREIGN KEY ("fk_member_id") REFERENCES "public"."members"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "member_club_title" ADD CONSTRAINT "fk_bk_title_id_bk_titles_it" FOREIGN KEY ("fk_club_title_id") REFERENCES "public"."club_titles"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "members" ADD CONSTRAINT "fk_auth_id_auth_id" FOREIGN KEY ("fk_auth_id") REFERENCES "auth"."users"("id") ON DELETE cascade ON UPDATE no action;
+ALTER TABLE "members" ADD CONSTRAINT "fk_auth_id_auth_id" FOREIGN KEY ("fk_auth_id") REFERENCES "auth"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+CREATE INDEX "member_club_title_fk_member_id_idx" ON "member_club_title" USING btree ("fk_member_id");--> statement-breakpoint
+CREATE INDEX "member_club_title_fk_club_title_id_idx" ON "member_club_title" USING btree ("fk_club_title_id");--> statement-breakpoint
+CREATE UNIQUE INDEX "uq_members_email_idx" ON "members" USING btree ("email");

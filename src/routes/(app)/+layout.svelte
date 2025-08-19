@@ -9,12 +9,9 @@
 	import type { NavItemPrimary } from '$lib/model';
 	import { createSlug } from '$lib/utils/helpers';
 	import { Routes } from '$lib/routes';
-	import { fly } from 'svelte/transition';
 
 	let { data, children }: LayoutProps = $props();
-
 	const { allMembers, books, authors, member } = data;
-	const nonNullMember = member!;
 
 	const primaryItems: Array<NavItemPrimary> = [
 		{
@@ -113,10 +110,10 @@
 <div class="[--header-height:calc(--spacing(14))]">
 	<Sidebar.Provider class="flex flex-col">
 		<div class="flex flex-1">
-			<AppSidebar variant="inset" {primaryItems} {activePrimary} />
+			<AppSidebar variant="inset" {primaryItems} {activePrimary} member={member!} />
 			<Sidebar.Inset>
-				<Header {breadcrumbs} member={nonNullMember} />
-					{@render children?.()}
+				<Header {breadcrumbs} />
+				{@render children?.()}
 			</Sidebar.Inset>
 		</div>
 	</Sidebar.Provider>

@@ -1,9 +1,331 @@
 {
-  "id": "fe56f015-d414-459d-8fcf-2c6b104536ef",
-  "prevId": "87283b9d-3102-4495-b13f-94deba9b4db8",
+  "id": "d790861d-1d7d-48f2-b61b-4594972a5eaf",
+  "prevId": "fff34a65-691a-45d9-be3f-b2586328a3fc",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
+    "public.authors": {
+      "name": "authors",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "smallint",
+          "primaryKey": true,
+          "notNull": true,
+          "identity": {
+            "type": "always",
+            "name": "authors_id_seq",
+            "schema": "public",
+            "increment": "1",
+            "startWith": "1",
+            "minValue": "1",
+            "maxValue": "32767",
+            "cache": "1",
+            "cycle": false
+          }
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar(256)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "description": {
+          "name": "description",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "awards": {
+          "name": "awards",
+          "type": "varchar(2048)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "born": {
+          "name": "born",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "died": {
+          "name": "died",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "image_url": {
+          "name": "image_url",
+          "type": "varchar(256)",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": true
+    },
+    "public.book_author": {
+      "name": "book_author",
+      "schema": "",
+      "columns": {
+        "fk_book_id": {
+          "name": "fk_book_id",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "fk_author_id": {
+          "name": "fk_author_id",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {
+        "book_author_fk_book_id_idx": {
+          "name": "book_author_fk_book_id_idx",
+          "columns": [
+            {
+              "expression": "fk_book_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "book_author_fk_author_id_idx": {
+          "name": "book_author_fk_author_id_idx",
+          "columns": [
+            {
+              "expression": "fk_author_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "fk_book_id_books_id": {
+          "name": "fk_book_id_books_id",
+          "tableFrom": "book_author",
+          "tableTo": "books",
+          "columnsFrom": [
+            "fk_book_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "fk_author_id_authors_id": {
+          "name": "fk_author_id_authors_id",
+          "tableFrom": "book_author",
+          "tableTo": "authors",
+          "columnsFrom": [
+            "fk_author_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "book_author_fk_book_id_fk_author_id_pk": {
+          "name": "book_author_fk_book_id_fk_author_id_pk",
+          "columns": [
+            "fk_book_id",
+            "fk_author_id"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": true
+    },
+    "public.book_meet": {
+      "name": "book_meet",
+      "schema": "",
+      "columns": {
+        "book_status": {
+          "name": "book_status",
+          "type": "book_status",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "fk_book_id": {
+          "name": "fk_book_id",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "fk_meet_id": {
+          "name": "fk_meet_id",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {
+        "book_meet_fk_book_id_idx": {
+          "name": "book_meet_fk_book_id_idx",
+          "columns": [
+            {
+              "expression": "fk_book_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "fk_book_id_books_id": {
+          "name": "fk_book_id_books_id",
+          "tableFrom": "book_meet",
+          "tableTo": "books",
+          "columnsFrom": [
+            "fk_book_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "fk_meet_id_meets_id": {
+          "name": "fk_meet_id_meets_id",
+          "tableFrom": "book_meet",
+          "tableTo": "meets",
+          "columnsFrom": [
+            "fk_meet_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": true
+    },
+    "public.books": {
+      "name": "books",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "smallint",
+          "primaryKey": true,
+          "notNull": true,
+          "identity": {
+            "type": "always",
+            "name": "books_id_seq",
+            "schema": "public",
+            "increment": "1",
+            "startWith": "1",
+            "minValue": "1",
+            "maxValue": "32767",
+            "cache": "1",
+            "cycle": false
+          }
+        },
+        "title": {
+          "name": "title",
+          "type": "varchar(256)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "first_published": {
+          "name": "first_published",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "pages": {
+          "name": "pages",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "awards": {
+          "name": "awards",
+          "type": "varchar(512)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "original_language": {
+          "name": "original_language",
+          "type": "varchar(16)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "description": {
+          "name": "description",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "genre": {
+          "name": "genre",
+          "type": "varchar(64)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "read": {
+          "name": "read",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "image_url": {
+          "name": "image_url",
+          "type": "varchar(2048)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "goodreads_rating": {
+          "name": "goodreads_rating",
+          "type": "numeric(4, 2)",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": true
+    },
     "public.club_titles": {
       "name": "club_titles",
       "schema": "",
@@ -65,7 +387,38 @@
           "notNull": true
         }
       },
-      "indexes": {},
+      "indexes": {
+        "meet_attendance_fk_member_id_idx": {
+          "name": "meet_attendance_fk_member_id_idx",
+          "columns": [
+            {
+              "expression": "fk_member_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "meet_attendance_fk_meet_id_idx": {
+          "name": "meet_attendance_fk_meet_id_idx",
+          "columns": [
+            {
+              "expression": "fk_meet_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {
         "fk_member_id_members_id": {
           "name": "fk_member_id_members_id",
@@ -94,7 +447,15 @@
           "onUpdate": "no action"
         }
       },
-      "compositePrimaryKeys": {},
+      "compositePrimaryKeys": {
+        "meet_attendance_fk_member_id_fk_meet_id_pk": {
+          "name": "meet_attendance_fk_member_id_fk_meet_id_pk",
+          "columns": [
+            "fk_member_id",
+            "fk_meet_id"
+          ]
+        }
+      },
       "uniqueConstraints": {},
       "policies": {},
       "checkConstraints": {},
@@ -197,7 +558,38 @@
           "notNull": true
         }
       },
-      "indexes": {},
+      "indexes": {
+        "member_club_title_fk_member_id_idx": {
+          "name": "member_club_title_fk_member_id_idx",
+          "columns": [
+            {
+              "expression": "fk_member_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "member_club_title_fk_club_title_id_idx": {
+          "name": "member_club_title_fk_club_title_id_idx",
+          "columns": [
+            {
+              "expression": "fk_club_title_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {
         "fk_member_id_members_id": {
           "name": "fk_member_id_members_id",
@@ -226,7 +618,15 @@
           "onUpdate": "no action"
         }
       },
-      "compositePrimaryKeys": {},
+      "compositePrimaryKeys": {
+        "member_club_title_fk_member_id_fk_club_title_id_pk": {
+          "name": "member_club_title_fk_member_id_fk_club_title_id_pk",
+          "columns": [
+            "fk_member_id",
+            "fk_club_title_id"
+          ]
+        }
+      },
       "uniqueConstraints": {},
       "policies": {},
       "checkConstraints": {},
@@ -304,6 +704,12 @@
           "notNull": true,
           "default": "'regular'"
         },
+        "last_updated": {
+          "name": "last_updated",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
         "image_url": {
           "name": "image_url",
           "type": "varchar(2048)",
@@ -311,7 +717,23 @@
           "notNull": true
         }
       },
-      "indexes": {},
+      "indexes": {
+        "uq_members_email_idx": {
+          "name": "uq_members_email_idx",
+          "columns": [
+            {
+              "expression": "email",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {
         "fk_auth_id_auth_id": {
           "name": "fk_auth_id_auth_id",
@@ -350,6 +772,15 @@
       "values": [
         "admin",
         "regular"
+      ]
+    },
+    "public.book_status": {
+      "name": "book_status",
+      "schema": "public",
+      "values": [
+        "elected",
+        "pitched",
+        "read"
       ]
     }
   },
