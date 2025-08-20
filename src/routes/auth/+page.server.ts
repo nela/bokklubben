@@ -3,15 +3,15 @@ import { fail, redirect, type Actions } from '@sveltejs/kit';
 import { err, fromPromise, ok, safeTry } from 'neverthrow';
 import { AuthInternalError } from '$lib/errors/auth';
 import type { Provider } from '@supabase/supabase-js';
-import { HOSTDOMAIN } from '$env/static/private';
 
 const emailSchema =
 	/^(?!\.)(?!.*\.\.)([a-z0-9_'+\-\.]*)[a-z0-9_+-]@([a-z0-9][a-z0-9\-]*\.)+[a-z]{2,}$/i;
 
-function getProviderOptions(provider: string) {
+function getProviderOptions(provider: string, url: URL) {
 	const initial = {
-		redirectTo: `${HOSTDOMAIN}/auth/callback`
+		redirectTo: `${url.origin}/auth/callback`
 	};
+	console.log(url.origin);
 
 	return provider === 'azure' ? { scopes: 'email', ...initial } : initial;
 }
@@ -74,7 +74,7 @@ export const actions: Actions = {
 	},
 	provider: async ({ request, url, locals: { supabase } }) => {
 		const provider = (await request.formData()).get('provider') as Provider;
-		const opts = getProviderOptions(provider);
+		const opts = getProviderOptions(provider, url);
 
 		const actionResult = fromPromise(
 			supabase.auth.signInWithOAuth({
