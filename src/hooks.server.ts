@@ -54,9 +54,7 @@ export const authGuard: Handle = async ({ event, resolve }) => {
 	const { session, user } = await event.locals.safeGetSession();
 
 	if (!session || !user) {
-		return (event.url.pathname.startsWith('/auth') &&
-			!event.url.pathname.startsWith(Routes.AUTHORS)) ||
-			event.url.pathname.startsWith('.well-known')
+		return event.url.pathname.startsWith('/auth') && !event.url.pathname.startsWith(Routes.AUTHORS)
 			? resolve(event)
 			: redirect(303, '/auth');
 	}
