@@ -151,7 +151,7 @@ function fetchClubTitles(memberId: number): ResultAsync<Array<ClubTitle>, DbErro
 			.filter((title) => {
 				const exists = titles.includes(title.clubTitle);
 				if (!exists) {
-					console.log('Received invalid ClubTitle key ${ct} during mapping to enum ClubTitle');
+					console.log(`Received invalid ClubTitle - ${title.clubTitle} - when mapping to enum ClubTitle`);
 				}
 				return exists;
 			})

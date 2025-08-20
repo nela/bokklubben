@@ -54,7 +54,9 @@ export const authGuard: Handle = async ({ event, resolve }) => {
 	const { session, user } = await event.locals.safeGetSession();
 
 	if (!session || !user) {
-		return event.url.pathname.startsWith('/auth') && !event.url.pathname.startsWith(Routes.AUTHORS)
+		return (event.url.pathname.startsWith('/auth') &&
+			!event.url.pathname.startsWith(Routes.AUTHORS)) ||
+			event.url.pathname.startsWith('.well-known')
 			? resolve(event)
 			: redirect(303, '/auth');
 	}
@@ -67,7 +69,6 @@ export const authGuard: Handle = async ({ event, resolve }) => {
 	}
 
 	event.locals.member = await event.locals.fetchMember(user.id);
-	console.log('member', event.locals.member);
 	if (!event.locals.member) {
 		await event.locals.supabase.auth.signOut();
 		throw redirect(303, '/auth?error=unauthorized');
