@@ -11,7 +11,6 @@ function getProviderOptions(provider: string, url: URL) {
 	const initial = {
 		redirectTo: `${url.origin}/auth/callback`
 	};
-	console.log(url.origin);
 
 	return provider === 'azure' ? { scopes: 'email', ...initial } : initial;
 }

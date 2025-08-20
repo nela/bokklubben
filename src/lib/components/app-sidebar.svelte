@@ -13,6 +13,7 @@
 	import * as Avatar from '$lib/components/ui/avatar';
 	import type { AuthError } from '@supabase/supabase-js';
 	import { goto } from '$app/navigation';
+	import { fly } from 'svelte/transition';
 
 	let {
 		ref = $bindable(null),
@@ -57,8 +58,13 @@
 	<Sidebar.Content>
 		<NavItemGroup items={primaryItems} />
 		{#if secondaryItems.length > 0}
-			<Separator orientation="horizontal" />
-			<NavItemGroup items={secondaryItems} />
+			<div
+				in:fly={{ x: -10, duration: 300, delay: 300 }}
+				out:fly={{ x: -10, duration: 300, delay: 0 }}
+			>
+				<Separator orientation="horizontal" />
+				<NavItemGroup items={secondaryItems} />
+			</div>
 		{/if}
 	</Sidebar.Content>
 	<Sidebar.Footer>
