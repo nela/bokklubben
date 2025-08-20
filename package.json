@@ -69,6 +69,7 @@
 		"@fontsource/shadows-into-light": "^5.2.6",
 		"@supabase/ssr": "^0.6.1",
 		"@supabase/supabase-js": "^2.55.0",
+		"@sveltejs/adapter-vercel": "^5.10.2",
 		"@tailwindcss/vite": "^4.1.12",
 		"dotenv": "^17.2.1",
 		"drizzle-orm": "^0.44.4",
