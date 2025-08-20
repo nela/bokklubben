@@ -39,7 +39,11 @@
 					<div class="text-muted-foreground text-lg">
 						<span class="font-montserrat mr-1">av</span>
 						{#each book.authors as author, i}
-							<AnimatedUnderline className="font-montserrat" href={`${Routes.AUTHORS}/${createSlug(author)}`} text={author}/>
+							<AnimatedUnderline
+								className="font-montserrat"
+								href={`${Routes.AUTHORS}/${createSlug(author)}`}
+								text={author}
+							/>
 							{#if i < book.authors.length - 1},&nbsp;{/if}
 						{/each}
 					</div>
@@ -91,10 +95,10 @@
 
 		{#if authors.length > 0}
 			<div class="mt-12">
-				<h2 class="mb-6 text-2xl font-bold">Forfatter{ authors.length > 1 ? 'e:' : ':'}</h2>
-				<div class="grid grid-cols-1 gap-4 sm:grid-cols-2 ">
+				<h2 class="mb-6 text-2xl font-bold">Forfatter{authors.length > 1 ? 'e:' : ':'}</h2>
+				<div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
 					{#each authors as author (author.name)}
-						<AuthorCard {author}/>
+						<AuthorCard {author} />
 					{/each}
 				</div>
 			</div>

@@ -1,5 +1,6 @@
 <script lang="ts">
-	import BookCard from "./book-card.svelte";
+	import type { Book } from '$lib/dto/dto';
+	import BookCard from './book-card.svelte';
 
 	let { books }: { books: Array<Book> } = $props();
 </script>

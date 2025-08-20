@@ -11,24 +11,24 @@
 	import type { Member } from '$lib/dto/dto';
 	import { toggleMode } from 'mode-watcher';
 	import * as Avatar from '$lib/components/ui/avatar';
+	import type { AuthError } from '@supabase/supabase-js';
+	import { goto } from '$app/navigation';
 
 	let {
 		ref = $bindable(null),
 		primaryItems,
 		activePrimary,
 		member,
+		signOut,
 		...restProps
 	}: ComponentProps<typeof Sidebar.Root> & {
 		activePrimary: NavItemPrimary | undefined;
 		primaryItems: Array<NavItemPrimary>;
 		member: Member;
+		signOut: () => Promise<{ error: AuthError | null }>;
 	} = $props();
 
 	const secondaryItems = $derived(activePrimary?.items.filter((i) => !i.hideFromSidebar) ?? []);
-
-	const signOut = async () => {
-		await fetch('/auth/signout');
-	};
 </script>
 
 <Sidebar.Root collapsible="offcanvas" {...restProps}>

@@ -38,13 +38,12 @@ export function sendEmail(
 	subject: string,
 	content: EmailContent
 ) {
-
 	return fromPromise(
 		fetch(SMTP2GO_URL, {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json',
-				'accept': 'application/json',
+				accept: 'application/json',
 				'X-Smtp2go-Api-Key': SMTP2GO_API_KEY
 				// Authorization: `Bearer ${SENDGRID_TOKEN}`
 			},
@@ -60,5 +59,5 @@ export function sendEmail(
 			})
 		}),
 		(e) => new EmailInternalError({ cause: e })
-	)
+	);
 }

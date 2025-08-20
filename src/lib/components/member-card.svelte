@@ -10,7 +10,7 @@
 		variant = 'extended'
 	}: {
 		member: PublicMember;
-		className: string;
+		className?: string;
 		variant?: 'extended' | 'short';
 	} = $props();
 
@@ -50,15 +50,15 @@
 				</div>
 			{/if}
 			{#if variant === 'extended'}
-			<div class="text-muted-foreground flex items-center gap-3 text-sm">
-				<CalendarCheck2 class="h-4 w-4 flex-shrink-0" />
-				<div>
-					<p>Medlem siden: {new Date(member.memberSince).toLocaleDateString()}</p>
-					{#if member.memberTo}
-						<p>Medlem til: {new Date(member.memberTo).toLocaleDateString()}</p>
-					{/if}
+				<div class="text-muted-foreground flex items-center gap-3 text-sm">
+					<CalendarCheck2 class="h-4 w-4 flex-shrink-0" />
+					<div>
+						<p>Medlem siden: {new Date(member.memberSince).toLocaleDateString()}</p>
+						{#if member.memberTo}
+							<p>Medlem til: {new Date(member.memberTo).toLocaleDateString()}</p>
+						{/if}
+					</div>
 				</div>
-			</div>
 			{/if}
 		</div>
 	</div>

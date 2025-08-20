@@ -3,9 +3,7 @@
 	import type { PageProps } from './$types';
 
 	const { data, params }: PageProps = $props();
-	const books = $derived(
-		data.books.filter((b) => b.read.getFullYear().toString() === params.year)
-	)
+	const books = $derived(data.books.filter((b) => b.read.getFullYear().toString() === params.year));
 </script>
 
 <div class="p-4">
@@ -17,4 +15,3 @@
 		</div>
 	{/if}
 </div>
-

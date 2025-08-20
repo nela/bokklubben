@@ -1,4 +1,3 @@
-
 <script lang="ts">
 	import type { Member } from '$lib/dto/dto';
 	import Badge from '$lib/components/ui/badge/badge.svelte';

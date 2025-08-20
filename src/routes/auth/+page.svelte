@@ -104,7 +104,7 @@
 					type="submit"
 					formaction="?/provider"
 					name="provider"
-					value="microsoft"
+					value="azure"
 					class="rounded-lg p-2 hover:cursor-pointer hover:shadow-lg dark:shadow-zinc-600 [&_svg]:transition-transform hover:[&_svg]:scale-105"
 				>
 					<MicrosoftIcon size={iconSize} />

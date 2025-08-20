@@ -1,7 +1,7 @@
-import { redirect, type Handle } from '@sveltejs/kit';
+/* import { redirect, type Handle } from '@sveltejs/kit';
 import { createServerClient } from '@supabase/ssr';
 import { PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY } from '$env/static/public';
-import { fetchMemberByUuid } from '../db/queries';
+import { fetchMemberByUuid } from '$lib/server/db/queries';
 
 export const supabaseHandle: Handle = async ({ event, resolve }) => {
 	event.locals.supabase = createServerClient(PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY, {
@@ -37,7 +37,7 @@ export const supabaseHandle: Handle = async ({ event, resolve }) => {
 	};
 
 	event.locals.fetchMember = async (uuid: string) => {
-		return fetchMemberByUuid(uuid).unwrapOr(null);
+		return fetchMemberByUuid(uuid).orTee((e) => console.error(e.message)).unwrapOr(null);
 	};
 
 	return resolve(event, {
@@ -61,6 +61,7 @@ export const authGuard: Handle = async ({ event, resolve }) => {
 	}
 
 	event.locals.member = await event.locals.fetchMember(user.id);
+	console.log('member', event.locals.member);
 	if (!event.locals.member) {
 		await event.locals.supabase.auth.signOut();
 		throw redirect(303, '/auth?error=unauthorized');
@@ -71,7 +72,7 @@ export const authGuard: Handle = async ({ event, resolve }) => {
 	}
 
 	return resolve(event);
-};
+}; */
 
 /* export const permissionGuard: Handle = async ({ event, resolve }) => {
 	event.locals.member = event.locals.user ? await event.locals.fetchMember(event.locals.user.id) : null;

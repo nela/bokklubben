@@ -6,6 +6,8 @@ export const GET: RequestHandler = async ({ url, locals: { supabase } }) => {
 	const code = url.searchParams.get('code') as string;
 	const next = url.searchParams.get('next') ?? '/';
 
+	console.log('code', code);
+
 	if (!code) {
 		// return redirect(303, '/auth?error=oauth_failed');
 		// Return a raw HTML response that executes a client-side redirect.
@@ -33,7 +35,7 @@ export const GET: RequestHandler = async ({ url, locals: { supabase } }) => {
 	).andThen((res) => (res.error ? err(new AuthInternalError({ cause: res.error })) : ok(res.data)));
 
 	return result.match(
-		(_) => redirect(303, `/${next.slice(1)}`),
+		() => redirect(303, `/${next.slice(1)}`),
 		(e) => {
 			console.error(e.message);
 			return redirect(303, '/auth?error=oauth_failed');

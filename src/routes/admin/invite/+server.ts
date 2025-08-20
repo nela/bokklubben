@@ -18,13 +18,11 @@ export const GET: RequestHandler = async () => {
 		type: 'text/html',
 		value: emailContent
 	}).match(
-		(r) => {
-			console.log(r);
-			return json({
+		() =>
+			json({
 				success: true,
 				message: 'Sent email to all members'
-			});
-		},
+			}),
 		(e) => {
 			console.error(e);
 			return error(500, 'Something went wrong with email dispatch.');

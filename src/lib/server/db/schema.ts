@@ -10,8 +10,8 @@ import {
 	timestamp,
 	text,
 	date,
-    uniqueIndex,
-    index
+	uniqueIndex,
+	index
 } from 'drizzle-orm/pg-core';
 import { authUsers } from 'drizzle-orm/supabase';
 import { customTypeNumeric } from './types';
@@ -74,29 +74,33 @@ export const memberClubTitle = pgTable(
 			foreignColumns: [clubTitles.id],
 			name: 'fk_bk_title_id_bk_titles_it'
 		}).onDelete('cascade'),
-		primaryKey({ columns: [t.fkMemberId, t.fkClubTitleId ]}),
+		primaryKey({ columns: [t.fkMemberId, t.fkClubTitleId] }),
 		index('member_club_title_fk_member_id_idx').on(t.fkMemberId),
 		index('member_club_title_fk_club_title_id_idx').on(t.fkClubTitleId)
 	]
 ).enableRLS();
 
-export const meets = pgTable('meets', {
-	id: smallint('id')
-		.primaryKey()
-		.generatedAlwaysAsIdentity({ name: 'meets_id_seq', startWith: 1, increment: 1 }),
-	datetime: timestamp('datetime', { withTimezone: true }).notNull(),
-	location: varchar('location', { length: 256 }),
-	fkMemberId: smallint('fkMemberId'),
-	address: varchar('address', { length: 256 }),
-	notes: text('notes'),
-	highlights: text('highlights')
-}, (t) => [
+export const meets = pgTable(
+	'meets',
+	{
+		id: smallint('id')
+			.primaryKey()
+			.generatedAlwaysAsIdentity({ name: 'meets_id_seq', startWith: 1, increment: 1 }),
+		datetime: timestamp('datetime', { withTimezone: true }).notNull(),
+		location: varchar('location', { length: 256 }),
+		fkMemberId: smallint('fkMemberId'),
+		address: varchar('address', { length: 256 }),
+		notes: text('notes'),
+		highlights: text('highlights')
+	},
+	(t) => [
 		foreignKey({
 			columns: [t.fkMemberId],
 			foreignColumns: [members.id],
 			name: 'fk_member_id_members_id'
 		})
-	]).enableRLS();
+	]
+).enableRLS();
 
 export const meetAttendance = pgTable(
 	'meet_attendance',
@@ -117,7 +121,7 @@ export const meetAttendance = pgTable(
 		}),
 		index('meet_attendance_fk_member_id_idx').on(t.fkMemberId),
 		index('meet_attendance_fk_meet_id_idx').on(t.fkMeetId),
-		primaryKey({ columns: [t.fkMemberId, t.fkMeetId ]})
+		primaryKey({ columns: [t.fkMemberId, t.fkMeetId] })
 	]
 ).enableRLS();
 

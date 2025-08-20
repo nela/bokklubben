@@ -10,7 +10,6 @@
 	}: {
 		breadcrumbs: Array<{ crumb: string; pathname: string }>;
 	} = $props();
-
 </script>
 
 <header

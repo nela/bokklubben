@@ -12,6 +12,6 @@ export type NavItemBase = {
 export interface NavItemPrimary extends NavItemBase {
 	items: Array<NavItemBase>;
 	icon: Component;
-};
+}
 
 export type NavItem = NavItemBase | NavItemPrimary;

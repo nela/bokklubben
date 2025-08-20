@@ -36,8 +36,8 @@
 				<Separator orientation="horizontal" />
 
 				<div>
-					{#each author.description.split('\n').filter(p => p) as paragraph}
-						<p class="text-base leading-relaxed mb-4">{paragraph}</p>
+					{#each author.description.split('\n').filter((p) => p) as paragraph}
+						<p class="mb-4 text-base leading-relaxed">{paragraph}</p>
 					{/each}
 				</div>
 

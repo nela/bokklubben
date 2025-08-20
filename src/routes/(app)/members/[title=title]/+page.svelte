@@ -8,13 +8,13 @@
 
 	const titledMembers = $derived.by(() => {
 		const searchTitle = params.title.toUpperCase() as ClubTitle;
-		return allMembers.filter((m) => m.titles.includes(searchTitle))
+		return allMembers.filter((m) => m.titles.includes(searchTitle));
 	});
 </script>
 
 <div class="p-4">
 	{#if titledMembers && titledMembers.length > 0}
-		<MemberList members={titledMembers} layout='list' />
+		<MemberList members={titledMembers} layout="list" />
 	{:else}
 		<div class="flex h-full items-center justify-center p-10">
 			<p class="text-muted-foreground">Ingen medlemmer funnet. Kontakt support.</p>

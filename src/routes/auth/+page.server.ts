@@ -4,7 +4,16 @@ import { err, fromPromise, ok, safeTry } from 'neverthrow';
 import { AuthInternalError } from '$lib/errors/auth';
 import type { Provider } from '@supabase/supabase-js';
 
-const emailSchema = /^(?!\.)(?!.*\.\.)([a-z0-9_'+\-\.]*)[a-z0-9_+-]@([a-z0-9][a-z0-9\-]*\.)+[a-z]{2,}$/i;
+const emailSchema =
+	/^(?!\.)(?!.*\.\.)([a-z0-9_'+\-\.]*)[a-z0-9_+-]@([a-z0-9][a-z0-9\-]*\.)+[a-z]{2,}$/i;
+
+function getProviderOptions(provider: string, url: URL) {
+	const initial = {
+		redirectTo: `${url.origin}/auth/callback`
+	};
+
+	return provider === 'azure' ? { scopes: 'email', ...initial } : initial;
+}
 
 export const actions: Actions = {
 	supabase: async ({ request, locals: { supabase } }) => {
@@ -13,15 +22,15 @@ export const actions: Actions = {
 		const password = formData.get('password') as string;
 
 		if (!email || !password) {
-			return fail(400, { status: false, message: "Bruker og logg inn nødvendig."})
+			return fail(400, { status: false, message: 'Bruker og logg inn nødvendig.' });
 		}
 
 		if (!emailSchema.test(email)) {
-			return fail(400, { status: false, message: "Ugyldig epost." });
+			return fail(400, { status: false, message: 'Ugyldig epost.' });
 		}
 
 		if (password.length < 8) {
-			return fail(400, { status: false, message: "Passord må være minst 8 karakterer langt."});
+			return fail(400, { status: false, message: 'Passord må være minst 8 karakterer langt.' });
 		}
 
 		const actionResult = safeTry(async function* () {
@@ -64,13 +73,12 @@ export const actions: Actions = {
 	},
 	provider: async ({ request, url, locals: { supabase } }) => {
 		const provider = (await request.formData()).get('provider') as Provider;
+		const opts = getProviderOptions(provider, url);
 
 		const actionResult = fromPromise(
 			supabase.auth.signInWithOAuth({
 				provider: provider,
-				options: {
-					redirectTo: `${url.origin}/auth/callback`
-				}
+				options: opts
 			}),
 			(e) => new AuthInternalError({ cause: e })
 		).andThen((res) =>
@@ -80,9 +88,7 @@ export const actions: Actions = {
 		);
 
 		return actionResult.match(
-			(data) => {
-				return redirect(303, data.url);
-			},
+			(data) => redirect(303, data.url),
 			(e) => {
 				console.error(e);
 				return fail(500, {

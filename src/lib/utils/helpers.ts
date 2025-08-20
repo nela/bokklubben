@@ -1,4 +1,4 @@
-import type { Author } from "$lib/dto/dto";
+import type { Author } from '$lib/dto/dto';
 
 export const validators = {
 	parseEmail: (email: string) => {

@@ -9,9 +9,10 @@
 	import type { NavItemPrimary } from '$lib/model';
 	import { createSlug } from '$lib/utils/helpers';
 	import { Routes } from '$lib/routes';
+	import type { AuthError } from '@supabase/supabase-js';
 
 	let { data, children }: LayoutProps = $props();
-	const { allMembers, books, authors, member } = data;
+	const { supabase, allMembers, books, authors, member } = data;
 
 	const primaryItems: Array<NavItemPrimary> = [
 		{
@@ -105,12 +106,14 @@
 			? [{ crumb: secondary.title, pathname: secondary.pathname }, primary]
 			: [primary];
 	});
+
+	const signOut = (): Promise<{ error: AuthError | null }> => supabase.auth.signOut();
 </script>
 
 <div class="[--header-height:calc(--spacing(14))]">
 	<Sidebar.Provider class="flex flex-col">
 		<div class="flex flex-1">
-			<AppSidebar variant="inset" {primaryItems} {activePrimary} member={member!} />
+			<AppSidebar variant="inset" {signOut} {primaryItems} {activePrimary} member={member!} />
 			<Sidebar.Inset>
 				<Header {breadcrumbs} />
 				{@render children?.()}

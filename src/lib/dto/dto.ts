@@ -22,7 +22,7 @@ export interface Member {
 	appRole: AppRole;
 	titles: Array<ClubTitle>;
 	imageUrl: string;
-};
+}
 
 export interface PublicMember {
 	firstname: string;
@@ -32,22 +32,22 @@ export interface PublicMember {
 	memberTo?: Date | null;
 	titles: Array<ClubTitle>;
 	imageUrl: string;
-};
+}
 
 export interface Author {
 	name: string;
-	description: string
-	awards: string | null,
-	born: Date,
-	died: Date | null,
+	description: string;
+	awards: string | null;
+	born: Date;
+	died: Date | null;
 	imageUrl: string;
 	books: Array<{
 		title: string;
 		imageUrl: string;
 		awards: string | null;
 		genre: string;
-	}>
-};
+	}>;
+}
 
 export interface Book {
 	title: string;
@@ -59,7 +59,7 @@ export interface Book {
 	read: Date;
 	goodreadsRating: number;
 	description: string;
-	authors: Array<string>
+	authors: Array<string>;
 	imageUrl: string;
 }
 
@@ -67,7 +67,8 @@ export interface Meet {
 	datetime: Date;
 	location: string | null;
 	host: {
-		firstname: string; lastname: string;
+		firstname: string;
+		lastname: string;
 	} | null; // firstname lastname
 	address: string | null;
 	notes: string | null;
@@ -75,5 +76,5 @@ export interface Meet {
 	book: {
 		title: string;
 		authors: Array<string>;
-	}
+	};
 }

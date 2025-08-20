@@ -1,12 +1,33 @@
 import { POSTGRES_URL } from '$env/static/private';
 import { drizzle } from 'drizzle-orm/postgres-js';
 import postgres from 'postgres';
-import { authors, bookAuthor, bookMeet, books, clubTitles, meets, memberClubTitle, members } from './schema';
+import {
+	authors,
+	bookAuthor,
+	bookMeet,
+	books,
+	clubTitles,
+	meets,
+	memberClubTitle,
+	members
+} from './schema';
 import { err, fromPromise, ok, ResultAsync, safeTry } from 'neverthrow';
-import { DbEntityNotFoundError, DbInternalError, DbTooManyRowsError, type DbError } from '$lib/errors/db';
+import {
+	DbEntityNotFoundError,
+	DbInternalError,
+	DbTooManyRowsError,
+	type DbError
+} from '$lib/errors/db';
 import { unwrapSingleQueryResult } from './utils';
 import { count, eq, inArray } from 'drizzle-orm';
-import { ClubTitle, type Author, type Book, type Meet, type Member, type PublicMember } from '$lib/dto/dto';
+import {
+	ClubTitle,
+	type Author,
+	type Book,
+	type Meet,
+	type Member,
+	type PublicMember
+} from '$lib/dto/dto';
 import type { MemberDbDto } from './model';
 import { authUsers } from 'drizzle-orm/supabase';
 
@@ -102,7 +123,7 @@ function fetchSingleMember(
 ): ResultAsync<MemberDbDto | undefined, DbError> {
 	return safeTry(async function* () {
 		const memberResult = yield* fromPromise(
-			db.select().from(members).where(eq(members[key], value)),
+			db.select().from(members).where(eq(members[key], value)).execute(),
 			(e) => new DbInternalError({ cause: e })
 		);
 
@@ -221,13 +242,13 @@ export function fetchAuthors(): ResultAsync<Array<Author>, DbError> {
 					awards: author.authorAwards,
 					imageUrl: author.authorImageUrl,
 					books: byAuthor
-					.filter((b) => b.bookTitle && b.bookImageUrl && b.bookGenre)
-					.map((b) => ({
-						title: b.bookTitle!,
-						imageUrl: b.bookImageUrl!,
-						awards: b.bookAwards,
-						genre: b.bookGenre!
-					}))
+						.filter((b) => b.bookTitle && b.bookImageUrl && b.bookGenre)
+						.map((b) => ({
+							title: b.bookTitle!,
+							imageUrl: b.bookImageUrl!,
+							awards: b.bookAwards,
+							genre: b.bookGenre!
+						}))
 				};
 			})
 			.toArray()
@@ -273,7 +294,8 @@ export function fetchBooks(): ResultAsync<Array<Book>, DbError> {
 export function fetchNextMeet(): ResultAsync<Meet, DbError> {
 	return safeTry(async function* () {
 		const results = yield* fromPromise(
-			db.select()
+			db
+				.select()
 				.from(meets)
 				.leftJoin(bookMeet, eq(bookMeet.fkMeetId, meets.id))
 				.leftJoin(books, eq(books.id, bookMeet.fkBookId))
@@ -288,19 +310,19 @@ export function fetchNextMeet(): ResultAsync<Meet, DbError> {
 
 		for (const r of results) {
 			if (r.books === null) {
-				return err(new DbEntityNotFoundError('', 'books'))
+				return err(new DbEntityNotFoundError('', 'books'));
 			}
 
 			if (r.authors === null) {
-				return err(new DbEntityNotFoundError('', 'authours'))
+				return err(new DbEntityNotFoundError('', 'authours'));
 			}
 		}
 
 		const bookIds: Array<number> = [...new Set(results.map((r) => r.books!.id))];
 
 		if (bookIds.length > 1) {
-			return err(new DbTooManyRowsError(bookIds.join(', '), 'Books in meets'))
-		};
+			return err(new DbTooManyRowsError(bookIds.join(', '), 'Books in meets'));
+		}
 
 		const first = results.length > 1 ? [results[0]] : results;
 		const firstUnwrapped = yield* unwrapSingleQueryResult(first, '', 'Books/Meets');
@@ -308,10 +330,12 @@ export function fetchNextMeet(): ResultAsync<Meet, DbError> {
 		return ok({
 			datetime: firstUnwrapped.meets.datetime,
 			location: firstUnwrapped.meets.location,
-			host: firstUnwrapped.members ? {
-				firstname: firstUnwrapped.members.firstname,
-				lastname: firstUnwrapped.members.lastname,
-			} : null,
+			host: firstUnwrapped.members
+				? {
+						firstname: firstUnwrapped.members.firstname,
+						lastname: firstUnwrapped.members.lastname
+					}
+				: null,
 			address: firstUnwrapped.meets.address,
 			notes: firstUnwrapped.meets.notes,
 			highlights: firstUnwrapped.meets.highlights,
@@ -320,12 +344,12 @@ export function fetchNextMeet(): ResultAsync<Meet, DbError> {
 				authors: results.map((r) => r.authors!.name)
 			}
 		});
-	})
+	});
 }
 
 export function fetchMemberEmails() {
 	return fromPromise(
 		db.select({ email: members.email }).from(members),
-		(e) => new DbInternalError({ cause :e })
+		(e) => new DbInternalError({ cause: e })
 	).map((res) => res.map((m) => m.email));
 }

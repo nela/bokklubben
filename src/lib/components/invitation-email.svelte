@@ -1,8 +1,8 @@
-<script>
-	import BkIcon from "./icons/bk-icon.svelte";
-
-</script>
 <svelte:options css="injected" />
+
+<script>
+	import BkIcon from './icons/bk-icon.svelte';
+</script>
 
 <div class="container">
 	<h1>Invitasjon til Bokklubbens <strong class="bold">EKTE</strong> nettside</h1>
@@ -11,22 +11,26 @@
 		Med en stor takk til Byråkraten, som har holdt i en alpha versjon av bokklubbens nettside,
 		inviterer jeg deg til å registrere deg på Bokklubbens
 		<strong class="bold">EKTE </strong>
-		nettside,
-		skapt med øl, svette og tårer av Bokklubbens rettsmessige CTO.
+		nettside, skapt med øl, svette og tårer av Bokklubbens rettsmessige CTO.
 	</p>
 	<p>
-		Her får du god oversikt over våre aktiviteter, presentert i sexy UI, og et merkverdig domene som er lett å huske.
-    Trykk på knappen nedenfor, for å bli med i Bokklubbens digitale æra.
-  </p>
+		Her får du god oversikt over våre aktiviteter, presentert i sexy UI, og et merkverdig domene som
+		er lett å huske. Trykk på knappen nedenfor, for å bli med i Bokklubbens digitale æra.
+		<br />
+	</p>
 	<a href="http://localhost:5173/auth" class="btn">Registrer deg her!</a>
+	<p>
+		<strong class="bold">NB!</strong> Du kan kun registrere det med mailadressen du har fått invitasjonen
+		på
+	</p>
 	<p>Med vennlig hilsen,<br />Nemænsje, CTO</p>
-	<BkIcon class="width=50 height=50"/>
+	<BkIcon class="width=50 height=50" />
 </div>
 
 <style>
-  .bold {
-    font-weight: 900;
-  }
+	.bold {
+		font-weight: 900;
+	}
 	.container {
 		font-family: 'Montserrat Variable', sans-serif;
 		max-width: 600px;

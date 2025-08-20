@@ -11,11 +11,13 @@
 
 		<div class="text-m text-primary gap-4">
 			<figure>
-			<blockquote class="mt-6 border-l-2 pl-6 italic">
-				Uten regler er vi intet annet enn villmenn.
-			</blockquote>
-			<figcaption class="mt-2 mr-80 text-right text-sm text-muted-foreground">- Elon Musk</figcaption>
-		</figure>
+				<blockquote class="mt-6 border-l-2 pl-6 italic">
+					Uten regler er vi intet annet enn villmenn.
+				</blockquote>
+				<figcaption class="text-muted-foreground mt-2 mr-80 text-right text-sm">
+					- Elon Musk
+				</figcaption>
+			</figure>
 		</div>
 
 		<div class="mt-4 flex flex-col gap-6">
