@@ -18,7 +18,7 @@
 		er lett å huske. Trykk på knappen nedenfor, for å bli med i Bokklubbens digitale æra.
 		<br />
 	</p>
-	<a href="http://localhost:5173/auth" class="btn">Registrer deg her!</a>
+	<a href="https://bokklubben.eu" class="btn">Registrer deg her!</a>
 	<p>
 		<strong class="bold">NB!</strong> Du kan kun registrere det med mailadressen du har fått invitasjonen
 		på
