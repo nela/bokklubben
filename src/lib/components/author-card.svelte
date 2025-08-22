@@ -19,7 +19,7 @@
 		<img
 			src={author.imageUrl}
 			alt={author.name}
-			class="aspect-[3/2] w-full flex-shrink-0 rounded-md object-cover object-top md:aspect-auto md:h-52 md:w-40"
+			class="aspect-[3/4] w-full flex-shrink-0 rounded-md object-cover object-top md:w-40"
 		/>
 	</a>
 

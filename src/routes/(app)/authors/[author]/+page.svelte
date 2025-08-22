@@ -1,9 +1,7 @@
 <script lang="ts">
-	import * as Card from '$lib/components/ui/card/index.js';
 	import type { PageProps } from './$types';
 	import { createSlug, getLifetime } from '$lib/utils/helpers';
 	import { Separator } from '$lib/components/ui/separator/index.js';
-	import { Routes } from '$lib/routes';
 	import BookCard from '$lib/components/book-card.svelte';
 
 	const { data, params }: PageProps = $props();
