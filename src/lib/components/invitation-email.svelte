@@ -14,11 +14,11 @@
 		nettside, skapt med øl, svette og tårer av Bokklubbens rettsmessige CTO.
 	</p>
 	<p>
-		Her får du god oversikt over våre aktiviteter, presentert i sexy UI, og et merkverdig domene som
-		er lett å huske. Trykk på knappen nedenfor, for å bli med i Bokklubbens digitale æra.
+		Her får du god oversikt over våre aktiviteter, presentert i sexy UI, og et ærverdig domene.
+		Trykk på knappen nedenfor, for å bli med i Bokklubbens digitale æra.
 		<br />
 	</p>
-	<a href="https://bokklubben.eu" class="btn">Registrer deg her!</a>
+	<a href="https://bokklubben.eu/auth" class="btn">Registrer deg her!</a>
 	<p>
 		<strong class="bold">NB!</strong> Du kan kun registrere det med mailadressen du har fått invitasjonen
 		på
