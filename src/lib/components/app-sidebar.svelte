@@ -12,7 +12,6 @@
 	import { toggleMode } from 'mode-watcher';
 	import * as Avatar from '$lib/components/ui/avatar';
 	import type { AuthError } from '@supabase/supabase-js';
-	import { goto } from '$app/navigation';
 	import { fly } from 'svelte/transition';
 
 	let {
@@ -30,6 +29,8 @@
 	} = $props();
 
 	const secondaryItems = $derived(activePrimary?.items.filter((i) => !i.hideFromSidebar) ?? []);
+
+	const displayName = $derived(member.username ?? member.firstname.split(" ")[0])
 </script>
 
 <Sidebar.Root collapsible="offcanvas" {...restProps}>
@@ -83,7 +84,7 @@
 										{member.firstname.charAt(0)}{member.lastname.charAt(0)}
 									</Avatar.Fallback>
 								</Avatar.Root>
-								{member.username ?? member.firstname}
+								{displayName}
 								<ChevronUp class="ml-auto" />
 							</Sidebar.MenuButton>
 						{/snippet}

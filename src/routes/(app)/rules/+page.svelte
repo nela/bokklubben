@@ -21,9 +21,9 @@
 		</div>
 
 		<div class="mt-4 flex flex-col gap-6">
-			<ul class="list-inside list-decimal space-y-4 text-base">
-				<li class="font-semibold">§ 1 Du skal lese klubbens bok</li>
-				<li class="font-semibold">§ 2 Kardemommeloven</li>
+			<ul class="list-inside space-y-4 text-base">
+				<li class="font-semibold">§&nbsp;1&nbsp;&nbsp; Du skal lese klubbens bok</li>
+				<li class="font-semibold">§&nbsp;2&nbsp;&nbsp; Kardemommeloven</li>
 			</ul>
 		</div>
 	</div>

@@ -35,7 +35,7 @@
 			<Card.Description>{lifetime}</Card.Description>
 		</Card.Header>
 
-		<Card.Content class="flex flex-col gap-4 px-0 py-4 pt-6">
+		<Card.Content class="flex flex-col gap-4 px-0 py-1 pt-6">
 			{#if author.awards}
 				<p class="text-base">
 					<span class="font-semibold">Priser: </span>

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import * as Card from '$lib/components/ui/card/index.js';
-	import type { PublicMember } from '$lib/dto/dto';
+	import { ClubTitle, type PublicMember } from '$lib/dto/dto';
 	import { CalendarCheck2, Crown, User } from '@lucide/svelte';
 	import * as Avatar from '$lib/components/ui/avatar/index.js';
 	import { Badge } from './ui/badge';
@@ -31,12 +31,9 @@
 		</Avatar.Root>
 
 		<div class="flex-1 space-y-4">
-			<div>
-				<div class="flex items-center gap-2">
-					<User class="text-muted-foreground h-5 w-5" />
-					<h3 class="text-lg font-semibold">{displayName}</h3>
-				</div>
-			</div>
+			<Card.Title>
+				{displayName}
+			</Card.Title>
 
 			{#if member.titles && member.titles.length > 0}
 				<div class="flex items-start gap-3">
@@ -44,7 +41,7 @@
 					<div class="flex flex-wrap items-center gap-2">
 						{#each member.titles as title}
 							{@const href = '/members'}
-							<Badge {href} variant="outline">{title}</Badge>
+							<Badge {href} variant="outline">{ClubTitle[title as keyof typeof ClubTitle]}</Badge>
 						{/each}
 					</div>
 				</div>
@@ -53,7 +50,7 @@
 				<div class="text-muted-foreground flex items-center gap-3 text-sm">
 					<CalendarCheck2 class="h-4 w-4 flex-shrink-0" />
 					<div>
-						<p>Medlem siden: {new Date(member.memberSince).toLocaleDateString()}</p>
+						<p>Medlem siden: {new Date(member.memberSince).getFullYear()}</p>
 						{#if member.memberTo}
 							<p>Medlem til: {new Date(member.memberTo).toLocaleDateString()}</p>
 						{/if}
