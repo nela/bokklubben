@@ -16,7 +16,7 @@
 
 	const displayName = $derived(
 		member.username
-			? `${member.firstname} '${member.username}' ${member.lastname}`
+			? `${member.firstname} ${member.username} ${member.lastname}`
 			: `${member.firstname} ${member.lastname}`
 	);
 </script>

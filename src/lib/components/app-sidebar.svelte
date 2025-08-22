@@ -83,7 +83,7 @@
 										{member.firstname.charAt(0)}{member.lastname.charAt(0)}
 									</Avatar.Fallback>
 								</Avatar.Root>
-								{member.firstname}
+								{member.username ?? member.firstname}
 								<ChevronUp class="ml-auto" />
 							</Sidebar.MenuButton>
 						{/snippet}
