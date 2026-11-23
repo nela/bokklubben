@@ -1,3 +1,4 @@
+/** Display labels for club titles. The database stores the keys. */
 export enum ClubTitle {
 	CTO = 'CTO',
 	CFO = 'CFO',
@@ -10,71 +11,77 @@ export enum ClubTitle {
 	FOUNDING_FATHER = 'Founding Father'
 }
 
+export type ClubTitleKey = keyof typeof ClubTitle;
+
 export type AppRole = 'admin' | 'regular';
 
-export interface Member {
-	firstname: string;
-	lastname: string;
-	username: string | null;
-	email: string;
-	memberSince: Date;
-	memberTo?: Date | null;
-	appRole: AppRole;
-	titles: Array<ClubTitle>;
-	imageUrl: string;
-}
+export type MeetBookStatus = 'pitched' | 'elected' | 'read';
 
 export interface PublicMember {
-	firstname: string;
-	lastname: string;
-	username: string | null;
+	firstName: string;
+	lastName: string;
+	nickname: string | null;
 	memberSince: Date;
-	memberTo?: Date | null;
-	titles: Array<ClubTitle>;
-	imageUrl: string;
+	memberUntil: Date | null;
+	titles: Array<ClubTitleKey>;
+	imageUrl: string | null;
 }
 
-export interface Author {
+/** The signed-in member. */
+export interface Member extends PublicMember {
+	id: number;
+	email: string;
+	role: AppRole;
+}
+
+export interface AuthorRef {
+	slug: string;
 	name: string;
-	description: string;
-	awards: string | null;
-	born: Date;
-	died: Date | null;
-	imageUrl: string;
-	books: Array<{
-		title: string;
-		imageUrl: string;
-		awards: string | null;
-		genre: string;
-	}>;
 }
 
-export interface Book {
+export interface BookRef {
+	slug: string;
 	title: string;
-	firstPublished: number;
-	pages: number;
-	awards: string | null;
-	originalLanguage: string;
-	genre: string;
-	read: Date;
-	goodreadsRating: number;
-	description: string;
-	authors: Array<string>;
-	imageUrl: string;
+}
+
+export interface Author extends AuthorRef {
+	bio: string | null;
+	awards: Array<string>;
+	born: Date | null;
+	died: Date | null;
+	imageUrl: string | null;
+	books: Array<
+		BookRef & {
+			imageUrl: string | null;
+			awards: Array<string>;
+			genre: string | null;
+		}
+	>;
+}
+
+/** A book the club has read, or will read at an upcoming meet. */
+export interface Book extends BookRef {
+	isbn: string | null;
+	description: string | null;
+	firstPublished: number | null;
+	pages: number | null;
+	originalLanguage: string | null;
+	genre: string | null;
+	rating: number | null;
+	awards: Array<string>;
+	imageUrl: string | null;
+	authors: Array<AuthorRef>;
+	/** Date of the meet where the book was discussed. */
+	readAt: Date;
 }
 
 export interface Meet {
-	datetime: Date;
+	startsAt: Date;
 	location: string | null;
-	host: {
-		firstname: string;
-		lastname: string;
-	} | null; // firstname lastname
 	address: string | null;
 	notes: string | null;
 	highlights: string | null;
-	book: {
-		title: string;
-		authors: Array<string>;
-	};
+	host: { firstName: string; lastName: string } | null;
+	/** Books discussed at this meet. */
+	books: Array<BookRef & { authors: Array<AuthorRef> }>;
 }

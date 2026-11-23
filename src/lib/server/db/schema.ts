@@ -195,7 +195,7 @@ export const meetsRelations = relations(meets, ({ one, many }) => ({
 export const meetBooksRelations = relations(meetBooks, ({ one }) => ({
 	meet: one(meets, { fields: [meetBooks.meetId], references: [meets.id] }),
 	book: one(books, { fields: [meetBooks.bookId], references: [books.id] }),
-	pitchedBy: one(members, { fields: [meetBooks.pitchedBy], references: [members.id] })
+	pitcher: one(members, { fields: [meetBooks.pitchedBy], references: [members.id] })
 }));
 
 export const meetAttendanceRelations = relations(meetAttendance, ({ one }) => ({
