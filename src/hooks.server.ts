@@ -1,9 +1,11 @@
-import { building } from '$app/environment';
+import { building, dev } from '$app/environment';
+import { env } from '$env/dynamic/private';
 import { redirect, type Handle } from '@sveltejs/kit';
 import { sequence } from '@sveltejs/kit/hooks';
 import { svelteKitHandler } from 'better-auth/svelte-kit';
 import { auth } from '$lib/server/auth';
 import { fetchMemberByUserId } from '$lib/server/db/queries';
+import type { Member } from '$lib/dto/dto';
 
 const isAuthPage = (pathname: string) => pathname === '/auth' || pathname.startsWith('/auth/');
 
@@ -49,4 +51,29 @@ const guardHandle: Handle = async ({ event, resolve }) => {
 	return resolve(event);
 };
 
-export const handle = sequence(betterAuthHandle, sessionHandle, guardHandle);
+/** Local development only: skip login and act as an admin member. */
+const devMember: Member = {
+	id: 0,
+	email: 'dev@localhost',
+	role: 'admin',
+	firstName: 'Dev',
+	lastName: 'Utvikler',
+	nickname: null,
+	memberSince: new Date(),
+	memberUntil: null,
+	titles: [],
+	imageUrl: null
+};
+
+const devSkipAuthHandle: Handle = ({ event, resolve }) => {
+	event.locals.session = null;
+	event.locals.user = null;
+	event.locals.member = devMember;
+	return resolve(event);
+};
+
+// `dev` is false in production builds, so the env flag can't disable auth on Vercel.
+export const handle =
+	dev && env.DEV_SKIP_AUTH === 'true'
+		? devSkipAuthHandle
+		: sequence(betterAuthHandle, sessionHandle, guardHandle);
