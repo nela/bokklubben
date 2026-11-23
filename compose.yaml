@@ -1,0 +1,31 @@
+# Local development database. Matches the Postgres major version used in production (Neon).
+#
+#   podman compose up -d      # start
+#   podman compose down       # stop (data is kept in the `pgdata` volume)
+#   podman compose down -v    # stop and wipe all data
+#
+# Connection string for .env:
+#   DATABASE_URL=postgres://bokklubben:bokklubben@localhost:5432/bokklubben
+
+services:
+  db:
+    image: docker.io/library/postgres:17-alpine
+    container_name: bokklubben-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: bokklubben
+      POSTGRES_PASSWORD: bokklubben
+      POSTGRES_DB: bokklubben
+    ports:
+      # Bound to localhost only. Override with DB_PORT=5433 if 5432 is already taken.
+      - '127.0.0.1:${DB_PORT:-5432}:5432'
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U bokklubben -d bokklubben']
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  pgdata:
