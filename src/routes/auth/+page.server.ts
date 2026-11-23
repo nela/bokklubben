@@ -1,101 +1,85 @@
-import * as db from '$lib/server/db/queries';
 import { fail, redirect, type Actions } from '@sveltejs/kit';
-import { err, fromPromise, ok, safeTry } from 'neverthrow';
+import { APIError } from 'better-auth/api';
+import { fromPromise } from 'neverthrow';
 import { AuthInternalError } from '$lib/errors/auth';
-import type { Provider } from '@supabase/supabase-js';
+import { auth } from '$lib/server/auth';
+import { fetchMemberByEmail } from '$lib/server/db/queries';
+import { validators } from '$lib/utils/helpers';
 
-const emailSchema =
-	/^(?!\.)(?!.*\.\.)([a-z0-9_'+\-\.]*)[a-z0-9_+-]@([a-z0-9][a-z0-9\-]*\.)+[a-z]{2,}$/i;
+const providers = ['google', 'microsoft', 'github'] as const;
+type Provider = (typeof providers)[number];
 
-function getProviderOptions(provider: string, url: URL) {
-	const initial = {
-		redirectTo: `${url.origin}/auth/callback`
-	};
-
-	return provider === 'azure' ? { scopes: 'email', ...initial } : initial;
-}
+const isProvider = (value: unknown): value is Provider =>
+	providers.includes(value as Provider);
 
 export const actions: Actions = {
-	supabase: async ({ request, locals: { supabase } }) => {
+	password: async ({ request }) => {
 		const formData = await request.formData();
-		const email = formData.get('email') as string;
-		const password = formData.get('password') as string;
+		const email = String(formData.get('email') ?? '').trim();
+		const password = String(formData.get('password') ?? '');
 
 		if (!email || !password) {
-			return fail(400, { status: false, message: 'Bruker og logg inn nødvendig.' });
+			return fail(400, { success: false, message: 'Epost og passord er påkrevd.' });
 		}
-
-		if (!emailSchema.test(email)) {
-			return fail(400, { status: false, message: 'Ugyldig epost.' });
+		if (!validators.parseEmail(email)) {
+			return fail(400, { success: false, message: 'Ugyldig epost.' });
 		}
-
 		if (password.length < 8) {
-			return fail(400, { status: false, message: 'Passord må være minst 8 karakterer langt.' });
+			return fail(400, { success: false, message: 'Passord må være minst 8 tegn langt.' });
 		}
 
-		const actionResult = safeTry(async function* () {
-			const isAllowed = yield* db.verifyUserAllowed(email);
+		const member = await fetchMemberByEmail(email);
+		if (member.isErr()) {
+			console.error(member.error);
+			return fail(500, { success: false, message: 'Innlogging feilet.' });
+		}
+		if (!member.value) {
+			return fail(403, { success: false, message: 'Kun for inviterte medlemmer.' });
+		}
 
-			if (!isAllowed.action) {
-				return ok(undefined);
-			}
-
-			const authMethod =
-				isAllowed.action === 'signin'
-					? () => supabase.auth.signInWithPassword({ email, password })
-					: () => supabase.auth.signUp({ email, password });
-
-			return fromPromise(authMethod(), (e) => new AuthInternalError({ cause: e })).andThen(
-				(res) => {
-					return res.error
-						? err(new AuthInternalError({ cause: `${res.error.cause} ${res.error.message}` }))
-						: ok(res.data);
-				}
-			);
-		});
-
-		return actionResult.match(
-			(res) =>
-				res
-					? redirect(303, '/')
-					: fail(403, {
-							success: false,
-							message: 'Invited members only.'
-						}),
-			(error) => {
-				console.error(error);
-				return fail(500, {
-					success: false,
-					message: 'Failed to login.'
-				});
-			}
+		// First password login for an invited member creates the account.
+		const { firstName, lastName, userId } = member.value;
+		const result = await fromPromise(
+			userId
+				? auth.api.signInEmail({ body: { email, password }, headers: request.headers })
+				: auth.api.signUpEmail({
+						body: { email, password, name: `${firstName} ${lastName}` },
+						headers: request.headers
+					}),
+			(e) => e
 		);
-	},
-	provider: async ({ request, url, locals: { supabase } }) => {
-		const provider = (await request.formData()).get('provider') as Provider;
-		const opts = getProviderOptions(provider, url);
 
-		const actionResult = fromPromise(
-			supabase.auth.signInWithOAuth({
-				provider: provider,
-				options: opts
+		if (result.isErr()) {
+			const e = result.error;
+			if (e instanceof APIError && e.status === 'UNAUTHORIZED') {
+				return fail(401, { success: false, message: 'Feil epost eller passord.' });
+			}
+			console.error(new AuthInternalError({ cause: e }));
+			return fail(500, { success: false, message: 'Innlogging feilet.' });
+		}
+
+		redirect(303, '/');
+	},
+
+	provider: async ({ request }) => {
+		const provider = (await request.formData()).get('provider');
+		if (!isProvider(provider)) {
+			return fail(400, { success: false, message: 'Ukjent innloggingsmetode.' });
+		}
+
+		const result = await fromPromise(
+			auth.api.signInSocial({
+				body: { provider, callbackURL: '/', errorCallbackURL: '/auth?error=oauth_failed' },
+				headers: request.headers
 			}),
 			(e) => new AuthInternalError({ cause: e })
-		).andThen((res) =>
-			res.error
-				? err(new AuthInternalError({ cause: `${res.error.cause} ${res.error.message}` }))
-				: ok(res.data)
 		);
 
-		return actionResult.match(
-			(data) => redirect(303, data.url),
-			(e) => {
-				console.error(e);
-				return fail(500, {
-					success: false,
-					message: 'Failed to login.'
-				});
-			}
-		);
+		if (result.isErr() || !result.value.url) {
+			console.error(result.isErr() ? result.error : 'No redirect URL from provider sign-in');
+			return fail(500, { success: false, message: 'Innlogging feilet.' });
+		}
+
+		redirect(303, result.value.url);
 	}
 };

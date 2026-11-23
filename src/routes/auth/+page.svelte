@@ -20,11 +20,25 @@
 	import MicrosoftIcon from '$lib/components/icons/microsoft-icon.svelte';
 	import { toast } from 'svelte-sonner';
 	import { enhance } from '$app/forms';
+	import { page } from '$app/state';
 	import type { SubmitFunction } from '@sveltejs/kit';
+	import { onMount } from 'svelte';
 
 	const iconSize = 70;
 
+	const errorMessages: Record<string, string> = {
+		unauthorized: 'Kun for inviterte medlemmer.',
+		oauth_failed: 'Innlogging feilet. Prøv igjen.'
+	};
+
 	let { form } = $props();
+
+	onMount(() => {
+		const error = page.url.searchParams.get('error');
+		if (error) {
+			toast.error(errorMessages[error] ?? errorMessages.oauth_failed, { duration: 5000 });
+		}
+	});
 
 	const disabled = false;
 
@@ -55,7 +69,7 @@
 		<form
 			method="POST"
 			class="flex flex-col gap-4 px-4 pb-4 sm:px-16"
-			action="?/supabase"
+			action="?/password"
 			use:enhance={enhanceCallback}
 		>
 			<div class="flex flex-col gap-2">
@@ -104,7 +118,7 @@
 					type="submit"
 					formaction="?/provider"
 					name="provider"
-					value="azure"
+					value="microsoft"
 					class="rounded-lg p-2 hover:cursor-pointer hover:shadow-lg dark:shadow-zinc-600 [&_svg]:transition-transform hover:[&_svg]:scale-105"
 				>
 					<MicrosoftIcon size={iconSize} />

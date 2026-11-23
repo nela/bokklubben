@@ -1,4 +1,4 @@
-import { asc, desc, gte, sql } from 'drizzle-orm';
+import { asc, desc, eq, gte, sql } from 'drizzle-orm';
 import { fromPromise, ResultAsync } from 'neverthrow';
 import { DbInternalError, type DbError } from '$lib/errors/db';
 import type { Author, Book, Meet, Member, PublicMember } from '$lib/dto/dto';
@@ -163,4 +163,17 @@ export function fetchNextMeet(): ResultAsync<Meet | null, DbError> {
 			}))
 		};
 	});
+}
+
+/** Used at sign-in to decide between signing in and first-time sign-up. */
+export function fetchMemberByEmail(
+	email: string
+): ResultAsync<{ firstName: string; lastName: string; userId: string | null } | null, DbError> {
+	return fromPromise(
+		db.query.members.findFirst({
+			where: eq(sql`lower(${members.email})`, email.toLowerCase()),
+			columns: { firstName: true, lastName: true, userId: true }
+		}),
+		toDbError
+	).map((member) => member ?? null);
 }
