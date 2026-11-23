@@ -9,10 +9,11 @@
 	import type { NavItemPrimary } from '$lib/model';
 	import { createSlug } from '$lib/utils/helpers';
 	import { Routes } from '$lib/routes';
-	import type { AuthError } from '@supabase/supabase-js';
+	import { authClient } from '$lib/auth-client';
+	import { goto } from '$app/navigation';
 
 	let { data, children }: LayoutProps = $props();
-	const { supabase, allMembers, books, authors, member } = data;
+	const { allMembers, books, authors, member } = data;
 
 	const primaryItems: Array<NavItemPrimary> = [
 		{
@@ -107,7 +108,10 @@
 			: [primary];
 	});
 
-	const signOut = (): Promise<{ error: AuthError | null }> => supabase.auth.signOut();
+	const signOut = async () => {
+		await authClient.signOut();
+		await goto('/auth', { invalidateAll: true });
+	};
 </script>
 
 <div class="[--header-height:calc(--spacing(14))]">

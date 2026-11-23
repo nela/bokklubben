@@ -11,7 +11,6 @@
 	import type { Member } from '$lib/dto/dto';
 	import { toggleMode } from 'mode-watcher';
 	import * as Avatar from '$lib/components/ui/avatar';
-	import type { AuthError } from '@supabase/supabase-js';
 	import { fly } from 'svelte/transition';
 
 	let {
@@ -25,7 +24,7 @@
 		activePrimary: NavItemPrimary | undefined;
 		primaryItems: Array<NavItemPrimary>;
 		member: Member;
-		signOut: () => Promise<{ error: AuthError | null }>;
+		signOut: () => Promise<void>;
 	} = $props();
 
 	const secondaryItems = $derived(activePrimary?.items.filter((i) => !i.hideFromSidebar) ?? []);
