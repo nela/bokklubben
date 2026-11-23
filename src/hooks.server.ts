@@ -1,82 +1,52 @@
-import { sequence } from '@sveltejs/kit/hooks';
+import { building } from '$app/environment';
 import { redirect, type Handle } from '@sveltejs/kit';
-import { createServerClient } from '@supabase/ssr';
-import { PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY } from '$env/static/public';
-import { fetchMemberByUuid } from '$lib/server/db/queries';
-import { Routes } from '$lib/routes';
+import { sequence } from '@sveltejs/kit/hooks';
+import { svelteKitHandler } from 'better-auth/svelte-kit';
+import { auth } from '$lib/server/auth';
+import { fetchMemberByUserId } from '$lib/server/db/queries';
 
-export const supabaseHandle: Handle = async ({ event, resolve }) => {
-	event.locals.supabase = createServerClient(PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY, {
-		cookies: {
-			getAll: () => event.cookies.getAll(),
-			setAll: (cookiesToSet) => {
-				cookiesToSet.forEach(({ name, value, options }) => {
-					event.cookies.set(name, value, { ...options, path: '/' });
-				});
-			}
-		}
-	});
+const isAuthPage = (pathname: string) => pathname === '/auth' || pathname.startsWith('/auth/');
 
-	event.locals.safeGetSession = async () => {
-		const {
-			data: { session }
-		} = await event.locals.supabase.auth.getSession();
+/** Serves Better Auth's own endpoints (`/api/auth/*`). */
+const betterAuthHandle: Handle = ({ event, resolve }) =>
+	svelteKitHandler({ event, resolve, auth, building });
 
-		if (!session) {
-			return { session: null, user: null };
-		}
+const sessionHandle: Handle = async ({ event, resolve }) => {
+	const result = await auth.api.getSession({ headers: event.request.headers });
 
-		const {
-			data: { user },
-			error
-		} = await event.locals.supabase.auth.getUser();
+	event.locals.session = result?.session ?? null;
+	event.locals.user = result?.user ?? null;
+	event.locals.member = result
+		? await fetchMemberByUserId(result.user.id)
+				.orTee((e) => console.error(e))
+				.unwrapOr(null)
+		: null;
 
-		if (error) {
-			return { session: null, user: null };
-		}
-
-		return { session, user };
-	};
-
-	event.locals.fetchMember = async (uuid: string) => {
-		return fetchMemberByUuid(uuid)
-			.orTee((e) => console.error(e.message))
-			.unwrapOr(null);
-	};
-
-	return resolve(event, {
-		filterSerializedResponseHeaders: (name) =>
-			name === 'content-range' || name === 'x-supabase-api-version'
-	});
+	return resolve(event);
 };
 
-export const authGuard: Handle = async ({ event, resolve }) => {
-	const { session, user } = await event.locals.safeGetSession();
+const guardHandle: Handle = async ({ event, resolve }) => {
+	const { user, member } = event.locals;
+	const { pathname } = event.url;
 
-	if (!session || !user) {
-		return event.url.pathname.startsWith('/auth') && !event.url.pathname.startsWith(Routes.AUTHORS)
-			? resolve(event)
-			: redirect(303, '/auth');
+	if (!user) {
+		return isAuthPage(pathname) ? resolve(event) : redirect(303, '/auth');
 	}
 
-	event.locals.session = session;
-	event.locals.user = user;
-
-	if (event.locals.session && event.url.pathname.startsWith('/auth')) {
-		throw redirect(303, '/');
+	if (!member) {
+		await auth.api.signOut({ headers: event.request.headers });
+		redirect(303, '/auth?error=unauthorized');
 	}
 
-	event.locals.member = await event.locals.fetchMember(user.id);
-	if (!event.locals.member) {
-		await event.locals.supabase.auth.signOut();
-		throw redirect(303, '/auth?error=unauthorized');
+	if (isAuthPage(pathname)) {
+		redirect(303, '/');
 	}
 
-	if (event.locals.member.appRole !== 'admin' && event.url.pathname.startsWith('/admin')) {
-		throw redirect(303, '/');
+	if (pathname.startsWith('/admin') && member.role !== 'admin') {
+		redirect(303, '/');
 	}
 
 	return resolve(event);
 };
 
-export const handle = sequence(supabaseHandle, authGuard);
+export const handle = sequence(betterAuthHandle, sessionHandle, guardHandle);
