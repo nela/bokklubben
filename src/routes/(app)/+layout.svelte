@@ -7,7 +7,6 @@
 	import { page } from '$app/state';
 	import { ClubTitle } from '$lib/dto/dto';
 	import type { NavItemPrimary } from '$lib/model';
-	import { createSlug } from '$lib/utils/helpers';
 	import { Routes } from '$lib/routes';
 	import { authClient } from '$lib/auth-client';
 	import { goto } from '$app/navigation';
@@ -22,15 +21,10 @@
 			hideFromSidebar: false,
 			icon: Users,
 			items: [...new Set(allMembers.flatMap((m) => m.titles))]
-				.toSorted((a, b) =>
-					ClubTitle[a as keyof typeof ClubTitle].localeCompare(
-						ClubTitle[b as keyof typeof ClubTitle],
-						'nb-NO'
-					)
-				)
+				.toSorted((a, b) => ClubTitle[a].localeCompare(ClubTitle[b], 'nb-NO'))
 				.map((t) => {
-					const tmp = ClubTitle[t as keyof typeof ClubTitle];
-					const title = tmp === ClubTitle.FOUNDING_FATHER ? tmp + 's' : tmp;
+					const label = ClubTitle[t];
+					const title = t === 'FOUNDING_FATHER' ? label + 's' : label;
 
 					return {
 						title: title,
@@ -45,7 +39,7 @@
 			pathname: Routes.BOOKS,
 			icon: BookIcon,
 			hideFromSidebar: false,
-			items: [...new Set(books.map((b) => b.read.getFullYear()))]
+			items: [...new Set(books.map((b) => b.readAt.getFullYear()))]
 				.toSorted((a, b) => b - a)
 				.map((year) => {
 					return {
@@ -57,7 +51,7 @@
 				.concat(
 					books.map((b) => ({
 						title: b.title,
-						pathname: `${Routes.BOOKS}/${createSlug(b.title)}`,
+						pathname: `${Routes.BOOKS}/${b.slug}`,
 						hideFromSidebar: true
 					}))
 				)
@@ -71,7 +65,7 @@
 				.map((a) => ({
 					title: a.name,
 					hideFromSidebar: true,
-					pathname: `${Routes.AUTHORS}/${createSlug(a.name)}`
+					pathname: `${Routes.AUTHORS}/${a.slug}`
 				}))
 				.toSorted((a, b) => a.title.localeCompare(b.title, 'nb-NO'))
 		},

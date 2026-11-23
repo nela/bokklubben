@@ -3,7 +3,6 @@
 	import * as Card from '$lib/components/ui/card/index.js';
 	import type { Book } from '$lib/dto/dto';
 	import { Routes } from '$lib/routes';
-	import { createSlug } from '$lib/utils/helpers';
 	import AnimatedUnderline from './animated-underline.svelte';
 
 	let {
@@ -14,7 +13,7 @@
 		includeAuthor?: boolean;
 	} = $props();
 
-	const bookHref = $derived(`${Routes.BOOKS}/${createSlug(book.title)}`);
+	const bookHref = $derived(`${Routes.BOOKS}/${book.slug}`);
 </script>
 
 <Card.Root class="flex flex-col gap-4 p-4 md:flex-row">
@@ -33,9 +32,9 @@
 			</Card.Title>
 			{#if includeAuthor}
 				<Card.Description class="text-base">
-					{#each book.authors as author, i (author)}
-						{@const authorHref = `${Routes.AUTHORS}/${createSlug(author)}`}
-						<AnimatedUnderline className="font-montserrat text-m" href={authorHref} text={author} />
+					{#each book.authors as author, i (author.slug)}
+						{@const authorHref = `${Routes.AUTHORS}/${author.slug}`}
+						<AnimatedUnderline className="font-montserrat text-m" href={authorHref} text={author.name} />
 						{#if i < book.authors.length - 1},&nbsp;{/if}
 					{/each}
 				</Card.Description>
@@ -48,10 +47,10 @@
 				{book.firstPublished}
 			</p>
 
-			{#if book.awards}
+			{#if book.awards.length > 0}
 				<p class="text-base">
 					<span class="font-semibold">Priser: </span>
-					{book.awards}
+					{book.awards.join(', ')}
 				</p>
 			{/if}
 
@@ -60,10 +59,12 @@
 				{book.genre}
 			</p>
 
-			<div class="flex items-center gap-1" role="img">
-				<span class="font-semibold">Goodreads rating:</span>
-				<StarRating value={book.goodreadsRating} />
-			</div>
+			{#if book.rating !== null}
+				<div class="flex items-center gap-1" role="img">
+					<span class="font-semibold">Goodreads rating:</span>
+					<StarRating value={book.rating} />
+				</div>
+			{/if}
 		</Card.Content>
 	</div>
 </Card.Root>

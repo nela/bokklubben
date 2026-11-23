@@ -1,6 +1,5 @@
 <script lang="ts">
 	import type { PageProps } from './$types';
-	import { createSlug } from '$lib/utils/helpers';
 	import { Separator } from '$lib/components/ui/separator/index.js';
 	import { Badge } from '$lib/components/ui/badge/index.js';
 	import StarRating from '$lib/components/star-rating.svelte';
@@ -10,8 +9,10 @@
 
 	const { data, params }: PageProps = $props();
 
-	const book = $derived(data.books.find((b) => createSlug(b.title.toLowerCase()) === params.title));
-	const authors = $derived(data.authors.filter((a) => (book?.authors ?? []).includes(a.name)));
+	const book = $derived(data.books.find((b) => b.slug === params.title));
+	const authors = $derived(
+		data.authors.filter((a) => book?.authors.some((ba) => ba.slug === a.slug))
+	);
 
 	function formatDate(date: Date) {
 		return new Date(date).toLocaleDateString('no-NB', {
@@ -38,11 +39,11 @@
 					<h1 class="font-montserrat text-4xl font-bold">{book.title}</h1>
 					<div class="text-muted-foreground text-lg">
 						<span class="font-montserrat mr-1">av</span>
-						{#each book.authors as author, i}
+						{#each book.authors as author, i (author.slug)}
 							<AnimatedUnderline
 								className="font-montserrat"
-								href={`${Routes.AUTHORS}/${createSlug(author)}`}
-								text={author}
+								href={`${Routes.AUTHORS}/${author.slug}`}
+								text={author.name}
 							/>
 							{#if i < book.authors.length - 1},&nbsp;{/if}
 						{/each}
@@ -52,7 +53,7 @@
 				<Separator orientation="horizontal" />
 
 				<div>
-					{#each book.description.split('\n').filter((p) => p) as paragraph}
+					{#each (book.description ?? '').split('\n').filter((p) => p) as paragraph}
 						<p class="mb-4 text-base leading-relaxed">{paragraph}</p>
 					{/each}
 				</div>
@@ -64,28 +65,29 @@
 					<p><span class="font-semibold">Utvigelsesår:</span> {book.firstPublished}</p>
 					<p><span class="font-semibold">Antall sider:</span> {book.pages}</p>
 					<p><span class="font-semibold">Originalspråk:</span> {book.originalLanguage}</p>
-					<p class="flex items-center gap-2">
-						<span class="font-semibold">Goodreads rating:</span>
-						<StarRating value={book.goodreadsRating} />
-					</p>
+					{#if book.rating !== null}
+						<p class="flex items-center gap-2">
+							<span class="font-semibold">Goodreads rating:</span>
+							<StarRating value={book.rating} />
+						</p>
+					{/if}
 					<p>
 						<span class="font-semibold">Sjanger:</span>
 						<Badge>{book.genre}</Badge>
 					</p>
-					<p><span class="font-semibold">Lest:</span> {formatDate(book.read)}</p>
+					<p><span class="font-semibold">Lest:</span> {formatDate(book.readAt)}</p>
 
-					{#if book.awards}
-						{@const awards = book.awards.split(', ')}
+					{#if book.awards.length > 0}
 						<div>
 							<span class="font-semibold">Priser:</span>
-							{#if awards.length > 1}
+							{#if book.awards.length > 1}
 								<ul class="list-inside list-disc">
-									{#each book.awards.split(', ') as award}
+									{#each book.awards as award}
 										<li class="text-base">{award}</li>
 									{/each}
 								</ul>
 							{:else}
-								<span>{awards[0]}</span>
+								<span>{book.awards[0]}</span>
 							{/if}
 						</div>
 					{/if}
@@ -97,7 +99,7 @@
 			<div class="mt-12">
 				<h2 class="mb-6 text-2xl font-bold">Forfatter{authors.length > 1 ? 'e:' : ':'}</h2>
 				<div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-					{#each authors as author (author.name)}
+					{#each authors as author (author.slug)}
 						<AuthorCard {author} />
 					{/each}
 				</div>

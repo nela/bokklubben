@@ -29,7 +29,7 @@
 
 	const secondaryItems = $derived(activePrimary?.items.filter((i) => !i.hideFromSidebar) ?? []);
 
-	const displayName = $derived(member.username ?? member.firstname.split(" ")[0])
+	const displayName = $derived(member.nickname ?? member.firstName.split(" ")[0])
 </script>
 
 <Sidebar.Root collapsible="offcanvas" {...restProps}>
@@ -78,9 +78,9 @@
 								class="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
 							>
 								<Avatar.Root class="size-8 rounded-lg">
-									<Avatar.Image src={member.imageUrl} alt={member.username ?? member.firstname} />
+									<Avatar.Image src={member.imageUrl} alt={member.nickname ?? member.firstName} />
 									<Avatar.Fallback class="rounded-lg">
-										{member.firstname.charAt(0)}{member.lastname.charAt(0)}
+										{member.firstName.charAt(0)}{member.lastName.charAt(0)}
 									</Avatar.Fallback>
 								</Avatar.Root>
 								{displayName}

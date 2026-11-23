@@ -1,13 +1,13 @@
 <script lang="ts">
 	import MemberList from '$lib/components/member-list.svelte';
-	import { ClubTitle } from '$lib/dto/dto';
+	import type { ClubTitleKey } from '$lib/dto/dto';
 	import type { PageProps } from './$types';
 
 	const { data, params }: PageProps = $props();
 	const { allMembers } = data;
 
 	const titledMembers = $derived.by(() => {
-		const searchTitle = params.title.toUpperCase() as ClubTitle;
+		const searchTitle = params.title.toUpperCase() as ClubTitleKey;
 		return allMembers.filter((m) => m.titles.includes(searchTitle));
 	});
 </script>

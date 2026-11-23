@@ -18,7 +18,7 @@
 </script>
 
 <div class={containerClasses}>
-	{#each members as member (member.firstname + member.lastname)}
+	{#each members as member (member.firstName + member.lastName)}
 		<MemberCard {member} />
 	{/each}
 </div>

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { Author } from '$lib/dto/dto';
 	import * as Card from '$lib/components/ui/card/index.js';
-	import { createSlug, getLifetime } from '$lib/utils/helpers';
+	import { getLifetime } from '$lib/utils/helpers';
 	import AnimatedUnderline from './animated-underline.svelte';
 	import { Routes } from '$lib/routes';
 
@@ -10,7 +10,7 @@
 	}: {
 		author: Author;
 	} = $props();
-	const authorHref = $derived(`${Routes.AUTHORS}/${createSlug(author.name)}`);
+	const authorHref = $derived(`${Routes.AUTHORS}/${author.slug}`);
 	const lifetime = $derived(getLifetime(author));
 </script>
 
@@ -36,18 +36,18 @@
 		</Card.Header>
 
 		<Card.Content class="flex flex-col gap-4 px-0 py-1 pt-6">
-			{#if author.awards}
+			{#if author.awards.length > 0}
 				<p class="text-base">
 					<span class="font-semibold">Priser: </span>
-					{author.awards}
+					{author.awards.join(', ')}
 				</p>
 			{/if}
 
 			{#if author.books && author.books.length > 0}
 				<p class="text-base">
 					<span class="font-semibold">Bøker: </span>
-					{#each author.books as book, i (book.title)}
-						{@const bookHref = `${Routes.AUTHORS}/${createSlug(book.title)}`}
+					{#each author.books as book, i (book.slug)}
+						{@const bookHref = `${Routes.BOOKS}/${book.slug}`}
 						<AnimatedUnderline href={bookHref} text={book.title} />
 						{#if i < author.books.length - 1},&nbsp;{/if}
 					{/each}

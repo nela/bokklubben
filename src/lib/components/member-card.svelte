@@ -15,9 +15,9 @@
 	} = $props();
 
 	const displayName = $derived(
-		member.username
-			? `${member.firstname} ${member.username} ${member.lastname}`
-			: `${member.firstname} ${member.lastname}`
+		member.nickname
+			? `${member.firstName} ${member.nickname} ${member.lastName}`
+			: `${member.firstName} ${member.lastName}`
 	);
 </script>
 
@@ -26,7 +26,7 @@
 		<Avatar.Root class="h-32 w-32">
 			<Avatar.Image src={member.imageUrl} alt={displayName} />
 			<Avatar.Fallback>
-				{member.firstname.charAt(0)}{member.lastname.charAt(0)}
+				{member.firstName.charAt(0)}{member.lastName.charAt(0)}
 			</Avatar.Fallback>
 		</Avatar.Root>
 
@@ -41,7 +41,7 @@
 					<div class="flex flex-wrap items-center gap-2">
 						{#each member.titles as title}
 							{@const href = '/members'}
-							<Badge {href} variant="outline">{ClubTitle[title as keyof typeof ClubTitle]}</Badge>
+							<Badge {href} variant="outline">{ClubTitle[title]}</Badge>
 						{/each}
 					</div>
 				</div>
@@ -51,8 +51,8 @@
 					<CalendarCheck2 class="h-4 w-4 flex-shrink-0" />
 					<div>
 						<p>Medlem siden: {new Date(member.memberSince).getFullYear()}</p>
-						{#if member.memberTo}
-							<p>Medlem til: {new Date(member.memberTo).toLocaleDateString()}</p>
+						{#if member.memberUntil}
+							<p>Medlem til: {new Date(member.memberUntil).toLocaleDateString()}</p>
 						{/if}
 					</div>
 				</div>

@@ -9,7 +9,7 @@
 	const { member } = data;
 
 	const getDisplayName = (m: Member) =>
-		m.username ? `${m.firstname} '${m.username}' ${m.lastname}` : `${m.firstname} ${m.lastname}`;
+		m.nickname ? `${m.firstName} '${m.nickname}' ${m.lastName}` : `${m.firstName} ${m.lastName}`;
 
 	const nnMember = member!;
 </script>

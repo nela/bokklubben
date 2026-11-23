@@ -36,8 +36,13 @@ export const createSlug = (name: string) => {
 	);
 };
 
-export const getLifetime = (author: Author) => {
-	const bornYear = new Date(author.born).getFullYear();
-	const diedYear = author.died ? new Date(author.died).getFullYear() : null;
-	return diedYear ? `${bornYear}–${diedYear}` : `f. ${bornYear}`;
+/** "1920–2010", "f. 1950", "d. 1900", or null when neither date is known. */
+export const getLifetime = (author: Pick<Author, 'born' | 'died'>) => {
+	const bornYear = author.born?.getFullYear();
+	const diedYear = author.died?.getFullYear();
+
+	if (bornYear && diedYear) return `${bornYear}–${diedYear}`;
+	if (bornYear) return `f. ${bornYear}`;
+	if (diedYear) return `d. ${diedYear}`;
+	return null;
 };

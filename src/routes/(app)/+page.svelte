@@ -4,29 +4,23 @@
 	import StarRating from '$lib/components/star-rating.svelte';
 	import * as Card from '$lib/components/ui/card';
 	import { Routes } from '$lib/routes';
-	import { createSlug, getLifetime } from '$lib/utils/helpers';
+	import { getLifetime } from '$lib/utils/helpers';
 
 	const { data } = $props();
 	const { allMembers, nextMeet, books, authors } = data;
 
-	const relatedBook = $derived(
-		nextMeet
-			? books.find(
-					(b) =>
-						b.title === nextMeet.book.title &&
-						b.authors.every((a) => nextMeet.book.authors.includes(a))
-				)
-			: undefined
+	const meetBookSlugs = $derived(new Set(nextMeet?.books.map((b) => b.slug)));
+	const meetAuthorSlugs = $derived(
+		new Set(nextMeet?.books.flatMap((b) => b.authors.map((a) => a.slug)))
 	);
 
-	const relatedAuthors = $derived(
-		nextMeet ? authors.filter((a) => nextMeet.book.authors.includes(a.name)) : []
-	);
+	const relatedBooks = $derived(books.filter((b) => meetBookSlugs.has(b.slug)));
+	const relatedAuthors = $derived(authors.filter((a) => meetAuthorSlugs.has(a.slug)));
 
 	const host = $derived(
 		nextMeet?.host
 			? allMembers.find(
-					(m) => m.firstname === nextMeet.host!.firstname && m.lastname === nextMeet.host!.lastname
+					(m) => m.firstName === nextMeet.host!.firstName && m.lastName === nextMeet.host!.lastName
 				)
 			: undefined
 	);
@@ -59,11 +53,11 @@
 					<div class="space-y-2 text-lg">
 						<div class="flex items-center gap-2">
 							<p class="font-bold">Dato:</p>
-							<p>{formatMeetDate(nextMeet.datetime)}</p>
+							<p>{formatMeetDate(nextMeet.startsAt)}</p>
 						</div>
 						<div class="flex items-center gap-2">
 							<p class="font-bold">Klokkeslett:</p>
-							<p>{timeFmt.format(nextMeet.datetime)}</p>
+							<p>{timeFmt.format(nextMeet.startsAt)}</p>
 						</div>
 						<div class="flex items-center gap-2">
 							<p class="font-bold">Sted:</p>
@@ -89,63 +83,69 @@
 	{/if}
 
 	<div class="grid grid-cols-1 items-stretch gap-8 md:grid-cols-2">
-		{#if relatedBook}
-			{@const bookHref = `${Routes.BOOKS}/${createSlug(relatedBook.title)}`}
+		{#if relatedBooks.length > 0}
 			<section>
-				<h2 class="font-montserrat mb-4 text-xl font-bold">Bok</h2>
-				<Card.Root class="flex flex-col gap-4 p-4 md:flex-row">
-					<a href={bookHref} class="w-full flex-shrink-0 md:w-48">
-						<img
-							src={relatedBook.imageUrl}
-							alt={relatedBook.title}
-							class="h-72 w-full rounded-md object-cover shadow-lg"
-						/>
-					</a>
+				<h2 class="font-montserrat mb-4 text-xl font-bold">
+					{relatedBooks.length > 1 ? 'Bøker' : 'Bok'}
+				</h2>
+				{#each relatedBooks as relatedBook (relatedBook.slug)}
+					{@const bookHref = `${Routes.BOOKS}/${relatedBook.slug}`}
+					<Card.Root class="flex flex-col gap-4 p-4 md:flex-row">
+						<a href={bookHref} class="w-full flex-shrink-0 md:w-48">
+							<img
+								src={relatedBook.imageUrl}
+								alt={relatedBook.title}
+								class="h-72 w-full rounded-md object-cover shadow-lg"
+							/>
+						</a>
 
-					<div class="flex flex-1 flex-col">
-						<Card.Header class="p-0">
-							<Card.Title>
-								<AnimatedUnderline
-									href={bookHref}
-									text={relatedBook.title}
-									className="font-montserrat text-xl font-semibold bg-gradient-to-r from-current to-current bg-no-repeat [background-position:0_100%] [background-size:0_1px] transition-[background-size] duration-300 hover:[background-size:100%_1px] "
-								/>
-							</Card.Title>
-						</Card.Header>
+						<div class="flex flex-1 flex-col">
+							<Card.Header class="p-0">
+								<Card.Title>
+									<AnimatedUnderline
+										href={bookHref}
+										text={relatedBook.title}
+										className="font-montserrat text-xl font-semibold bg-gradient-to-r from-current to-current bg-no-repeat [background-position:0_100%] [background-size:0_1px] transition-[background-size] duration-300 hover:[background-size:100%_1px] "
+									/>
+								</Card.Title>
+							</Card.Header>
 
-						<Card.Content class="flex flex-col gap-2 px-0 py-4 pt-6">
-							<p class="text-base">
-								<span class="font-semibold">Utgivelsesår: </span>
-								{relatedBook.firstPublished}
-							</p>
-
-							{#if relatedBook.awards}
+							<Card.Content class="flex flex-col gap-2 px-0 py-4 pt-6">
 								<p class="text-base">
-									<span class="font-semibold">Priser: </span>
-									{relatedBook.awards}
+									<span class="font-semibold">Utgivelsesår: </span>
+									{relatedBook.firstPublished}
 								</p>
-							{/if}
 
-							<p class="text-base">
-								<span class="font-semibold">Sjanger: </span>
-								{relatedBook.genre}
-							</p>
+								{#if relatedBook.awards.length > 0}
+									<p class="text-base">
+										<span class="font-semibold">Priser: </span>
+										{relatedBook.awards.join(', ')}
+									</p>
+								{/if}
 
-							<div class="flex items-center gap-1" role="img">
-								<span class="font-semibold">Goodreads rating:</span>
-								<StarRating value={relatedBook.goodreadsRating} />
-							</div>
-						</Card.Content>
-					</div>
-				</Card.Root>
+								<p class="text-base">
+									<span class="font-semibold">Sjanger: </span>
+									{relatedBook.genre}
+								</p>
+
+								{#if relatedBook.rating !== null}
+									<div class="flex items-center gap-1" role="img">
+										<span class="font-semibold">Goodreads rating:</span>
+										<StarRating value={relatedBook.rating} />
+									</div>
+								{/if}
+							</Card.Content>
+						</div>
+					</Card.Root>
+				{/each}
 			</section>
 		{/if}
 
 		{#if relatedAuthors.length > 0}
 			<section>
 				<h2 class="mb-4 text-xl font-bold">Forfatter{relatedAuthors.length > 1 ? 'e' : ''}</h2>
-				{#each relatedAuthors as author (author.name)}
-					{@const authorHref = `${Routes.BOOKS}/${createSlug(author.name)}`}
+				{#each relatedAuthors as author (author.slug)}
+					{@const authorHref = `${Routes.AUTHORS}/${author.slug}`}
 					{@const lifetime = getLifetime(author)}
 					<Card.Root class="flex flex-col gap-4 p-4 md:flex-row">
 						<a href={authorHref} class="w-full flex-shrink-0 md:w-48">
@@ -169,11 +169,11 @@
 							</Card.Header>
 
 							<Card.Content class="flex flex-col gap-4 px-0 py-4 pt-6">
-								{#if author.awards}
+								{#if author.awards.length > 0}
 									<div>
 										<h3 class="text-md mb-2 font-semibold">Priser</h3>
 										<ul class="list-inside list-disc">
-											{#each author.awards.split(', ') as award}
+											{#each author.awards as award}
 												<li>{award}</li>
 											{/each}
 										</ul>
