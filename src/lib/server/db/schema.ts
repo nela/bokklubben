@@ -1,201 +1,204 @@
+import { relations, sql } from 'drizzle-orm';
 import {
+	date,
+	index,
+	integer,
+	numeric,
+	pgEnum,
 	pgTable,
 	primaryKey,
-	foreignKey,
-	unique,
-	uuid,
-	varchar,
 	smallint,
-	pgEnum,
-	timestamp,
 	text,
-	date,
-	uniqueIndex,
-	index
+	timestamp,
+	uniqueIndex
 } from 'drizzle-orm/pg-core';
-import { authUsers } from 'drizzle-orm/supabase';
-import { customTypeNumeric } from './types';
+import { user } from './auth-schema';
+
+export * from './auth-schema';
+
+const timestamps = {
+	createdAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
+	updatedAt: timestamp({ withTimezone: true })
+		.notNull()
+		.defaultNow()
+		.$onUpdate(() => new Date())
+};
 
 export const appRole = pgEnum('app_role', ['admin', 'regular']);
+
+/** Stored as keys; display labels live in the UI (`ClubTitle` in dto.ts). */
+export const clubTitle = pgEnum('club_title', [
+	'CTO',
+	'CFO',
+	'WHIP',
+	'BUREAUCRAT',
+	'USURPER',
+	'EXECUTIONER',
+	'PROBATE',
+	'HONORARY',
+	'FOUNDING_FATHER'
+]);
+
+/**
+ * A book's relation to a meet:
+ * - pitched: proposed at this meet
+ * - elected: proposed and voted in at this meet
+ * - read:    discussed at this meet (upcoming if the meet is in the future)
+ */
+export const meetBookStatus = pgEnum('meet_book_status', ['pitched', 'elected', 'read']);
 
 export const members = pgTable(
 	'members',
 	{
-		id: smallint('id')
-			.primaryKey()
-			.generatedAlwaysAsIdentity({ name: 'members_id_seq', startWith: 1, increment: 1 }),
-		fkAuthId: uuid('fk_auth_id'),
-		firstname: varchar('firstname', { length: 256 }).notNull(),
-		lastname: varchar('lastname', { length: 256 }).notNull(),
-		username: varchar('username', { length: 256 }),
-		email: varchar('email', { length: 256 }).notNull(),
-		memberSince: date('member_since', { mode: 'date' }).defaultNow().notNull(),
-		memberTo: date('member_to', { mode: 'date' }),
-		appRole: appRole('app_role').notNull().default('regular'),
-		lastUpdated: timestamp('last_updated', { withTimezone: true }),
-		imageUrl: varchar('image_url', { length: 2048 }).notNull()
+		id: integer().primaryKey().generatedAlwaysAsIdentity(),
+		/** Set when the member signs up; null for invited members who haven't yet. */
+		userId: text()
+			.unique('members_user_id_unique')
+			.references(() => user.id, { onDelete: 'set null' }),
+		firstName: text().notNull(),
+		lastName: text().notNull(),
+		nickname: text(),
+		email: text().notNull(),
+		role: appRole().notNull().default('regular'),
+		titles: clubTitle().array().notNull().default(sql`'{}'`),
+		memberSince: date({ mode: 'date' }).notNull().defaultNow(),
+		memberUntil: date({ mode: 'date' }),
+		imageUrl: text(),
+		...timestamps
+	},
+	(t) => [uniqueIndex('members_email_lower_idx').on(sql`lower(${t.email})`)]
+);
+
+export const authors = pgTable('authors', {
+	id: integer().primaryKey().generatedAlwaysAsIdentity(),
+	slug: text().notNull().unique(),
+	name: text().notNull(),
+	bio: text(),
+	born: date({ mode: 'date' }),
+	died: date({ mode: 'date' }),
+	awards: text().array().notNull().default(sql`'{}'`),
+	imageUrl: text(),
+	...timestamps
+});
+
+export const books = pgTable('books', {
+	id: integer().primaryKey().generatedAlwaysAsIdentity(),
+	slug: text().notNull().unique(),
+	title: text().notNull(),
+	isbn: text().unique(),
+	description: text(),
+	firstPublished: smallint(),
+	pages: smallint(),
+	originalLanguage: text(),
+	genre: text(),
+	/** Goodreads rating, entered manually. */
+	rating: numeric({ precision: 3, scale: 2, mode: 'number' }),
+	awards: text().array().notNull().default(sql`'{}'`),
+	imageUrl: text(),
+	...timestamps
+});
+
+export const bookAuthors = pgTable(
+	'book_authors',
+	{
+		bookId: integer()
+			.notNull()
+			.references(() => books.id, { onDelete: 'cascade' }),
+		authorId: integer()
+			.notNull()
+			.references(() => authors.id, { onDelete: 'cascade' })
 	},
 	(t) => [
-		foreignKey({
-			columns: [t.fkAuthId],
-			foreignColumns: [authUsers.id],
-			name: 'fk_auth_id_auth_id'
-		}).onDelete('cascade'),
-		unique('uq_member_email_key').on(t.email),
-		uniqueIndex('uq_members_email_idx').on(t.email)
+		primaryKey({ columns: [t.bookId, t.authorId] }),
+		index('book_authors_author_id_idx').on(t.authorId)
 	]
-).enableRLS();
-
-export const clubTitles = pgTable(
-	'club_titles',
-	{
-		id: smallint('id')
-			.primaryKey()
-			.generatedAlwaysAsIdentity({ name: 'club_titles_id_seq', startWith: 1, increment: 1 }),
-		name: varchar('name', { length: 32 }).notNull()
-	},
-	(t) => [unique('uq_club_title_name_key').on(t.name)]
-).enableRLS();
-
-export const memberClubTitle = pgTable(
-	'member_club_title',
-	{
-		fkMemberId: smallint('fk_member_id').notNull(),
-		fkClubTitleId: smallint('fk_club_title_id').notNull()
-	},
-	(t) => [
-		foreignKey({
-			columns: [t.fkMemberId],
-			foreignColumns: [members.id],
-			name: 'fk_member_id_members_id'
-		}).onDelete('cascade'),
-		foreignKey({
-			columns: [t.fkClubTitleId],
-			foreignColumns: [clubTitles.id],
-			name: 'fk_bk_title_id_bk_titles_it'
-		}).onDelete('cascade'),
-		primaryKey({ columns: [t.fkMemberId, t.fkClubTitleId] }),
-		index('member_club_title_fk_member_id_idx').on(t.fkMemberId),
-		index('member_club_title_fk_club_title_id_idx').on(t.fkClubTitleId)
-	]
-).enableRLS();
+);
 
 export const meets = pgTable(
 	'meets',
 	{
-		id: smallint('id')
-			.primaryKey()
-			.generatedAlwaysAsIdentity({ name: 'meets_id_seq', startWith: 1, increment: 1 }),
-		datetime: timestamp('datetime', { withTimezone: true }).notNull(),
-		location: varchar('location', { length: 256 }),
-		fkMemberId: smallint('fkMemberId'),
-		address: varchar('address', { length: 256 }),
-		notes: text('notes'),
-		highlights: text('highlights')
+		id: integer().primaryKey().generatedAlwaysAsIdentity(),
+		startsAt: timestamp({ withTimezone: true }).notNull(),
+		hostId: integer().references(() => members.id, { onDelete: 'set null' }),
+		location: text(),
+		address: text(),
+		notes: text(),
+		highlights: text(),
+		...timestamps
+	},
+	(t) => [index('meets_starts_at_idx').on(t.startsAt)]
+);
+
+export const meetBooks = pgTable(
+	'meet_books',
+	{
+		meetId: integer()
+			.notNull()
+			.references(() => meets.id, { onDelete: 'cascade' }),
+		bookId: integer()
+			.notNull()
+			.references(() => books.id, { onDelete: 'cascade' }),
+		status: meetBookStatus().notNull(),
+		/** Who brought the book up (pitched/elected rows). */
+		pitchedBy: integer().references(() => members.id, { onDelete: 'set null' })
 	},
 	(t) => [
-		foreignKey({
-			columns: [t.fkMemberId],
-			foreignColumns: [members.id],
-			name: 'fk_member_id_members_id'
-		})
+		primaryKey({ columns: [t.meetId, t.bookId] }),
+		index('meet_books_book_id_idx').on(t.bookId),
+		index('meet_books_pitched_by_idx').on(t.pitchedBy)
 	]
-).enableRLS();
+);
 
 export const meetAttendance = pgTable(
 	'meet_attendance',
 	{
-		fkMeetId: smallint('fk_meet_id').notNull(),
-		fkMemberId: smallint('fk_member_id').notNull()
+		meetId: integer()
+			.notNull()
+			.references(() => meets.id, { onDelete: 'cascade' }),
+		memberId: integer()
+			.notNull()
+			.references(() => members.id, { onDelete: 'cascade' })
 	},
 	(t) => [
-		foreignKey({
-			columns: [t.fkMemberId],
-			foreignColumns: [members.id],
-			name: 'fk_member_id_members_id'
-		}),
-		foreignKey({
-			columns: [t.fkMeetId],
-			foreignColumns: [meets.id],
-			name: 'fk_meet_id_meets_id'
-		}),
-		index('meet_attendance_fk_member_id_idx').on(t.fkMemberId),
-		index('meet_attendance_fk_meet_id_idx').on(t.fkMeetId),
-		primaryKey({ columns: [t.fkMemberId, t.fkMeetId] })
+		primaryKey({ columns: [t.meetId, t.memberId] }),
+		index('meet_attendance_member_id_idx').on(t.memberId)
 	]
-).enableRLS();
+);
 
-export const authors = pgTable('authors', {
-	id: smallint('id')
-		.primaryKey()
-		.generatedAlwaysAsIdentity({ name: 'authors_id_seq', startWith: 1, increment: 1 }),
-	name: varchar('name', { length: 256 }).notNull(),
-	description: text('description').notNull(),
-	awards: varchar('awards', { length: 2048 }),
-	born: date('born', { mode: 'date' }).notNull(),
-	died: date('died', { mode: 'date' }),
-	imageUrl: varchar('image_url', { length: 256 }).notNull()
-}).enableRLS();
+export const membersRelations = relations(members, ({ one, many }) => ({
+	user: one(user, { fields: [members.userId], references: [user.id] }),
+	hostedMeets: many(meets),
+	pitches: many(meetBooks),
+	attendance: many(meetAttendance)
+}));
 
-export const books = pgTable('books', {
-	id: smallint('id')
-		.primaryKey()
-		.generatedAlwaysAsIdentity({ name: 'books_id_seq', startWith: 1, increment: 1 }),
-	title: varchar('title', { length: 256 }).notNull(),
-	firstPublished: smallint('first_published').notNull(),
-	pages: smallint('pages').notNull(),
-	awards: varchar('awards', { length: 512 }),
-	originalLanguage: varchar('original_language', { length: 16 }).notNull(),
-	description: text('description').notNull(),
-	genre: varchar('genre', { length: 64 }).notNull(),
-	read: date('read', { mode: 'date' }).notNull(),
-	imageUrl: varchar('image_url', { length: 2048 }).notNull(),
-	goodreadsRating: customTypeNumeric('goodreads_rating', { precision: 4, scale: 2 }).notNull()
-}).enableRLS();
+export const authorsRelations = relations(authors, ({ many }) => ({
+	bookAuthors: many(bookAuthors)
+}));
 
-export const bookAuthor = pgTable(
-	'book_author',
-	{
-		fkBookId: smallint('fk_book_id').notNull(),
-		fkAuthorId: smallint('fk_author_id').notNull()
-	},
-	(t) => [
-		foreignKey({
-			columns: [t.fkBookId],
-			foreignColumns: [books.id],
-			name: 'fk_book_id_books_id'
-		}).onDelete('cascade'),
-		foreignKey({
-			columns: [t.fkAuthorId],
-			foreignColumns: [authors.id],
-			name: 'fk_author_id_authors_id'
-		}).onDelete('cascade'),
-		index('book_author_fk_book_id_idx').on(t.fkBookId),
-		index('book_author_fk_author_id_idx').on(t.fkAuthorId),
-		primaryKey({ columns: [t.fkBookId, t.fkAuthorId] })
-	]
-).enableRLS();
+export const booksRelations = relations(books, ({ many }) => ({
+	bookAuthors: many(bookAuthors),
+	meetBooks: many(meetBooks)
+}));
 
-export const bookStatus = pgEnum('book_status', ['elected', 'pitched', 'read']);
+export const bookAuthorsRelations = relations(bookAuthors, ({ one }) => ({
+	book: one(books, { fields: [bookAuthors.bookId], references: [books.id] }),
+	author: one(authors, { fields: [bookAuthors.authorId], references: [authors.id] })
+}));
 
-export const bookMeet = pgTable(
-	'book_meet',
-	{
-		status: bookStatus('book_status').notNull(),
-		fkBookId: smallint('fk_book_id').notNull(),
-		fkMeetId: smallint('fk_meet_id')
-	},
-	(t) => [
-		foreignKey({
-			columns: [t.fkBookId],
-			foreignColumns: [books.id],
-			name: 'fk_book_id_books_id'
-		}).onDelete('cascade'),
-		foreignKey({
-			columns: [t.fkMeetId],
-			foreignColumns: [meets.id],
-			name: 'fk_meet_id_meets_id'
-		}).onDelete('cascade'),
-		index('book_meet_fk_book_id_idx').on(t.fkBookId)
-	]
-).enableRLS();
+export const meetsRelations = relations(meets, ({ one, many }) => ({
+	host: one(members, { fields: [meets.hostId], references: [members.id] }),
+	meetBooks: many(meetBooks),
+	attendance: many(meetAttendance)
+}));
+
+export const meetBooksRelations = relations(meetBooks, ({ one }) => ({
+	meet: one(meets, { fields: [meetBooks.meetId], references: [meets.id] }),
+	book: one(books, { fields: [meetBooks.bookId], references: [books.id] }),
+	pitchedBy: one(members, { fields: [meetBooks.pitchedBy], references: [members.id] })
+}));
+
+export const meetAttendanceRelations = relations(meetAttendance, ({ one }) => ({
+	meet: one(meets, { fields: [meetAttendance.meetId], references: [meets.id] }),
+	member: one(members, { fields: [meetAttendance.memberId], references: [members.id] })
+}));
