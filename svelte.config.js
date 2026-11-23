@@ -13,7 +13,7 @@ const config = {
 		// See https://svelte.dev/docs/kit/adapters for more information about adapters.
 		adapter: adapter({
 			runtime: 'nodejs22.x',
-			regions: ['arn1']
+			regions: ['fra1']
 		})
 	}
 };
