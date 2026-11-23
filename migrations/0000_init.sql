@@ -9,7 +9,7 @@ CREATE TABLE "authors" (
 	"born" date,
 	"died" date,
 	"awards" text[] DEFAULT '{}' NOT NULL,
-	"image_url" text,
+	"image_path" text,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
 	CONSTRAINT "authors_slug_unique" UNIQUE("slug")
@@ -33,7 +33,7 @@ CREATE TABLE "books" (
 	"genre" text,
 	"rating" numeric(3, 2),
 	"awards" text[] DEFAULT '{}' NOT NULL,
-	"image_url" text,
+	"image_path" text,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
 	CONSTRAINT "books_slug_unique" UNIQUE("slug"),
@@ -77,7 +77,7 @@ CREATE TABLE "members" (
 	"titles" "club_title"[] DEFAULT '{}' NOT NULL,
 	"member_since" date DEFAULT now() NOT NULL,
 	"member_until" date,
-	"image_url" text,
+	"image_path" text,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
 	CONSTRAINT "members_user_id_unique" UNIQUE("user_id")

@@ -62,8 +62,8 @@
           "notNull": true,
           "default": "'{}'"
         },
-        "image_url": {
-          "name": "image_url",
+        "image_path": {
+          "name": "image_path",
           "type": "text",
           "primaryKey": false,
           "notNull": false
@@ -257,8 +257,8 @@
           "notNull": true,
           "default": "'{}'"
         },
-        "image_url": {
-          "name": "image_url",
+        "image_path": {
+          "name": "image_path",
           "type": "text",
           "primaryKey": false,
           "notNull": false
@@ -684,8 +684,8 @@
           "primaryKey": false,
           "notNull": false
         },
-        "image_url": {
-          "name": "image_url",
+        "image_path": {
+          "name": "image_path",
           "type": "text",
           "primaryKey": false,
           "notNull": false

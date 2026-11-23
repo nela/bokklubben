@@ -28,7 +28,7 @@ insert into members (first_name, last_name, nickname, email, role, titles, membe
 
 -- Authors -------------------------------------------------------------------
 
-insert into authors (slug, name, bio, born, died, awards, image_url) values
+insert into authors (slug, name, bio, born, died, awards, image_path) values
 	('cormac-mccarthy', 'Cormac McCarthy',
 		'Amerikansk forfatter kjent for et nakent, voldsomt språk og landskap som nesten blir egne karakterer.',
 		'1933-07-20', '2023-06-13',
@@ -110,8 +110,8 @@ insert into books (slug, title, isbn, description, first_published, pages, origi
 	('blood-meridian', 'Blood Meridian', '9780679728757',
 		null, 1985, 351, 'Engelsk', 'Western', 4.17, '{}');
 
-update books set image_url = 'https://covers.openlibrary.org/b/isbn/' || isbn || '-L.jpg' where isbn is not null;
-update books set image_url = 'https://covers.openlibrary.org/b/isbn/9780374534141-L.jpg' where slug = 'min-kamp-1';
+update books set image_path = 'https://covers.openlibrary.org/b/isbn/' || isbn || '-L.jpg' where isbn is not null;
+update books set image_path = 'https://covers.openlibrary.org/b/isbn/9780374534141-L.jpg' where slug = 'min-kamp-1';
 
 insert into book_authors (book_id, author_id)
 select b.id, a.id

@@ -63,7 +63,8 @@ export const members = pgTable(
 		titles: clubTitle().array().notNull().default(sql`'{}'`),
 		memberSince: date({ mode: 'date' }).notNull().defaultNow(),
 		memberUntil: date({ mode: 'date' }),
-		imageUrl: text(),
+		/** Path in the private Blob store, or an absolute URL. See $lib/server/images. */
+		imagePath: text(),
 		...timestamps
 	},
 	(t) => [uniqueIndex('members_email_lower_idx').on(sql`lower(${t.email})`)]
@@ -77,7 +78,8 @@ export const authors = pgTable('authors', {
 	born: date({ mode: 'date' }),
 	died: date({ mode: 'date' }),
 	awards: text().array().notNull().default(sql`'{}'`),
-	imageUrl: text(),
+	/** Path in the public Blob store, or an absolute URL. See $lib/server/images. */
+	imagePath: text(),
 	...timestamps
 });
 
@@ -94,7 +96,8 @@ export const books = pgTable('books', {
 	/** Goodreads rating, entered manually. */
 	rating: numeric({ precision: 3, scale: 2, mode: 'number' }),
 	awards: text().array().notNull().default(sql`'{}'`),
-	imageUrl: text(),
+	/** Path in the public Blob store, or an absolute URL. See $lib/server/images. */
+	imagePath: text(),
 	...timestamps
 });
 

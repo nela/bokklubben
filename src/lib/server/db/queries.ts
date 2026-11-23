@@ -2,12 +2,24 @@ import { asc, desc, eq, gte, sql } from 'drizzle-orm';
 import { fromPromise, ResultAsync } from 'neverthrow';
 import { DbInternalError, type DbError } from '$lib/errors/db';
 import type { Author, Book, Meet, Member, PublicMember } from '$lib/dto/dto';
+import { privateImageUrl, publicImageUrl } from '$lib/server/images';
 import { db } from './index';
 import { meets, members } from './schema';
 
 const toDbError = (e: unknown) => new DbInternalError({ cause: e });
 
 const authorRef = { columns: { slug: true, name: true } } as const;
+
+/** Swaps the stored image path for the URL the browser loads. */
+const withImage =
+	(toUrl: (path: string | null) => string | null) =>
+	<T extends { imagePath: string | null }>({ imagePath, ...rest }: T) => ({
+		...rest,
+		imageUrl: toUrl(imagePath)
+	});
+
+const withMemberImage = withImage(privateImageUrl);
+const withPublicImage = withImage(publicImageUrl);
 
 export function fetchMemberByUserId(userId: string): ResultAsync<Member | null, DbError> {
 	return fromPromise(
@@ -23,11 +35,11 @@ export function fetchMemberByUserId(userId: string): ResultAsync<Member | null, 
 				memberSince: true,
 				memberUntil: true,
 				titles: true,
-				imageUrl: true
+				imagePath: true
 			}
 		}),
 		toDbError
-	).map((member) => member ?? null);
+	).map((member) => (member ? withMemberImage(member) : null));
 }
 
 export function fetchMembers(): ResultAsync<Array<PublicMember>, DbError> {
@@ -40,12 +52,12 @@ export function fetchMembers(): ResultAsync<Array<PublicMember>, DbError> {
 				memberSince: true,
 				memberUntil: true,
 				titles: true,
-				imageUrl: true
+				imagePath: true
 			},
 			orderBy: [asc(members.memberSince), asc(members.firstName)]
 		}),
 		toDbError
-	);
+	).map((rows) => rows.map(withMemberImage));
 }
 
 export function fetchMemberEmails(): ResultAsync<Array<string>, DbError> {
@@ -72,7 +84,7 @@ export function fetchBooks(): ResultAsync<Array<Book>, DbError> {
 		rows
 			.filter((b) => b.meetBooks.length > 0)
 			.map(({ bookAuthors, meetBooks, ...book }) => ({
-				...book,
+				...withPublicImage(book),
 				authors: bookAuthors.map((ba) => ba.author),
 				readAt: new Date(Math.min(...meetBooks.map((mb) => mb.meet.startsAt.getTime())))
 			}))
@@ -89,7 +101,7 @@ export function fetchAuthors(): ResultAsync<Array<Author>, DbError> {
 				bookAuthors: {
 					with: {
 						book: {
-							columns: { slug: true, title: true, imageUrl: true, awards: true, genre: true },
+							columns: { slug: true, title: true, imagePath: true, awards: true, genre: true },
 							with: {
 								meetBooks: {
 									where: (mb, { eq }) => eq(mb.status, 'read'),
@@ -106,11 +118,11 @@ export function fetchAuthors(): ResultAsync<Array<Author>, DbError> {
 	).map((rows) =>
 		rows
 			.map(({ bookAuthors, ...author }) => ({
-				...author,
+				...withPublicImage(author),
 				books: bookAuthors
 					.map((ba) => ba.book)
 					.filter((b) => b.meetBooks.length > 0)
-					.map(({ meetBooks: _, ...book }) => book)
+					.map(({ meetBooks: _, ...book }) => withPublicImage(book))
 			}))
 			.filter((a) => a.books.length > 0)
 	);
