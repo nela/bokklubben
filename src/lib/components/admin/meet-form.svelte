@@ -6,14 +6,16 @@
 	import type { AdminFormState, AdminMeet, MemberOption } from '$lib/dto/admin';
 	import { AdminRoutes } from '$lib/routes';
 	import FormField from './form-field.svelte';
-	import { fieldValue, osloDateTimeInput } from './form-values';
+	import { fieldValue, fieldValues, osloDateTimeInput } from './form-values';
 	import Select from './select.svelte';
+	import TagInput from './tag-input.svelte';
 	import Textarea from './textarea.svelte';
 
 	let {
 		meet,
 		members,
 		genres,
+		languages,
 		form
 	}: {
 		/** null when creating a new meet. */
@@ -21,6 +23,8 @@
 		members: Array<MemberOption>;
 		/** Genres already in use, suggested in the genre field. */
 		genres: Array<string>;
+		/** Original languages already in use, suggested in the language field. */
+		languages: Array<string>;
 		form: AdminFormState | null | undefined;
 	} = $props();
 
@@ -159,36 +163,38 @@
 
 			<div class="grid gap-4 sm:grid-cols-2">
 				<FormField
-					label="Sjanger"
-					id="bookGenre"
-					errors={errors.bookGenre}
-					hint="Velg en eksisterende, eller skriv en ny."
+					label="Sjangre"
+					id="bookGenres"
+					errors={errors.bookGenres}
+					hint="Velg eksisterende, eller skriv en ny og trykk Enter."
 				>
-					<Input
-						id="bookGenre"
-						name="bookGenre"
-						list="genres"
-						autocomplete="off"
-						value={value('bookGenre', book?.genre ?? '')}
-						aria-invalid={!!errors.bookGenre}
+					<TagInput
+						id="bookGenres"
+						name="bookGenres"
+						values={fieldValues(form, 'bookGenres', book?.genres ?? [])}
+						suggestions={genres}
+						invalid={!!errors.bookGenres}
 					/>
-					<datalist id="genres">
-						{#each genres as genre (genre)}
-							<option value={genre}></option>
-						{/each}
-					</datalist>
 				</FormField>
 				<FormField
 					label="Originalspråk"
 					id="bookOriginalLanguage"
 					errors={errors.bookOriginalLanguage}
+					hint="Velg et eksisterende, eller skriv et nytt."
 				>
 					<Input
 						id="bookOriginalLanguage"
 						name="bookOriginalLanguage"
+						list="languages"
+						autocomplete="off"
 						value={value('bookOriginalLanguage', book?.originalLanguage ?? '')}
 						aria-invalid={!!errors.bookOriginalLanguage}
 					/>
+					<datalist id="languages">
+						{#each languages as language (language)}
+							<option value={language}></option>
+						{/each}
+					</datalist>
 				</FormField>
 			</div>
 

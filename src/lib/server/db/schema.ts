@@ -92,7 +92,8 @@ export const books = pgTable('books', {
 	firstPublished: smallint(),
 	pages: smallint(),
 	originalLanguage: text(),
-	genre: text(),
+	/** Free text, so new genres need no migration. The admin suggests the ones already in use. */
+	genres: text().array().notNull().default(sql`'{}'`),
 	/** Goodreads rating, entered manually. */
 	rating: numeric({ precision: 3, scale: 2, mode: 'number' }),
 	awards: text().array().notNull().default(sql`'{}'`),

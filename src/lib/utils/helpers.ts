@@ -36,6 +36,22 @@ export const createSlug = (name: string) => {
 	);
 };
 
+/**
+ * Swaps each value for an existing one that only differs in case, and drops duplicates, so a
+ * typed "science fiction" becomes the "Science Fiction" already in use.
+ */
+export const matchSpelling = (values: Array<string>, existing: Array<string>) => {
+	const known = new Map(existing.map((e) => [e.toLowerCase(), e]));
+	const result = new Map<string, string>();
+	for (const value of values) {
+		const key = value.toLowerCase();
+		if (!result.has(key)) {
+			result.set(key, known.get(key) ?? value);
+		}
+	}
+	return [...result.values()];
+};
+
 /** "1920–2010", "f. 1950", "d. 1900", or null when neither date is known. */
 export const getLifetime = (author: Pick<Author, 'born' | 'died'>) => {
 	const bornYear = author.born?.getFullYear();

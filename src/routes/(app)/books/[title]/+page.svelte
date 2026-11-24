@@ -71,10 +71,14 @@
 							<StarRating value={book.rating} />
 						</p>
 					{/if}
-					<p>
-						<span class="font-semibold">Sjanger:</span>
-						<Badge>{book.genre}</Badge>
-					</p>
+					{#if book.genres.length > 0}
+						<p class="flex flex-wrap items-center gap-1">
+							<span class="mr-1 font-semibold">Sjanger:</span>
+							{#each book.genres as genre (genre)}
+								<Badge>{genre}</Badge>
+							{/each}
+						</p>
+					{/if}
 					<p><span class="font-semibold">Lest:</span> {formatDate(book.readAt)}</p>
 
 					{#if book.awards.length > 0}

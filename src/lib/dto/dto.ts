@@ -54,7 +54,7 @@ export interface Author extends AuthorRef {
 		BookRef & {
 			imageUrl: string | null;
 			awards: Array<string>;
-			genre: string | null;
+			genres: Array<string>;
 		}
 	>;
 }
@@ -66,7 +66,7 @@ export interface Book extends BookRef {
 	firstPublished: number | null;
 	pages: number | null;
 	originalLanguage: string | null;
-	genre: string | null;
+	genres: Array<string>;
 	rating: number | null;
 	awards: Array<string>;
 	imageUrl: string | null;

@@ -75,40 +75,40 @@ insert into authors (slug, name, bio, born, died, awards, image_path) values
 
 -- Books ---------------------------------------------------------------------
 
-insert into books (slug, title, isbn, description, first_published, pages, original_language, genre, rating, awards) values
+insert into books (slug, title, isbn, description, first_published, pages, original_language, genres, rating, awards) values
 	('the-road', 'The Road', '9780307387899',
 		'En far og en sønn vandrer gjennom et nedbrent Amerika.',
-		2006, 287, 'Engelsk', 'Postapokalyptisk', 3.99, array['Pulitzerprisen for skjønnlitteratur (2007)']),
+		2006, 287, 'Engelsk', array['Postapokalyptisk', 'Roman'], 3.99, array['Pulitzerprisen for skjønnlitteratur (2007)']),
 	('norwegian-wood', 'Norwegian Wood', '9780375704024',
 		'Toru ser tilbake på studietiden i Tokyo på slutten av 60-tallet.',
-		1987, 296, 'Japansk', 'Roman', 4.02, '{}'),
+		1987, 296, 'Japansk', array['Roman'], 4.02, '{}'),
 	('good-omens', 'Good Omens', '9780060853983',
 		'En engel og en demon prøver å forhindre dommedag.',
-		1990, 412, 'Engelsk', 'Fantasy', 4.25, '{}'),
+		1990, 412, 'Engelsk', array['Fantasy', 'Humor'], 4.25, '{}'),
 	('the-remains-of-the-day', 'The Remains of the Day', '9780679731726',
 		'En butler på biltur gjennom England tenker tilbake på et liv i tjeneste.',
-		1989, 245, 'Engelsk', 'Roman', 4.13, array['Bookerprisen (1989)']),
+		1989, 245, 'Engelsk', array['Roman'], 4.13, array['Bookerprisen (1989)']),
 	-- Missing description and rating, to exercise the null handling.
 	('never-let-me-go', 'Never Let Me Go', '9781400078776',
 		null,
-		2005, 288, 'Engelsk', null, null, '{}'),
+		2005, 288, 'Engelsk', '{}', null, '{}'),
 	('min-kamp-1', 'Min kamp 1', null,
 		'Første bind av Knausgårds selvbiografiske romanserie.',
-		2009, 441, 'Norsk', 'Roman', 3.90, array['Brageprisen (2009)']),
+		2009, 441, 'Norsk', array['Roman', 'Selvbiografi'], 3.90, array['Brageprisen (2009)']),
 	('1984', '1984', '9780451524935',
 		'Winston Smith lever under Storebrors overvåkning.',
-		1949, 328, 'Engelsk', 'Dystopi', 4.19, '{}'),
+		1949, 328, 'Engelsk', array['Dystopi', 'Klassiker'], 4.19, '{}'),
 	('beloved', 'Beloved', '9781400033416',
 		'Sethe er rømt fra slaveriet, men fortiden følger etter henne.',
-		1987, 324, 'Engelsk', 'Roman', 3.90, array['Pulitzerprisen for skjønnlitteratur (1988)']),
+		1987, 324, 'Engelsk', array['Roman'], 3.90, array['Pulitzerprisen for skjønnlitteratur (1988)']),
 	-- Pitched, never read.
 	('sapiens', 'Sapiens', '9780062316097',
 		'En kort historie om menneskeheten.',
-		2011, 443, 'Hebraisk', 'Sakprosa', 4.37, '{}'),
+		2011, 443, 'Hebraisk', array['Sakprosa'], 4.37, '{}'),
 	('project-hail-mary', 'Project Hail Mary', '9780593135204',
-		null, 2021, 476, 'Engelsk', 'Science fiction', 4.50, '{}'),
+		null, 2021, 476, 'Engelsk', array['Science Fiction'], 4.50, '{}'),
 	('blood-meridian', 'Blood Meridian', '9780679728757',
-		null, 1985, 351, 'Engelsk', 'Western', 4.17, '{}');
+		null, 1985, 351, 'Engelsk', array['Western'], 4.17, '{}');
 
 update books set image_path = 'https://covers.openlibrary.org/b/isbn/' || isbn || '-L.jpg' where isbn is not null;
 update books set image_path = 'https://covers.openlibrary.org/b/isbn/9780374534141-L.jpg' where slug = 'min-kamp-1';

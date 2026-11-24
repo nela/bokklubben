@@ -13,6 +13,22 @@ export function fieldValue(
 	return typeof typed === 'string' ? typed : saved;
 }
 
+/**
+ * Like `fieldValue`, for a field sent once per value (tags, checkboxes). After a failed save a
+ * missing field means none were chosen.
+ */
+export function fieldValues(
+	form: AdminFormState | null | undefined,
+	name: string,
+	saved: Array<string>
+): Array<string> {
+	if (!form) {
+		return saved;
+	}
+	const typed = form.values[name];
+	return typed === undefined ? [] : Array.isArray(typed) ? typed : [typed];
+}
+
 /** A date column (midnight UTC) as `<input type="date">` wants it: YYYY-MM-DD. */
 export const dateInput = (date: Date | null | undefined) =>
 	date ? date.toISOString().slice(0, 10) : '';

@@ -10,7 +10,7 @@ import type {
 } from '$lib/dto/admin';
 import { toDbError, type DbError } from '$lib/errors/db';
 import type { MeetInput } from '$lib/server/admin/schemas';
-import { createSlug } from '$lib/utils/helpers';
+import { createSlug, matchSpelling } from '$lib/utils/helpers';
 import { db } from './index';
 import { authors, bookAuthors, books, meetBooks, meets, members } from './schema';
 
@@ -25,16 +25,31 @@ export function fetchMemberOptions(): ResultAsync<Array<MemberOption>, DbError> 
 	).map((rows) => rows.map((m) => ({ id: m.id, name: `${m.firstName} ${m.lastName}` })));
 }
 
+/** Every genre used on a book, alphabetically. Works in and outside a transaction. */
+const selectGenres = (q: Pick<typeof db, 'selectDistinct'>) =>
+	q
+		.selectDistinct({ genre: sql<string>`unnest(${books.genres})`.as('genre') })
+		.from(books)
+		.orderBy(sql`genre`)
+		.then((rows) => rows.map((r) => r.genre));
+
 /** Genres already used on books, for suggestions when typing one. */
 export function fetchGenres(): ResultAsync<Array<string>, DbError> {
-	return fromPromise(
-		db
-			.selectDistinct({ genre: books.genre })
-			.from(books)
-			.where(isNotNull(books.genre))
-			.orderBy(asc(books.genre)),
-		toDbError
-	).map((rows) => rows.flatMap((r) => (r.genre ? [r.genre] : [])));
+	return fromPromise(selectGenres(db), toDbError);
+}
+
+/** Every original language used on a book, alphabetically. Works in and outside a transaction. */
+const selectLanguages = (q: Pick<typeof db, 'selectDistinct'>) =>
+	q
+		.selectDistinct({ language: books.originalLanguage })
+		.from(books)
+		.where(isNotNull(books.originalLanguage))
+		.orderBy(asc(books.originalLanguage))
+		.then((rows) => rows.flatMap((r) => (r.language ? [r.language] : [])));
+
+/** Original languages already used on books, for suggestions when typing one. */
+export function fetchLanguages(): ResultAsync<Array<string>, DbError> {
+	return fromPromise(selectLanguages(db), toDbError);
 }
 
 const meetBookColumns = {
@@ -43,7 +58,7 @@ const meetBookColumns = {
 	isbn: true,
 	pages: true,
 	firstPublished: true,
-	genre: true,
+	genres: true,
 	originalLanguage: true,
 	description: true
 } as const;
@@ -105,16 +120,12 @@ export function saveMeet(
 				return meetId;
 			}
 
-			// A genre that only differs in case from an existing one uses the existing spelling.
-			const existingGenre = book.genre
-				? await tx.query.books.findFirst({
-						where: sql`lower(${books.genre}) = lower(${book.genre})`,
-						columns: { genre: true }
-					})
-				: undefined;
 			const values = {
 				...book,
-				genre: existingGenre?.genre ?? book.genre,
+				genres: matchSpelling(book.genres, await selectGenres(tx)),
+				originalLanguage: book.originalLanguage
+					? matchSpelling([book.originalLanguage], await selectLanguages(tx))[0]
+					: null,
 				slug: createSlug(book.title)
 			};
 

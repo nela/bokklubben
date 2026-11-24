@@ -32,6 +32,20 @@ describe('meetSchema', () => {
 		expect(result._unsafeUnwrapErr().data.errors.bookTitle).toBeDefined();
 	});
 
+	it('takes genres as repeated fields', () => {
+		const data = formData({ ...meet, bookTitle: 'Dune' });
+		data.append('bookGenres', 'Science Fiction');
+		data.append('bookGenres', 'Klassiker');
+
+		const { book } = parseForm(data, meetSchema)._unsafeUnwrap().data;
+		expect(book?.genres).toEqual(['Science Fiction', 'Klassiker']);
+	});
+
+	it('has no book when only the title is empty and no genres are chosen', () => {
+		const result = parseForm(formData({ ...meet, bookTitle: '' }), meetSchema);
+		expect(result._unsafeUnwrap().data.book).toBeNull();
+	});
+
 	it('rejects an invalid ISBN', () => {
 		const result = parseForm(formData({ ...meet, bookTitle: 'Dune', bookIsbn: '123' }), meetSchema);
 		expect(result._unsafeUnwrapErr().data.errors.bookIsbn).toBeDefined();

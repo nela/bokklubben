@@ -25,7 +25,7 @@ export interface AdminMeetBook {
 	isbn: string | null;
 	pages: number | null;
 	firstPublished: number | null;
-	genre: string | null;
+	genres: Array<string>;
 	originalLanguage: string | null;
 	description: string | null;
 }

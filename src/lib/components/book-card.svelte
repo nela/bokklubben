@@ -54,10 +54,12 @@
 				</p>
 			{/if}
 
-			<p class="text-base">
-				<span class="font-semibold">Sjanger: </span>
-				{book.genre}
-			</p>
+			{#if book.genres.length > 0}
+				<p class="text-base">
+					<span class="font-semibold">Sjanger: </span>
+					{book.genres.join(', ')}
+				</p>
+			{/if}
 
 			{#if book.rating !== null}
 				<div class="flex items-center gap-1" role="img">

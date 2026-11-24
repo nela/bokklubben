@@ -20,7 +20,8 @@ const bookFields = {
 		'Ugyldig antall sider'
 	),
 	bookFirstPublished: smallInt('Ugyldig årstall'),
-	bookGenre: field.optionalText(),
+	/** One hidden input per genre. */
+	bookGenres: field.array(z.string().trim().min(1)),
 	bookOriginalLanguage: field.optionalText(),
 	bookDescription: field.optionalText()
 };
@@ -37,7 +38,10 @@ export const meetSchema = z
 	})
 	.superRefine((form, ctx) => {
 		const hasBookDetails = Object.entries(form).some(
-			([key, value]) => key.startsWith('book') && key !== 'bookTitle' && value !== null
+			([key, value]) =>
+				key.startsWith('book') &&
+				key !== 'bookTitle' &&
+				(Array.isArray(value) ? value.length > 0 : value !== null)
 		);
 		if (hasBookDetails && !form.bookTitle) {
 			ctx.addIssue({ code: 'custom', path: ['bookTitle'], message: 'Boken trenger en tittel' });
@@ -49,7 +53,7 @@ export const meetSchema = z
 			bookIsbn,
 			bookPages,
 			bookFirstPublished,
-			bookGenre,
+			bookGenres,
 			bookOriginalLanguage,
 			bookDescription,
 			...meet
@@ -61,7 +65,7 @@ export const meetSchema = z
 						isbn: bookIsbn,
 						pages: bookPages,
 						firstPublished: bookFirstPublished,
-						genre: bookGenre,
+						genres: bookGenres,
 						originalLanguage: bookOriginalLanguage,
 						description: bookDescription
 					}

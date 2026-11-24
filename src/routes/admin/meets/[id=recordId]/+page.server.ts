@@ -7,6 +7,7 @@ import {
 	deleteMeet,
 	fetchAdminMeet,
 	fetchGenres,
+	fetchLanguages,
 	fetchMemberOptions,
 	saveMeet
 } from '$lib/server/db/admin';
@@ -18,19 +19,20 @@ export const load: PageServerLoad = async ({ params }) => {
 	const result = await ResultAsync.combine([
 		id === null ? okAsync(null) : fetchAdminMeet(id),
 		fetchMemberOptions(),
-		fetchGenres()
+		fetchGenres(),
+		fetchLanguages()
 	]);
 	if (result.isErr()) {
 		console.error(result.error);
 		error(500, 'Kunne ikke laste møtet.');
 	}
 
-	const [meet, members, genres] = result.value;
+	const [meet, members, genres, languages] = result.value;
 	if (id !== null && !meet) {
 		error(404, 'Fant ikke møtet.');
 	}
 
-	return { meet, members, genres };
+	return { meet, members, genres, languages };
 };
 
 export const actions: Actions = {

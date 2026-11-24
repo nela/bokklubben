@@ -99,7 +99,7 @@ export function fetchAuthors(): ResultAsync<Array<Author>, DbError> {
 				bookAuthors: {
 					with: {
 						book: {
-							columns: { slug: true, title: true, imagePath: true, awards: true, genre: true },
+							columns: { slug: true, title: true, imagePath: true, awards: true, genres: true },
 							with: {
 								meetBooks: {
 									where: (mb, { eq }) => eq(mb.status, 'read'),
