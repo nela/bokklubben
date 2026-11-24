@@ -1,12 +1,10 @@
 import { asc, desc, eq, gte, sql } from 'drizzle-orm';
 import { fromPromise, ResultAsync } from 'neverthrow';
-import { DbInternalError, type DbError } from '$lib/errors/db';
+import { toDbError, type DbError } from '$lib/errors/db';
 import type { Author, Book, Meet, Member, PublicMember } from '$lib/dto/dto';
 import { privateImageUrl, publicImageUrl } from '$lib/server/images';
 import { db } from './index';
 import { meets, members } from './schema';
-
-const toDbError = (e: unknown) => new DbInternalError({ cause: e });
 
 const authorRef = { columns: { slug: true, name: true } } as const;
 

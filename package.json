@@ -75,7 +75,8 @@
 		"drizzle-orm": "^0.45.4",
 		"neverthrow": "^8.2.0",
 		"postgres": "^3.4.7",
-		"svelte-sonner": "^1.0.5"
+		"svelte-sonner": "^1.0.5",
+		"zod": "^4.6.7"
 	},
 	"packageManager": "pnpm@10.5.2"
 }
