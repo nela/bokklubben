@@ -1,10 +1,11 @@
 import { error, redirect } from '@sveltejs/kit';
-import { ResultAsync } from 'neverthrow';
+import { okAsync, ResultAsync } from 'neverthrow';
 import { AdminRoutes } from '$lib/routes';
 import { dbFailure, formFailure, parseForm, parseRecordId } from '$lib/server/admin/form';
-import { memberSchema, sendEmailSchema } from '$lib/server/admin/schemas';
+import { memberSchema, sendEmailSchema, type MemberInput } from '$lib/server/admin/schemas';
 import { sendEmailToMembers } from '$lib/server/admin/send-email';
 import {
+	createMember,
 	deleteMember,
 	fetchAdminMember,
 	fetchEmailTemplates,
@@ -14,22 +15,38 @@ import { deleteImage, uploadImage } from '$lib/server/images';
 import { createSlug, hasLeft } from '$lib/utils/helpers';
 import type { Actions, PageServerLoad } from './$types';
 
-const emailTaken = { email: ['Eposten er allerede i bruk.'] };
+const emailTaken = {
+	members_email_lower_idx: { email: ['Eposten er allerede i bruk.'] },
+	user_email_unique: { email: ['Eposten er allerede i bruk.'] }
+};
+
+/** The photo fields apart from the fields saved on the member. */
+const splitPhoto = ({ photo, removePhoto, ...fields }: MemberInput) => ({
+	photo,
+	removePhoto,
+	fields
+});
+
+/** Uploads a new profile photo to `profiles/<fornavn-etternavn>-<random>`; returns its path. */
+function uploadPhoto(photo: File, name: { firstName: string; lastName: string }) {
+	const slug = createSlug(`${name.firstName} ${name.lastName}`) || 'medlem';
+	return uploadImage('private', `profiles/${slug}`, photo).orTee((e) => console.error(e));
+}
 
 export const load: PageServerLoad = async ({ params }) => {
 	const id = parseRecordId(params.id);
-	if (id === null) {
-		error(404, 'Nye medlemmer kommer snart.');
-	}
 
-	const result = await ResultAsync.combine([fetchAdminMember(id), fetchEmailTemplates()]);
+	const result = await ResultAsync.combine([
+		id === null ? okAsync(null) : fetchAdminMember(id),
+		fetchEmailTemplates()
+	]);
 	if (result.isErr()) {
 		console.error(result.error);
 		error(500, 'Kunne ikke laste medlemmet.');
 	}
 
 	const [member, emailTemplates] = result.value;
-	if (!member) {
+	if (id !== null && !member) {
 		error(404, 'Fant ikke medlemmet.');
 	}
 
@@ -37,6 +54,42 @@ export const load: PageServerLoad = async ({ params }) => {
 };
 
 export const actions: Actions = {
+	/**
+	 * `/admin/members/new`. Then goes to the new member's page with "Send e-post" open, so the
+	 * invitation can be checked and sent.
+	 */
+	create: async ({ params, request }) => {
+		if (parseRecordId(params.id) !== null) {
+			error(400, 'Medlemmet finnes allerede.');
+		}
+
+		const form = parseForm(await request.formData(), memberSchema);
+		if (form.isErr()) {
+			return form.error;
+		}
+		const { data, values } = form.value;
+		const { photo, fields } = splitPhoto(data);
+
+		let imagePath: string | null = null;
+		if (photo) {
+			const uploaded = await uploadPhoto(photo, fields);
+			if (uploaded.isErr()) {
+				return formFailure(values, { photo: ['Kunne ikke laste opp bildet.'] }, 500);
+			}
+			imagePath = uploaded.value;
+		}
+
+		const created = await createMember({ ...fields, imagePath });
+		if (created.isErr()) {
+			if (imagePath) {
+				await deleteImage('private', imagePath).orTee((e) => console.error(e));
+			}
+			return dbFailure(values, created.error, emailTaken);
+		}
+
+		redirect(303, `${AdminRoutes.MEMBERS}/${created.value}?send-email`);
+	},
+
 	/** `/admin/members/<id>`: updates the existing member. */
 	update: async ({ params, request, locals }) => {
 		const id = parseRecordId(params.id);
@@ -60,15 +113,13 @@ export const actions: Actions = {
 			}
 		}
 
-		const { photo, removePhoto, ...fields } = data;
+		const { photo, removePhoto, fields } = splitPhoto(data);
 
 		// Upload a new photo first, so its path can be saved with the rest.
 		let imagePath: string | null | undefined = removePhoto ? null : undefined;
 		if (photo) {
-			const slug = createSlug(`${fields.firstName} ${fields.lastName}`) || `member-${id}`;
-			const uploaded = await uploadImage('private', `profiles/${slug}`, photo);
+			const uploaded = await uploadPhoto(photo, fields);
 			if (uploaded.isErr()) {
-				console.error(uploaded.error);
 				return formFailure(values, { photo: ['Kunne ikke laste opp bildet.'] }, 500);
 			}
 			imagePath = uploaded.value;
@@ -79,10 +130,7 @@ export const actions: Actions = {
 			if (imagePath) {
 				await deleteImage('private', imagePath).orTee((e) => console.error(e));
 			}
-			return dbFailure(values, saved.error, {
-				members_email_lower_idx: emailTaken,
-				user_email_unique: emailTaken
-			});
+			return dbFailure(values, saved.error, emailTaken);
 		}
 
 		// The old photo is only removed once the new path is saved.

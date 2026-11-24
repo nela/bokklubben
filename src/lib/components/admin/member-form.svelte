@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
+	import { today } from '@internationalized/date';
 	import { toast } from 'svelte-sonner';
 	import * as Avatar from '$lib/components/ui/avatar';
 	import { Button } from '$lib/components/ui/button';
@@ -15,21 +16,38 @@
 		member,
 		form
 	}: {
-		member: AdminMember;
+		/** null when adding a new member. */
+		member: AdminMember | null;
 		form: AdminFormState | null | undefined;
 	} = $props();
 
 	let pending = $state(false);
 
+	// A new member starts as a regular member from today.
+	const newMember: AdminMember = {
+		id: 0,
+		firstName: '',
+		lastName: '',
+		nickname: null,
+		email: '',
+		role: 'regular',
+		titles: [],
+		memberSince: new Date(today('Europe/Oslo').toString()),
+		memberUntil: null,
+		signedUp: false,
+		imageUrl: null
+	};
+	const shown = $derived(member ?? newMember);
+
 	const value = (name: string, saved: string) => fieldValue(form, name, saved);
 	const errors = $derived(form?.errors ?? {});
-	const role = $derived(value('role', member.role));
-	const titles = $derived(fieldValues(form, 'titles', member.titles));
+	const role = $derived(value('role', shown.role));
+	const titles = $derived(fieldValues(form, 'titles', shown.titles));
 
 	// A chosen file is previewed before it's saved; "remove" hides the current photo.
 	let photoPreview = $state<string | null>(null);
 	let removePhoto = $state(false);
-	const shownPhoto = $derived(photoPreview ?? (removePhoto ? null : member.imageUrl));
+	const shownPhoto = $derived(photoPreview ?? (removePhoto ? null : shown.imageUrl));
 
 	function previewPhoto(event: Event & { currentTarget: HTMLInputElement }) {
 		if (photoPreview) {
@@ -49,7 +67,7 @@
 
 <form
 	method="POST"
-	action="?/update"
+	action={member ? '?/update' : '?/create'}
 	enctype="multipart/form-data"
 	class="flex flex-col gap-4"
 	use:enhance={() => {
@@ -65,8 +83,10 @@
 >
 	<div class="flex items-center gap-4">
 		<Avatar.Root class="size-20">
-			<Avatar.Image src={shownPhoto} alt={`${member.firstName} ${member.lastName}`} />
-			<Avatar.Fallback>{member.firstName.charAt(0)}{member.lastName.charAt(0)}</Avatar.Fallback>
+			<Avatar.Image src={shownPhoto} alt={`${shown.firstName} ${shown.lastName}`} />
+			<Avatar.Fallback>
+				{member ? `${shown.firstName.charAt(0)}${shown.lastName.charAt(0)}` : '?'}
+			</Avatar.Fallback>
 		</Avatar.Root>
 		<div class="flex flex-1 flex-col gap-2">
 			<FormField
@@ -84,7 +104,7 @@
 					aria-invalid={!!errors.photo}
 				/>
 			</FormField>
-			{#if member.imageUrl && !photoPreview}
+			{#if shown.imageUrl && !photoPreview}
 				<label class="flex items-center gap-2 text-sm">
 					<input
 						type="checkbox"
@@ -104,7 +124,7 @@
 				id="firstName"
 				name="firstName"
 				required
-				value={value('firstName', member.firstName)}
+				value={value('firstName', shown.firstName)}
 				aria-invalid={!!errors.firstName}
 			/>
 		</FormField>
@@ -112,7 +132,7 @@
 			<Input
 				id="nickname"
 				name="nickname"
-				value={value('nickname', member.nickname ?? '')}
+				value={value('nickname', shown.nickname ?? '')}
 				aria-invalid={!!errors.nickname}
 			/>
 		</FormField>
@@ -121,7 +141,7 @@
 				id="lastName"
 				name="lastName"
 				required
-				value={value('lastName', member.lastName)}
+				value={value('lastName', shown.lastName)}
 				aria-invalid={!!errors.lastName}
 			/>
 		</FormField>
@@ -132,16 +152,16 @@
 			label="E-post"
 			id="email"
 			errors={errors.email}
-			hint={member.signedUp
+			hint={shown.signedUp
 				? 'Endres også for innloggingen.'
-				: 'Invitasjonen gjelder denne adressen.'}
+				: 'Medlemmet må logge inn med denne adressen.'}
 		>
 			<Input
 				id="email"
 				name="email"
 				type="email"
 				required
-				value={value('email', member.email)}
+				value={value('email', shown.email)}
 				aria-invalid={!!errors.email}
 			/>
 		</FormField>
@@ -160,7 +180,7 @@
 				name="memberSince"
 				type="date"
 				required
-				value={value('memberSince', dateInput(member.memberSince))}
+				value={value('memberSince', dateInput(shown.memberSince))}
 				aria-invalid={!!errors.memberSince}
 			/>
 		</FormField>
@@ -174,7 +194,7 @@
 				id="memberUntil"
 				name="memberUntil"
 				type="date"
-				value={value('memberUntil', dateInput(member.memberUntil))}
+				value={value('memberUntil', dateInput(shown.memberUntil))}
 				aria-invalid={!!errors.memberUntil}
 			/>
 		</FormField>

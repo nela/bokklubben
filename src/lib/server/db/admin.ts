@@ -94,6 +94,13 @@ export type MemberUpdate = Omit<MemberInput, 'photo' | 'removePhoto'> & {
 	imagePath?: string | null;
 };
 
+/** Adds a member, who can then sign up with their email. Returns the new member's id. */
+export function createMember(input: MemberUpdate): ResultAsync<number, DbError> {
+	return fromPromise(db.insert(members).values(input).returning({ id: members.id }), toDbError).map(
+		([row]) => row.id
+	);
+}
+
 /**
  * Updates a member. For a member who has signed up, a changed email also changes their login's
  * email, or password login would stop matching. Returns the photo path from before the update, so

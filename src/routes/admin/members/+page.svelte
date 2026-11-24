@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Mail } from '@lucide/svelte';
+	import { Mail, Plus } from '@lucide/svelte';
 	import SendEmailSheet from '$lib/components/admin/send-email-sheet.svelte';
 	import { Badge } from '$lib/components/ui/badge';
 	import { Button } from '$lib/components/ui/button';
@@ -24,9 +24,12 @@
 
 <div class="mb-2 flex flex-wrap items-center justify-between gap-4">
 	<h1 class="text-2xl font-semibold">Medlemmer</h1>
-	<Button variant="outline" disabled={selected.length === 0} onclick={() => (emailOpen = true)}>
-		<Mail />Send e-post ({selected.length})
-	</Button>
+	<div class="flex flex-wrap gap-2">
+		<Button variant="outline" disabled={selected.length === 0} onclick={() => (emailOpen = true)}>
+			<Mail />Send e-post ({selected.length})
+		</Button>
+		<Button href={`${AdminRoutes.MEMBERS}/new`}><Plus />Nytt medlem</Button>
+	</div>
 </div>
 <p class="text-muted-foreground mb-4 text-sm">
 	{signedUpCount} av {data.members.length} har registrert seg.
