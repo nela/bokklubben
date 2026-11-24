@@ -167,7 +167,10 @@ export const memberSchema = z
 		/** One checkbox per title; the keys, not the display labels. */
 		titles: field.array(z.enum(clubTitle.enumValues)),
 		memberSince: field.date(),
-		memberUntil: field.optionalDate()
+		memberUntil: field.optionalDate(),
+		/** A new profile photo; empty keeps the current one. */
+		photo: field.optionalImage(),
+		removePhoto: field.checkbox()
 	})
 	.refine((m) => m.memberUntil === null || m.memberUntil >= m.memberSince, {
 		path: ['memberUntil'],

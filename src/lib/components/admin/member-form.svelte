@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import { toast } from 'svelte-sonner';
+	import * as Avatar from '$lib/components/ui/avatar';
 	import { Badge } from '$lib/components/ui/badge';
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
@@ -26,6 +27,22 @@
 	const role = $derived(value('role', member.role));
 	const titles = $derived(fieldValues(form, 'titles', member.titles));
 
+	// A chosen file is previewed before it's saved; "remove" hides the current photo.
+	let photoPreview = $state<string | null>(null);
+	let removePhoto = $state(false);
+	const shownPhoto = $derived(photoPreview ?? (removePhoto ? null : member.imageUrl));
+
+	function previewPhoto(event: Event & { currentTarget: HTMLInputElement }) {
+		if (photoPreview) {
+			URL.revokeObjectURL(photoPreview);
+		}
+		const file = event.currentTarget.files?.[0];
+		photoPreview = file ? URL.createObjectURL(file) : null;
+		if (file) {
+			removePhoto = false;
+		}
+	}
+
 	const titleKeys = (Object.keys(ClubTitle) as Array<ClubTitleKey>).toSorted((a, b) =>
 		ClubTitle[a].localeCompare(ClubTitle[b], 'nb-NO')
 	);
@@ -34,6 +51,7 @@
 <form
 	method="POST"
 	action="?/update"
+	enctype="multipart/form-data"
 	class="flex flex-col gap-4"
 	use:enhance={() => {
 		pending = true;
@@ -56,6 +74,41 @@
 			Har ikke logget inn ennå.
 		{/if}
 	</p>
+
+	<div class="flex items-center gap-4">
+		<Avatar.Root class="size-20">
+			<Avatar.Image src={shownPhoto} alt={`${member.firstName} ${member.lastName}`} />
+			<Avatar.Fallback>{member.firstName.charAt(0)}{member.lastName.charAt(0)}</Avatar.Fallback>
+		</Avatar.Root>
+		<div class="flex flex-1 flex-col gap-2">
+			<FormField
+				label="Profilbilde"
+				id="photo"
+				errors={errors.photo}
+				hint="JPG, PNG, WebP, GIF eller AVIF, maks 4 MB."
+			>
+				<Input
+					id="photo"
+					name="photo"
+					type="file"
+					accept="image/jpeg,image/png,image/webp,image/gif,image/avif"
+					onchange={previewPhoto}
+					aria-invalid={!!errors.photo}
+				/>
+			</FormField>
+			{#if member.imageUrl && !photoPreview}
+				<label class="flex items-center gap-2 text-sm">
+					<input
+						type="checkbox"
+						name="removePhoto"
+						bind:checked={removePhoto}
+						class="accent-primary size-4"
+					/>
+					Fjern bildet
+				</label>
+			{/if}
+		</div>
+	</div>
 
 	<div class="grid gap-4 sm:grid-cols-3">
 		<FormField label="Fornavn" id="firstName" errors={errors.firstName}>

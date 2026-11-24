@@ -19,6 +19,7 @@ import type {
 	MeetPitchInput,
 	MemberInput
 } from '$lib/server/admin/schemas';
+import { privateImageUrl } from '$lib/server/images';
 import { createSlug, hasLeft, matchSpelling } from '$lib/utils/helpers';
 import { db } from './index';
 import {
@@ -70,23 +71,39 @@ export function fetchAdminMember(id: number): ResultAsync<AdminMember | null, Db
 				titles: members.titles,
 				memberSince: members.memberSince,
 				memberUntil: members.memberUntil,
-				signedUp: sql<boolean>`${members.userId} is not null`
+				signedUp: sql<boolean>`${members.userId} is not null`,
+				imagePath: members.imagePath
 			})
 			.from(members)
 			.where(eq(members.id, id)),
 		toDbError
-	).map(([member]) => member ?? null);
+	).map(([member]) => {
+		if (!member) {
+			return null;
+		}
+		const { imagePath, ...rest } = member;
+		return { ...rest, imageUrl: privateImageUrl(imagePath) };
+	});
 }
+
+/** The member fields that are saved; `imagePath` only when the photo changes. */
+export type MemberUpdate = Omit<MemberInput, 'photo' | 'removePhoto'> & {
+	imagePath?: string | null;
+};
 
 /**
  * Updates a member. For a member who has signed up, a changed email also changes their login's
- * email, or password login would stop matching.
+ * email, or password login would stop matching. Returns the photo path from before the update, so
+ * a replaced photo can be deleted.
  */
-export function updateMember(id: number, input: MemberInput): ResultAsync<number, DbError> {
+export function updateMember(
+	id: number,
+	input: MemberUpdate
+): ResultAsync<{ previousImagePath: string | null }, DbError> {
 	return fromPromise(
 		db.transaction(async (tx) => {
 			const [current] = await tx
-				.select({ userId: members.userId, email: members.email })
+				.select({ userId: members.userId, email: members.email, imagePath: members.imagePath })
 				.from(members)
 				.where(eq(members.id, id));
 
@@ -95,7 +112,7 @@ export function updateMember(id: number, input: MemberInput): ResultAsync<number
 			if (current?.userId && current.email.toLowerCase() !== input.email) {
 				await tx.update(user).set({ email: input.email }).where(eq(user.id, current.userId));
 			}
-			return id;
+			return { previousImagePath: current?.imagePath ?? null };
 		}),
 		toDbError
 	);

@@ -164,6 +164,21 @@ describe('memberSchema', () => {
 		expect(Object.keys(errors)).toEqual(expect.arrayContaining(['role', 'email', 'titles']));
 	});
 
+	it('takes a new photo, or a request to remove the current one', () => {
+		const photo = new File(['x'], 'ola.jpg', { type: 'image/jpeg' });
+		const withPhoto = formData(member);
+		withPhoto.append('photo', photo);
+		expect(parseForm(withPhoto, memberSchema)._unsafeUnwrap().data).toMatchObject({
+			photo,
+			removePhoto: false
+		});
+
+		const remove = parseForm(formData({ ...member, removePhoto: 'on' }), memberSchema);
+		const { data } = remove._unsafeUnwrap();
+		expect(data.photo).toBeUndefined();
+		expect(data.removePhoto).toBe(true);
+	});
+
 	it('rejects an end date before the start date', () => {
 		const result = parseForm(formData({ ...member, memberUntil: '2019-12-31' }), memberSchema);
 		expect(result._unsafeUnwrapErr().data.errors.memberUntil).toBeDefined();

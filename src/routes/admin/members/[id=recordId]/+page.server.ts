@@ -3,7 +3,8 @@ import { AdminRoutes } from '$lib/routes';
 import { dbFailure, formFailure, parseForm, parseRecordId } from '$lib/server/admin/form';
 import { memberSchema } from '$lib/server/admin/schemas';
 import { fetchAdminMember, updateMember } from '$lib/server/db/admin';
-import { hasLeft } from '$lib/utils/helpers';
+import { deleteImage, uploadImage } from '$lib/server/images';
+import { createSlug, hasLeft } from '$lib/utils/helpers';
 import type { Actions, PageServerLoad } from './$types';
 
 const emailTaken = { email: ['Eposten er allerede i bruk.'] };
@@ -50,12 +51,35 @@ export const actions: Actions = {
 			}
 		}
 
-		const saved = await updateMember(id, data);
+		const { photo, removePhoto, ...fields } = data;
+
+		// Upload a new photo first, so its path can be saved with the rest.
+		let imagePath: string | null | undefined = removePhoto ? null : undefined;
+		if (photo) {
+			const slug = createSlug(`${fields.firstName} ${fields.lastName}`) || `member-${id}`;
+			const uploaded = await uploadImage('private', `profiles/${slug}`, photo);
+			if (uploaded.isErr()) {
+				console.error(uploaded.error);
+				return formFailure(values, { photo: ['Kunne ikke laste opp bildet.'] }, 500);
+			}
+			imagePath = uploaded.value;
+		}
+
+		const saved = await updateMember(id, { ...fields, imagePath });
 		if (saved.isErr()) {
+			if (imagePath) {
+				await deleteImage('private', imagePath).orTee((e) => console.error(e));
+			}
 			return dbFailure(values, saved.error, {
 				members_email_lower_idx: emailTaken,
 				user_email_unique: emailTaken
 			});
+		}
+
+		// The old photo is only removed once the new path is saved.
+		const { previousImagePath } = saved.value;
+		if (imagePath !== undefined && previousImagePath && previousImagePath !== imagePath) {
+			await deleteImage('private', previousImagePath).orTee((e) => console.error(e));
 		}
 
 		redirect(303, AdminRoutes.MEMBERS);

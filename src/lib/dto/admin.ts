@@ -42,6 +42,8 @@ export interface AdminMember {
 	memberSince: Date;
 	memberUntil: Date | null;
 	signedUp: boolean;
+	/** The profile photo, through /images (see privateImageUrl). */
+	imageUrl: string | null;
 }
 
 /** For selects, e.g. choosing a meet's host. */
