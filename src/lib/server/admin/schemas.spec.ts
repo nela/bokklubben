@@ -73,6 +73,51 @@ describe('meetSchema', () => {
 		expect(parseForm(formData(meet), meetSchema)._unsafeUnwrap().data.attendees).toEqual([]);
 	});
 
+	describe('pitches', () => {
+		const withPitches = (rows: Array<[string, string, string, string]>) => {
+			const data = formData(meet);
+			for (const [title, author, pitchedBy, status] of rows) {
+				data.append('pitchTitles', title);
+				data.append('pitchAuthors', author);
+				data.append('pitchedBy', pitchedBy);
+				data.append('pitchStatuses', status);
+			}
+			return parseForm(data, meetSchema);
+		};
+
+		it('pairs the rows up and leaves out empty ones', () => {
+			const result = withPitches([
+				['Sapiens', 'Yuval Noah Harari', '3', 'pitched'],
+				['', '', '', 'pitched'],
+				['Dune', '', '', 'elected']
+			]);
+
+			expect(result._unsafeUnwrap().data.pitches).toEqual([
+				{ title: 'Sapiens', author: 'Yuval Noah Harari', pitchedBy: 3, status: 'pitched' },
+				{ title: 'Dune', author: null, pitchedBy: null, status: 'elected' }
+			]);
+		});
+
+		it('asks for a title when a row has an author or pitcher', () => {
+			const result = withPitches([['', 'Yuval Noah Harari', '', 'pitched']]);
+			expect(result._unsafeUnwrapErr().data.errors.pitches).toEqual([
+				'Hver pitch trenger en tittel'
+			]);
+		});
+
+		it('allows only one elected book', () => {
+			const result = withPitches([
+				['Sapiens', '', '', 'elected'],
+				['Dune', '', '', 'elected']
+			]);
+			expect(result._unsafeUnwrapErr().data.errors.pitches).toEqual(['Bare én bok kan være valgt']);
+		});
+
+		it('has no pitches when creating a meet', () => {
+			expect(parseForm(formData(meet), meetSchema)._unsafeUnwrap().data.pitches).toEqual([]);
+		});
+	});
+
 	it('rejects an invalid ISBN', () => {
 		const result = parseForm(formData({ ...meet, bookTitle: 'Dune', bookIsbn: '123' }), meetSchema);
 		expect(result._unsafeUnwrapErr().data.errors.bookIsbn).toBeDefined();

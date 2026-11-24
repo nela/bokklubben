@@ -19,6 +19,7 @@
 	genres={data.genres}
 	languages={data.languages}
 	authorNames={data.authorNames}
+	bookTitles={data.bookTitles}
 	form={failedForm(form)}
 />
 

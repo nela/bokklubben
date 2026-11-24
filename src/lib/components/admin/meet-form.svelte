@@ -9,6 +9,7 @@
 	import NewAuthorSheet from './new-author-sheet.svelte';
 	import { fieldValue, fieldValues, osloDateTimeInput } from './form-values';
 	import PickOrCreate from './pick-or-create.svelte';
+	import PitchRows from './pitch-rows.svelte';
 	import Select from './select.svelte';
 	import SuggestInput from './suggest-input.svelte';
 	import TagInput from './tag-input.svelte';
@@ -20,6 +21,7 @@
 		genres,
 		languages,
 		authorNames,
+		bookTitles,
 		form
 	}: {
 		/** null when creating a new meet. */
@@ -31,6 +33,8 @@
 		languages: Array<string>;
 		/** Existing authors, suggested in the authors field. */
 		authorNames: Array<string>;
+		/** Existing books, suggested in the pitch rows. */
+		bookTitles: Array<string>;
 		form: AdminFormState | null | undefined;
 	} = $props();
 
@@ -277,6 +281,21 @@
 					{#if errors.attendees}
 						<p class="text-destructive text-sm">{errors.attendees.join(' ')}</p>
 					{/if}
+				</fieldset>
+
+				<fieldset class="flex flex-col gap-2">
+					<legend class="mb-1 text-sm font-medium">Pitcher</legend>
+					<p class="text-muted-foreground mb-2 text-sm">
+						Bøkene som ble pitchet, og hvilken som ble valgt. Nye bøker og forfattere opprettes med
+						bare navnet; resten fylles inn når boken skal leses.
+					</p>
+					<PitchRows
+						pitches={meet.pitches}
+						{members}
+						{bookTitles}
+						authorNames={authorOptions}
+						errors={errors.pitches}
+					/>
 				</fieldset>
 			</fieldset>
 		</div>

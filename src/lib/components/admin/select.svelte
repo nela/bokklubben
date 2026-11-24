@@ -2,11 +2,17 @@
 	import type { HTMLSelectAttributes } from 'svelte/elements';
 	import { cn } from '$lib/utils/shadcn';
 
-	let { class: className, children, ...restProps }: HTMLSelectAttributes = $props();
+	let {
+		class: className,
+		value = $bindable(),
+		children,
+		...restProps
+	}: HTMLSelectAttributes = $props();
 </script>
 
 <!-- A native select, styled like $lib/components/ui/input. -->
 <select
+	bind:value
 	class={cn(
 		'border-input bg-background dark:bg-input/30 h-9 w-full rounded-md border px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none md:text-sm',
 		'focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]',

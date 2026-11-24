@@ -32,6 +32,16 @@ export interface AdminMeetBook {
 	authors: Array<string>;
 }
 
+/** A book pitched at a meet, as shown in the "Etter møtet" rows. */
+export interface AdminMeetPitch {
+	title: string;
+	/** The book's first author, if any. */
+	author: string | null;
+	/** Member id. */
+	pitchedBy: number | null;
+	status: 'pitched' | 'elected';
+}
+
 export interface AdminMeet {
 	id: number;
 	startsAt: Date;
@@ -42,6 +52,7 @@ export interface AdminMeet {
 	highlights: string | null;
 	/** Ids of the members who attended. */
 	attendeeIds: Array<number>;
+	pitches: Array<AdminMeetPitch>;
 	/** The book read at the meet, or null if it has none yet. */
 	book: AdminMeetBook | null;
 }

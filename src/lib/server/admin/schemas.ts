@@ -39,10 +39,53 @@ export const authorSchema = z.object({
 export type AuthorInput = z.output<typeof authorSchema>;
 
 /**
+ * Pitch rows in the "Etter møtet" form. Each row sends one value per field, in row order, so the
+ * nth title, author, pitcher and status belong together. Rows without a title are left out.
+ */
+const pitchFields = {
+	pitchTitles: field.array(z.string().trim()),
+	pitchAuthors: field.array(z.string().trim()),
+	/** Member id, or empty for nobody. */
+	pitchedBy: field.array(z.string()),
+	pitchStatuses: field.array(z.enum(['pitched', 'elected']))
+};
+
+type PitchForm = { [K in keyof typeof pitchFields]: z.output<(typeof pitchFields)[K]> };
+
+function checkPitches(form: PitchForm, ctx: z.RefinementCtx) {
+	const { pitchTitles, pitchAuthors, pitchedBy, pitchStatuses } = form;
+	const rows = pitchTitles.length;
+	if ([pitchAuthors, pitchedBy, pitchStatuses].some((field) => field.length !== rows)) {
+		ctx.addIssue({ code: 'custom', path: ['pitches'], message: 'Ugyldige pitch-rader' });
+		return;
+	}
+	if (pitchTitles.some((title, i) => !title && (pitchAuthors[i] || pitchedBy[i]))) {
+		ctx.addIssue({ code: 'custom', path: ['pitches'], message: 'Hver pitch trenger en tittel' });
+	}
+	if (pitchStatuses.filter((status, i) => status === 'elected' && pitchTitles[i]).length > 1) {
+		ctx.addIssue({ code: 'custom', path: ['pitches'], message: 'Bare én bok kan være valgt' });
+	}
+}
+
+const toPitches = ({ pitchTitles, pitchAuthors, pitchedBy, pitchStatuses }: PitchForm) =>
+	pitchTitles.flatMap((title, i) =>
+		title
+			? [
+					{
+						title,
+						author: pitchAuthors[i] || null,
+						pitchedBy: pitchedBy[i] ? Number(pitchedBy[i]) : null,
+						status: pitchStatuses[i]
+					}
+				]
+			: []
+	);
+
+/**
  * A meet and the book read at it. The book's fields are prefixed `book` in the form.
  *
- * `highlights` and `attendees` are only in the edit form ("Etter møtet"); when creating a meet
- * they are missing, which gives null and no attendees.
+ * `highlights`, `attendees` and the pitches are only in the edit form ("Etter møtet"); when
+ * creating a meet they are missing, which gives null and empty lists.
  */
 export const meetSchema = z
 	.object({
@@ -54,6 +97,7 @@ export const meetSchema = z
 		highlights: field.optionalText(),
 		/** Member ids, one checkbox each. */
 		attendees: field.array(z.coerce.number().int().positive()),
+		...pitchFields,
 		...bookFields
 	})
 	.superRefine((form, ctx) => {
@@ -66,6 +110,7 @@ export const meetSchema = z
 		if (hasBookDetails && !form.bookTitle) {
 			ctx.addIssue({ code: 'custom', path: ['bookTitle'], message: 'Boken trenger en tittel' });
 		}
+		checkPitches(form, ctx);
 	})
 	.transform(
 		({
@@ -78,10 +123,15 @@ export const meetSchema = z
 			bookOriginalLanguage,
 			bookDescription,
 			attendees,
+			pitchTitles,
+			pitchAuthors,
+			pitchedBy,
+			pitchStatuses,
 			...meet
 		}) => ({
 			meet,
 			attendees: [...new Set(attendees)],
+			pitches: toPitches({ pitchTitles, pitchAuthors, pitchedBy, pitchStatuses }),
 			book: bookTitle
 				? {
 						title: bookTitle,
@@ -99,3 +149,4 @@ export const meetSchema = z
 
 export type MeetInput = z.output<typeof meetSchema>;
 export type MeetBookInput = NonNullable<MeetInput['book']>;
+export type MeetPitchInput = MeetInput['pitches'][number];

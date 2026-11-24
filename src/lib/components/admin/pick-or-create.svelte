@@ -29,6 +29,8 @@
 	} = $props();
 
 	const available = $derived(options.filter((o) => !chosen.includes(o)));
+	/** The dropdown's value; reset right after a pick, so it shows its label again. */
+	let picked = $state('');
 </script>
 
 <div class="flex flex-col gap-2">
@@ -57,15 +59,15 @@
 			{id}
 			aria-invalid={invalid}
 			disabled={available.length === 0}
-			onchange={(event) => {
-				const value = event.currentTarget.value;
-				if (value) {
-					chosen = [...chosen, value];
+			bind:value={picked}
+			onchange={() => {
+				if (picked) {
+					chosen = [...chosen, picked];
 				}
-				event.currentTarget.value = '';
+				picked = '';
 			}}
 		>
-			<option value="" selected>{selectLabel}</option>
+			<option value="">{selectLabel}</option>
 			{#each available as option (option)}
 				<option value={option}>{option}</option>
 			{/each}

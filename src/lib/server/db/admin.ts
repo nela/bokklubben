@@ -1,6 +1,6 @@
 /** Queries and changes for the admin pages. The site's own reads live in queries.ts. */
 
-import { and, asc, count, eq, inArray, isNotNull, sql } from 'drizzle-orm';
+import { and, asc, count, eq, inArray, isNotNull, ne, sql } from 'drizzle-orm';
 import { fromPromise, type ResultAsync } from 'neverthrow';
 import type {
 	AdminAuthorListItem,
@@ -9,7 +9,12 @@ import type {
 	MemberOption
 } from '$lib/dto/admin';
 import { toDbError, type DbError } from '$lib/errors/db';
-import type { AuthorInput, MeetInput } from '$lib/server/admin/schemas';
+import type {
+	AuthorInput,
+	MeetBookInput,
+	MeetInput,
+	MeetPitchInput
+} from '$lib/server/admin/schemas';
 import { createSlug, matchSpelling } from '$lib/utils/helpers';
 import { db } from './index';
 import { authors, bookAuthors, books, meetAttendance, meetBooks, meets, members } from './schema';
@@ -52,6 +57,14 @@ export function fetchLanguages(): ResultAsync<Array<string>, DbError> {
 	return fromPromise(selectLanguages(db), toDbError);
 }
 
+/** All book titles, alphabetically, for suggestions when adding a pitch. */
+export function fetchBookTitles(): ResultAsync<Array<string>, DbError> {
+	return fromPromise(
+		db.select({ title: books.title }).from(books).orderBy(asc(books.title)),
+		toDbError
+	).map((rows) => rows.map((r) => r.title));
+}
+
 /** All author names, alphabetically, for suggestions when adding a book's authors. */
 export function fetchAuthorNames(): ResultAsync<Array<string>, DbError> {
 	return fromPromise(
@@ -74,22 +87,22 @@ export function createAuthor(input: AuthorInput): ResultAsync<{ name: string }, 
 type Tx = Parameters<Parameters<typeof db.transaction>[0]>[0];
 
 /**
- * Sets a book's authors by name. A name matches an existing author by slug (so case and accents
- * don't matter); any other name becomes a new author with just the name.
+ * Ids of the authors with these names. A name matches an existing author by slug (so case and
+ * accents don't matter); any other name becomes a new author with just the name.
  */
-async function setBookAuthors(tx: Tx, bookId: number, names: Array<string>) {
+async function findOrCreateAuthors(tx: Tx, names: Array<string>): Promise<Array<number>> {
 	const wanted = new Map(
 		names.map((name) => [createSlug(name), name] as const).filter(([slug]) => slug !== '')
 	);
 	const slugs = [...wanted.keys()];
+	if (slugs.length === 0) {
+		return [];
+	}
 
-	const existing =
-		slugs.length > 0
-			? await tx
-					.select({ id: authors.id, slug: authors.slug })
-					.from(authors)
-					.where(inArray(authors.slug, slugs))
-			: [];
+	const existing = await tx
+		.select({ id: authors.id, slug: authors.slug })
+		.from(authors)
+		.where(inArray(authors.slug, slugs));
 	const missing = slugs.filter((slug) => !existing.some((a) => a.slug === slug));
 	const created =
 		missing.length > 0
@@ -99,10 +112,69 @@ async function setBookAuthors(tx: Tx, bookId: number, names: Array<string>) {
 					.returning({ id: authors.id, slug: authors.slug })
 			: [];
 
+	return [...existing, ...created].map((a) => a.id);
+}
+
+/** Replaces a book's authors; see `findOrCreateAuthors`. */
+async function setBookAuthors(tx: Tx, bookId: number, names: Array<string>) {
+	const authorIds = await findOrCreateAuthors(tx, names);
 	await tx.delete(bookAuthors).where(eq(bookAuthors.bookId, bookId));
-	const authorIds = [...existing, ...created].map((a) => a.id);
 	if (authorIds.length > 0) {
 		await tx.insert(bookAuthors).values(authorIds.map((authorId) => ({ bookId, authorId })));
+	}
+}
+
+/** The id of the book with this title (matched by slug), or of a new book with just the title. */
+async function findOrCreateBook(tx: Tx, title: string): Promise<number | null> {
+	const slug = createSlug(title);
+	if (!slug) {
+		return null;
+	}
+	const existing = await tx.query.books.findFirst({
+		where: eq(books.slug, slug),
+		columns: { id: true }
+	});
+	if (existing) {
+		return existing.id;
+	}
+	const [created] = await tx.insert(books).values({ title, slug }).returning({ id: books.id });
+	return created.id;
+}
+
+/**
+ * Replaces a meet's pitched and elected books. A pitch's book and author are found by name or
+ * created with just the name; an author is added to the book, never removed from it. The meet's
+ * read book can't also be pitched at it, so such a row is skipped.
+ */
+async function setPitches(tx: Tx, meetId: number, pitches: Array<MeetPitchInput>) {
+	const read = await tx
+		.select({ bookId: meetBooks.bookId })
+		.from(meetBooks)
+		.where(and(eq(meetBooks.meetId, meetId), eq(meetBooks.status, 'read')));
+	const readIds = new Set(read.map((r) => r.bookId));
+
+	await tx.delete(meetBooks).where(and(eq(meetBooks.meetId, meetId), ne(meetBooks.status, 'read')));
+
+	// One row per book; if the same book is listed twice, "elected" wins.
+	const rows = new Map<number, typeof meetBooks.$inferInsert>();
+	for (const pitch of pitches) {
+		const bookId = await findOrCreateBook(tx, pitch.title);
+		if (bookId === null || readIds.has(bookId)) {
+			continue;
+		}
+		if (pitch.author) {
+			const [authorId] = await findOrCreateAuthors(tx, [pitch.author]);
+			if (authorId) {
+				await tx.insert(bookAuthors).values({ bookId, authorId }).onConflictDoNothing();
+			}
+		}
+		if (!rows.has(bookId) || pitch.status === 'elected') {
+			rows.set(bookId, { meetId, bookId, status: pitch.status, pitchedBy: pitch.pitchedBy });
+		}
+	}
+
+	if (rows.size > 0) {
+		await tx.insert(meetBooks).values([...rows.values()]);
 	}
 }
 
@@ -133,10 +205,8 @@ export function fetchAdminMeet(id: number): ResultAsync<AdminMeet | null, DbErro
 			with: {
 				attendance: { columns: { memberId: true } },
 				meetBooks: {
-					where: (mb, { eq }) => eq(mb.status, 'read'),
 					orderBy: (mb, { asc }) => asc(mb.bookId),
-					limit: 1,
-					columns: { bookId: true },
+					columns: { bookId: true, status: true, pitchedBy: true },
 					with: {
 						book: {
 							columns: meetBookColumns,
@@ -153,32 +223,46 @@ export function fetchAdminMeet(id: number): ResultAsync<AdminMeet | null, DbErro
 		}
 		const { meetBooks, attendance, ...rest } = meet;
 		const attendeeIds = attendance.map((a) => a.memberId);
-		const found = meetBooks[0]?.book;
+		const pitches = meetBooks.flatMap(({ status, pitchedBy, book }) =>
+			status === 'read'
+				? []
+				: [
+						{
+							title: book.title,
+							author: book.bookAuthors[0]?.author.name ?? null,
+							pitchedBy,
+							status
+						}
+					]
+		);
+
+		const found = meetBooks.find((mb) => mb.status === 'read')?.book;
 		if (!found) {
-			return { ...rest, attendeeIds, book: null };
+			return { ...rest, attendeeIds, pitches, book: null };
 		}
 		const { bookAuthors, ...book } = found;
 		return {
 			...rest,
 			attendeeIds,
+			pitches,
 			book: { ...book, authors: bookAuthors.map((ba) => ba.author.name) }
 		};
 	});
 }
 
 /**
- * Creates (`id` null) or updates a meet, its attendance and its book, in one transaction. Returns
- * the meet's id.
+ * Creates (`id` null) or updates a meet, in one transaction. Returns the meet's id.
  *
  * - Attendance is replaced by the input's.
  * - The meet has no book yet: a book in the input is created and linked as read.
  * - The meet has a book: the input updates it. Without a book in the input it's left as is; the
  *   form requires the title, so that only happens if the browser skipped validation.
  * - The book's authors are replaced by the input's; see `setBookAuthors`.
+ * - Pitched and elected books are replaced by the input's; see `setPitches`.
  */
 export function saveMeet(
 	id: number | null,
-	{ meet, attendees, book }: MeetInput
+	{ meet, attendees, pitches, book }: MeetInput
 ): ResultAsync<number, DbError> {
 	return fromPromise(
 		db.transaction(async (tx) => {
@@ -195,40 +279,45 @@ export function saveMeet(
 				await tx.insert(meetAttendance).values(attendees.map((memberId) => ({ meetId, memberId })));
 			}
 
-			if (!book) {
-				return meetId;
+			if (book) {
+				await saveReadBook(tx, meetId, book);
 			}
+			await setPitches(tx, meetId, pitches);
 
-			const { authors: authorNames, ...fields } = book;
-			const values = {
-				...fields,
-				genres: matchSpelling(fields.genres, await selectGenres(tx)),
-				originalLanguage: fields.originalLanguage
-					? matchSpelling([fields.originalLanguage], await selectLanguages(tx))[0]
-					: null,
-				slug: createSlug(fields.title)
-			};
-
-			const current = await tx.query.meetBooks.findFirst({
-				where: and(eq(meetBooks.meetId, meetId), eq(meetBooks.status, 'read')),
-				orderBy: asc(meetBooks.bookId),
-				columns: { bookId: true }
-			});
-
-			let bookId: number;
-			if (current) {
-				bookId = current.bookId;
-				await tx.update(books).set(values).where(eq(books.id, bookId));
-			} else {
-				[{ id: bookId }] = await tx.insert(books).values(values).returning({ id: books.id });
-				await tx.insert(meetBooks).values({ meetId, bookId, status: 'read' });
-			}
-
-			await setBookAuthors(tx, bookId, authorNames);
 			return meetId;
 		}),
 		toDbError
 	);
+}
+
+/** Updates the meet's read book, or creates it and links it as read. */
+async function saveReadBook(tx: Tx, meetId: number, book: MeetBookInput) {
+	const { authors: authorNames, ...fields } = book;
+	const values = {
+		...fields,
+		genres: matchSpelling(fields.genres, await selectGenres(tx)),
+		originalLanguage: fields.originalLanguage
+			? matchSpelling([fields.originalLanguage], await selectLanguages(tx))[0]
+			: null,
+		slug: createSlug(fields.title)
+	};
+
+	const current = await tx.query.meetBooks.findFirst({
+		where: and(eq(meetBooks.meetId, meetId), eq(meetBooks.status, 'read')),
+		orderBy: asc(meetBooks.bookId),
+		columns: { bookId: true }
+	});
+
+	let bookId: number;
+	if (current) {
+		bookId = current.bookId;
+		await tx.update(books).set(values).where(eq(books.id, bookId));
+	} else {
+		[{ id: bookId }] = await tx.insert(books).values(values).returning({ id: books.id });
+		await tx.insert(meetBooks).values({ meetId, bookId, status: 'read' });
+	}
+
+	await setBookAuthors(tx, bookId, authorNames);
 }
 
 /** Also removes the meet's books and attendance. The books themselves stay. */
