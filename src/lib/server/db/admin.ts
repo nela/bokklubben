@@ -1,6 +1,6 @@
 /** Queries and changes for the admin pages. The site's own reads live in queries.ts. */
 
-import { and, asc, count, eq, isNotNull, sql } from 'drizzle-orm';
+import { and, asc, count, eq, inArray, isNotNull, sql } from 'drizzle-orm';
 import { fromPromise, type ResultAsync } from 'neverthrow';
 import type {
 	AdminAuthorListItem,
@@ -9,7 +9,7 @@ import type {
 	MemberOption
 } from '$lib/dto/admin';
 import { toDbError, type DbError } from '$lib/errors/db';
-import type { MeetInput } from '$lib/server/admin/schemas';
+import type { AuthorInput, MeetInput } from '$lib/server/admin/schemas';
 import { createSlug, matchSpelling } from '$lib/utils/helpers';
 import { db } from './index';
 import { authors, bookAuthors, books, meetBooks, meets, members } from './schema';
@@ -52,6 +52,60 @@ export function fetchLanguages(): ResultAsync<Array<string>, DbError> {
 	return fromPromise(selectLanguages(db), toDbError);
 }
 
+/** All author names, alphabetically, for suggestions when adding a book's authors. */
+export function fetchAuthorNames(): ResultAsync<Array<string>, DbError> {
+	return fromPromise(
+		db.select({ name: authors.name }).from(authors).orderBy(asc(authors.name)),
+		toDbError
+	).map((rows) => rows.map((r) => r.name));
+}
+
+/** Creates an author; the slug (used in URLs) comes from the name. Returns the saved name. */
+export function createAuthor(input: AuthorInput): ResultAsync<{ name: string }, DbError> {
+	return fromPromise(
+		db
+			.insert(authors)
+			.values({ ...input, slug: createSlug(input.name) })
+			.returning({ name: authors.name }),
+		toDbError
+	).map(([author]) => author);
+}
+
+type Tx = Parameters<Parameters<typeof db.transaction>[0]>[0];
+
+/**
+ * Sets a book's authors by name. A name matches an existing author by slug (so case and accents
+ * don't matter); any other name becomes a new author with just the name.
+ */
+async function setBookAuthors(tx: Tx, bookId: number, names: Array<string>) {
+	const wanted = new Map(
+		names.map((name) => [createSlug(name), name] as const).filter(([slug]) => slug !== '')
+	);
+	const slugs = [...wanted.keys()];
+
+	const existing =
+		slugs.length > 0
+			? await tx
+					.select({ id: authors.id, slug: authors.slug })
+					.from(authors)
+					.where(inArray(authors.slug, slugs))
+			: [];
+	const missing = slugs.filter((slug) => !existing.some((a) => a.slug === slug));
+	const created =
+		missing.length > 0
+			? await tx
+					.insert(authors)
+					.values(missing.map((slug) => ({ slug, name: wanted.get(slug)! })))
+					.returning({ id: authors.id, slug: authors.slug })
+			: [];
+
+	await tx.delete(bookAuthors).where(eq(bookAuthors.bookId, bookId));
+	const authorIds = [...existing, ...created].map((a) => a.id);
+	if (authorIds.length > 0) {
+		await tx.insert(bookAuthors).values(authorIds.map((authorId) => ({ bookId, authorId })));
+	}
+}
+
 const meetBookColumns = {
 	id: true,
 	title: true,
@@ -81,7 +135,12 @@ export function fetchAdminMeet(id: number): ResultAsync<AdminMeet | null, DbErro
 					orderBy: (mb, { asc }) => asc(mb.bookId),
 					limit: 1,
 					columns: { bookId: true },
-					with: { book: { columns: meetBookColumns } }
+					with: {
+						book: {
+							columns: meetBookColumns,
+							with: { bookAuthors: { with: { author: { columns: { name: true } } } } }
+						}
+					}
 				}
 			}
 		}),
@@ -91,7 +150,12 @@ export function fetchAdminMeet(id: number): ResultAsync<AdminMeet | null, DbErro
 			return null;
 		}
 		const { meetBooks, ...rest } = meet;
-		return { ...rest, book: meetBooks[0]?.book ?? null };
+		const found = meetBooks[0]?.book;
+		if (!found) {
+			return { ...rest, book: null };
+		}
+		const { bookAuthors, ...book } = found;
+		return { ...rest, book: { ...book, authors: bookAuthors.map((ba) => ba.author.name) } };
 	});
 }
 
@@ -101,6 +165,7 @@ export function fetchAdminMeet(id: number): ResultAsync<AdminMeet | null, DbErro
  * - The meet has no book yet: a book in the input is created and linked as read.
  * - The meet has a book: the input updates it. Without a book in the input it's left as is; the
  *   form requires the title, so that only happens if the browser skipped validation.
+ * - The book's authors are replaced by the input's; see `setBookAuthors`.
  */
 export function saveMeet(
 	id: number | null,
@@ -120,13 +185,14 @@ export function saveMeet(
 				return meetId;
 			}
 
+			const { authors: authorNames, ...fields } = book;
 			const values = {
-				...book,
-				genres: matchSpelling(book.genres, await selectGenres(tx)),
-				originalLanguage: book.originalLanguage
-					? matchSpelling([book.originalLanguage], await selectLanguages(tx))[0]
+				...fields,
+				genres: matchSpelling(fields.genres, await selectGenres(tx)),
+				originalLanguage: fields.originalLanguage
+					? matchSpelling([fields.originalLanguage], await selectLanguages(tx))[0]
 					: null,
-				slug: createSlug(book.title)
+				slug: createSlug(fields.title)
 			};
 
 			const current = await tx.query.meetBooks.findFirst({
@@ -135,13 +201,16 @@ export function saveMeet(
 				columns: { bookId: true }
 			});
 
+			let bookId: number;
 			if (current) {
-				await tx.update(books).set(values).where(eq(books.id, current.bookId));
+				bookId = current.bookId;
+				await tx.update(books).set(values).where(eq(books.id, bookId));
 			} else {
-				const [created] = await tx.insert(books).values(values).returning({ id: books.id });
-				await tx.insert(meetBooks).values({ meetId, bookId: created.id, status: 'read' });
+				[{ id: bookId }] = await tx.insert(books).values(values).returning({ id: books.id });
+				await tx.insert(meetBooks).values({ meetId, bookId, status: 'read' });
 			}
 
+			await setBookAuthors(tx, bookId, authorNames);
 			return meetId;
 		}),
 		toDbError

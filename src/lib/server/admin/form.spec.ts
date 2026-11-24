@@ -7,7 +7,7 @@ const schema = z.object({
 	bio: field.optionalText(),
 	pages: field.optionalInt(),
 	born: field.optionalDate(),
-	awards: field.commaList(),
+	awards: field.semicolonList(),
 	titles: field.array(z.string()),
 	invite: field.checkbox()
 });
@@ -26,7 +26,7 @@ describe('parseForm', () => {
 				['bio', ''],
 				['pages', '412'],
 				['born', '1920-10-08'],
-				['awards', 'Hugo Award, Nebula Award,'],
+				['awards', 'Hugo Award; Nebula Award, Best Novel ;'],
 				['titles', 'CTO'],
 				['invite', 'on']
 			]),
@@ -38,7 +38,7 @@ describe('parseForm', () => {
 			bio: null,
 			pages: 412,
 			born: new Date('1920-10-08'),
-			awards: ['Hugo Award', 'Nebula Award'],
+			awards: ['Hugo Award', 'Nebula Award, Best Novel'],
 			titles: ['CTO'],
 			invite: true
 		});

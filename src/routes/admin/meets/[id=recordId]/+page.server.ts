@@ -2,10 +2,12 @@ import { error, redirect } from '@sveltejs/kit';
 import { okAsync, ResultAsync } from 'neverthrow';
 import { AdminRoutes } from '$lib/routes';
 import { dbFailure, formFailure, parseForm, parseRecordId } from '$lib/server/admin/form';
-import { meetSchema } from '$lib/server/admin/schemas';
+import { authorSchema, meetSchema } from '$lib/server/admin/schemas';
 import {
+	createAuthor,
 	deleteMeet,
 	fetchAdminMeet,
+	fetchAuthorNames,
 	fetchGenres,
 	fetchLanguages,
 	fetchMemberOptions,
@@ -20,19 +22,20 @@ export const load: PageServerLoad = async ({ params }) => {
 		id === null ? okAsync(null) : fetchAdminMeet(id),
 		fetchMemberOptions(),
 		fetchGenres(),
-		fetchLanguages()
+		fetchLanguages(),
+		fetchAuthorNames()
 	]);
 	if (result.isErr()) {
 		console.error(result.error);
 		error(500, 'Kunne ikke laste møtet.');
 	}
 
-	const [meet, members, genres, languages] = result.value;
+	const [meet, members, genres, languages, authorNames] = result.value;
 	if (id !== null && !meet) {
 		error(404, 'Fant ikke møtet.');
 	}
 
-	return { meet, members, genres, languages };
+	return { meet, members, genres, languages, authorNames };
 };
 
 export const actions: Actions = {
@@ -52,6 +55,24 @@ export const actions: Actions = {
 		}
 
 		redirect(303, AdminRoutes.MEETS);
+	},
+
+	/** From the "new author" panel. Saved right away, so it can be picked for the book. */
+	createAuthor: async ({ request }) => {
+		const form = parseForm(await request.formData(), authorSchema);
+		if (form.isErr()) {
+			return form.error;
+		}
+
+		const { data, values } = form.value;
+		const created = await createAuthor(data);
+		if (created.isErr()) {
+			return dbFailure(values, created.error, {
+				authors_slug_unique: { name: ['Det finnes allerede en forfatter med dette navnet.'] }
+			});
+		}
+
+		return { author: created.value };
 	},
 
 	delete: async ({ params }) => {

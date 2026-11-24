@@ -1,5 +1,6 @@
 <script lang="ts">
 	import DeleteForm from '$lib/components/admin/delete-form.svelte';
+	import { failedForm } from '$lib/components/admin/form-values';
 	import MeetForm from '$lib/components/admin/meet-form.svelte';
 	import type { PageProps } from './$types';
 
@@ -17,7 +18,8 @@
 	members={data.members}
 	genres={data.genres}
 	languages={data.languages}
-	{form}
+	authorNames={data.authorNames}
+	form={failedForm(form)}
 />
 
 {#if data.meet}

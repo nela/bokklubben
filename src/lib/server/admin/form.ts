@@ -121,14 +121,17 @@ export const field = {
 				}
 			}),
 
-	/** "A, B , C" → ['A', 'B', 'C']. */
-	commaList: () =>
+	/**
+	 * "A; B, C ;" → ['A', 'B, C']. Split on semicolons, since names such as awards can contain
+	 * commas.
+	 */
+	semicolonList: () =>
 		z
 			.string()
 			.optional()
 			.transform((v) =>
 				(v ?? '')
-					.split(',')
+					.split(';')
 					.map((s) => s.trim())
 					.filter(Boolean)
 			),

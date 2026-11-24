@@ -41,6 +41,22 @@ describe('meetSchema', () => {
 		expect(book?.genres).toEqual(['Science Fiction', 'Klassiker']);
 	});
 
+	it('takes authors as repeated fields, and asks for a title when only they are filled in', () => {
+		const withTitle = formData({ ...meet, bookTitle: 'Good Omens' });
+		withTitle.append('bookAuthors', 'Terry Pratchett');
+		withTitle.append('bookAuthors', 'Neil Gaiman');
+		expect(parseForm(withTitle, meetSchema)._unsafeUnwrap().data.book?.authors).toEqual([
+			'Terry Pratchett',
+			'Neil Gaiman'
+		]);
+
+		const withoutTitle = formData(meet);
+		withoutTitle.append('bookAuthors', 'Neil Gaiman');
+		expect(
+			parseForm(withoutTitle, meetSchema)._unsafeUnwrapErr().data.errors.bookTitle
+		).toBeDefined();
+	});
+
 	it('has no book when only the title is empty and no genres are chosen', () => {
 		const result = parseForm(formData({ ...meet, bookTitle: '' }), meetSchema);
 		expect(result._unsafeUnwrap().data.book).toBeNull();

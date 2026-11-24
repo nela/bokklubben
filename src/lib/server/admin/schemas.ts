@@ -14,6 +14,8 @@ const smallInt = (message: string) =>
 
 const bookFields = {
 	bookTitle: field.optionalText(),
+	/** Author names, one hidden input each. Unknown names become new authors. */
+	bookAuthors: field.array(z.string().trim().min(1)),
 	bookIsbn: isbn(),
 	bookPages: smallInt('Ugyldig antall sider').refine(
 		(v) => v === null || v > 0,
@@ -25,6 +27,16 @@ const bookFields = {
 	bookOriginalLanguage: field.optionalText(),
 	bookDescription: field.optionalText()
 };
+
+export const authorSchema = z.object({
+	name: field.text(),
+	born: field.optionalDate(),
+	died: field.optionalDate(),
+	bio: field.optionalText(),
+	awards: field.semicolonList()
+});
+
+export type AuthorInput = z.output<typeof authorSchema>;
 
 /** A meet, and the book read at it. The book's fields are prefixed `book` in the form. */
 export const meetSchema = z
@@ -50,6 +62,7 @@ export const meetSchema = z
 	.transform(
 		({
 			bookTitle,
+			bookAuthors,
 			bookIsbn,
 			bookPages,
 			bookFirstPublished,
@@ -62,6 +75,7 @@ export const meetSchema = z
 			book: bookTitle
 				? {
 						title: bookTitle,
+						authors: bookAuthors,
 						isbn: bookIsbn,
 						pages: bookPages,
 						firstPublished: bookFirstPublished,

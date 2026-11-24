@@ -6,7 +6,9 @@
 	import type { AdminFormState, AdminMeet, MemberOption } from '$lib/dto/admin';
 	import { AdminRoutes } from '$lib/routes';
 	import FormField from './form-field.svelte';
+	import NewAuthorSheet from './new-author-sheet.svelte';
 	import { fieldValue, fieldValues, osloDateTimeInput } from './form-values';
+	import PickOrCreate from './pick-or-create.svelte';
 	import Select from './select.svelte';
 	import SuggestInput from './suggest-input.svelte';
 	import TagInput from './tag-input.svelte';
@@ -17,6 +19,7 @@
 		members,
 		genres,
 		languages,
+		authorNames,
 		form
 	}: {
 		/** null when creating a new meet. */
@@ -26,6 +29,8 @@
 		genres: Array<string>;
 		/** Original languages already in use, suggested in the language field. */
 		languages: Array<string>;
+		/** Existing authors, suggested in the authors field. */
+		authorNames: Array<string>;
 		form: AdminFormState | null | undefined;
 	} = $props();
 
@@ -35,6 +40,16 @@
 	const errors = $derived(form?.errors ?? {});
 	const hostId = $derived(value('hostId', meet?.hostId?.toString() ?? ''));
 	const book = $derived(meet?.book ?? null);
+
+	// Authors created in the side panel join the options and are chosen for the book.
+	let authorOptions = $state([...authorNames]);
+	let chosenAuthors = $state(fieldValues(form, 'bookAuthors', meet?.book?.authors ?? []));
+	let authorSheetOpen = $state(false);
+
+	function authorCreated(name: string) {
+		authorOptions = [...authorOptions, name].sort((a, b) => a.localeCompare(b, 'nb-NO'));
+		chosenAuthors = [...chosenAuthors, name];
+	}
 </script>
 
 <form
@@ -126,6 +141,24 @@
 				/>
 			</FormField>
 
+			<FormField
+				label="Forfattere"
+				id="bookAuthors"
+				errors={errors.bookAuthors}
+				hint="Velg en eksisterende forfatter, eller legg til en ny."
+			>
+				<PickOrCreate
+					id="bookAuthors"
+					name="bookAuthors"
+					bind:chosen={chosenAuthors}
+					options={authorOptions}
+					selectLabel="Velg forfatter…"
+					createLabel="Legg til ny forfatter"
+					oncreate={() => (authorSheetOpen = true)}
+					invalid={!!errors.bookAuthors}
+				/>
+			</FormField>
+
 			<div class="grid gap-4 sm:grid-cols-3">
 				<FormField label="ISBN" id="bookIsbn" errors={errors.bookIsbn}>
 					<Input
@@ -167,13 +200,14 @@
 					label="Sjangre"
 					id="bookGenres"
 					errors={errors.bookGenres}
-					hint="Velg eksisterende, eller skriv en ny og trykk Enter."
+					hint="Velg fra listen, eller skriv og velg «Ny sjanger»."
 				>
 					<TagInput
 						id="bookGenres"
 						name="bookGenres"
 						values={fieldValues(form, 'bookGenres', book?.genres ?? [])}
 						suggestions={genres}
+						createLabel="Ny sjanger"
 						invalid={!!errors.bookGenres}
 					/>
 				</FormField>
@@ -181,13 +215,14 @@
 					label="Originalspråk"
 					id="bookOriginalLanguage"
 					errors={errors.bookOriginalLanguage}
-					hint="Velg et eksisterende, eller skriv et nytt."
+					hint="Velg fra listen, eller skriv et nytt."
 				>
 					<SuggestInput
 						id="bookOriginalLanguage"
 						name="bookOriginalLanguage"
 						value={value('bookOriginalLanguage', book?.originalLanguage ?? '')}
 						suggestions={languages}
+						createLabel="Nytt språk"
 						invalid={!!errors.bookOriginalLanguage}
 					/>
 				</FormField>
@@ -214,3 +249,6 @@
 		<Button variant="outline" href={AdminRoutes.MEETS}>Avbryt</Button>
 	</div>
 </form>
+
+<!-- Outside the meet form: the panel has a form of its own. -->
+<NewAuthorSheet bind:open={authorSheetOpen} oncreated={authorCreated} />

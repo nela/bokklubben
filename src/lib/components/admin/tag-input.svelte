@@ -9,6 +9,7 @@
 		name,
 		values,
 		suggestions,
+		createLabel,
 		placeholder,
 		invalid = false
 	}: {
@@ -18,6 +19,8 @@
 		/** The tags to start with. */
 		values: Array<string>;
 		suggestions: Array<string>;
+		/** Label for the "create new" option, e.g. `Ny forfatter`. See SuggestInput. */
+		createLabel: string;
 		placeholder?: string;
 		invalid?: boolean;
 	} = $props();
@@ -26,18 +29,18 @@
 	let tags = $state([...values]);
 	let draft = $state('');
 
-	const remaining = $derived(
-		suggestions.filter((s) => !tags.some((t) => t.toLowerCase() === s.toLowerCase()))
-	);
+	const sameText = (a: string, b: string) => a.toLowerCase() === b.toLowerCase();
+	const remaining = $derived(suggestions.filter((s) => !tags.some((t) => sameText(t, s))));
+	const isNew = (tag: string) => !suggestions.some((s) => sameText(s, tag));
 
 	/** Adds a tag, using a suggestion's spelling if it matches one. */
 	function add(text: string) {
 		const tag = text.trim();
 		draft = '';
-		if (!tag || tags.some((t) => t.toLowerCase() === tag.toLowerCase())) {
+		if (!tag || tags.some((t) => sameText(t, tag))) {
 			return;
 		}
-		tags.push(suggestions.find((s) => s.toLowerCase() === tag.toLowerCase()) ?? tag);
+		tags.push(suggestions.find((s) => sameText(s, tag)) ?? tag);
 	}
 
 	function onkeydown(event: KeyboardEvent) {
@@ -58,8 +61,11 @@
 	)}
 >
 	{#each tags as tag (tag)}
-		<Badge variant="secondary" class="gap-1 pr-1">
+		<Badge variant={isNew(tag) ? 'outline' : 'secondary'} class="gap-1 pr-1">
 			{tag}
+			{#if isNew(tag)}
+				<span class="text-muted-foreground text-xs font-normal">(ny)</span>
+			{/if}
 			<button
 				type="button"
 				class="hover:text-foreground text-muted-foreground rounded-sm"
@@ -75,6 +81,8 @@
 		{id}
 		bind:value={draft}
 		suggestions={remaining}
+		known={[...suggestions, ...tags]}
+		{createLabel}
 		placeholder={tags.length === 0 ? placeholder : undefined}
 		{invalid}
 		boxed={false}
@@ -82,6 +90,5 @@
 		onselect={add}
 		onenter={add}
 		{onkeydown}
-		onblur={() => add(draft)}
 	/>
 </div>

@@ -28,6 +28,8 @@ export interface AdminMeetBook {
 	genres: Array<string>;
 	originalLanguage: string | null;
 	description: string | null;
+	/** Author names. */
+	authors: Array<string>;
 }
 
 export interface AdminMeet {

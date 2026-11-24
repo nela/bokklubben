@@ -1,6 +1,12 @@
 import { fromDate, toCalendarDateTime } from '@internationalized/date';
 import type { AdminFormState } from '$lib/dto/admin';
 
+/** The page's `form` when it holds a failed form (values and errors), otherwise null. */
+export const failedForm = (form: unknown): AdminFormState | null =>
+	form && typeof form === 'object' && 'errors' in form && form.errors
+		? (form as AdminFormState)
+		: null;
+
 /**
  * The value a form field shows: what was typed if the last save failed, otherwise the saved value.
  */
