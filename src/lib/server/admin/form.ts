@@ -1,15 +1,12 @@
+import { parseDateTime } from '@internationalized/date';
 import { fail, type ActionFailure } from '@sveltejs/kit';
 import { err, ok, type Result } from 'neverthrow';
 import { z } from 'zod';
+import type { AdminFormState, FieldErrors, FormValues } from '$lib/dto/admin';
+import { DbConflictError, type DbError } from '$lib/errors/db';
 import { IMAGE_TYPES, MAX_IMAGE_BYTES } from '$lib/server/images';
 
-/** Field name → messages shown under that field. */
-export type FieldErrors = Partial<Record<string, Array<string>>>;
-
-/** What was typed, sent back so a failed form keeps its values. */
-export type FormValues = Record<string, string | Array<string>>;
-
-export type FormFailure = ActionFailure<{ values: FormValues; errors: FieldErrors }>;
+export type FormFailure = ActionFailure<AdminFormState>;
 
 export interface ParsedForm<T> {
 	data: T;
@@ -19,6 +16,22 @@ export interface ParsedForm<T> {
 export function formFailure(values: FormValues, errors: FieldErrors, status = 400): FormFailure {
 	return fail(status, { values, errors });
 }
+
+/** A failed save: `onConflict` for a duplicate (e.g. same name), otherwise a general error. */
+export function dbFailure(
+	values: FormValues,
+	error: DbError,
+	onConflict: FieldErrors = { form: ['Finnes allerede.'] }
+): FormFailure {
+	if (error instanceof DbConflictError) {
+		return formFailure(values, onConflict, 409);
+	}
+	console.error(error);
+	return formFailure(values, { form: ['Noe gikk galt. Prøv igjen.'] }, 500);
+}
+
+/** The `[id=recordId]` route param: `new` → null, otherwise the record's id. */
+export const parseRecordId = (param: string) => (param === 'new' ? null : Number(param));
 
 /**
  * Parses submitted form data with a Zod schema. Use the `field` helpers below in the schema:
@@ -87,6 +100,20 @@ export const field = {
 		z
 			.preprocess(emptyToUndefined, z.iso.date().optional())
 			.transform((v) => (v ? new Date(v) : null)),
+
+	/** `<input type="datetime-local">` (YYYY-MM-DDTHH:mm), read as Oslo time. */
+	osloDateTime: () =>
+		z
+			.string()
+			.regex(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2})?$/, 'Ugyldig dato og tid')
+			.transform((v, ctx) => {
+				try {
+					return parseDateTime(v).toDate('Europe/Oslo');
+				} catch {
+					ctx.addIssue({ code: 'custom', message: 'Ugyldig dato og tid' });
+					return z.NEVER;
+				}
+			}),
 
 	/** "A, B , C" → ['A', 'B', 'C']. */
 	commaList: () =>

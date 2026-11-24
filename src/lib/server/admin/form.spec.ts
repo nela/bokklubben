@@ -77,6 +77,26 @@ describe('parseForm', () => {
 	});
 });
 
+describe('field.osloDateTime', () => {
+	const meetSchema = z.object({ startsAt: field.osloDateTime() });
+	const parseStartsAt = (value: string) =>
+		parseForm(formData([['startsAt', value]]), meetSchema).map(({ data }) => data.startsAt);
+
+	it('reads the time as Oslo time, winter and summer', () => {
+		expect(parseStartsAt('2026-12-03T19:00')._unsafeUnwrap()).toEqual(
+			new Date('2026-12-03T18:00:00Z')
+		);
+		expect(parseStartsAt('2026-06-10T19:00')._unsafeUnwrap()).toEqual(
+			new Date('2026-06-10T17:00:00Z')
+		);
+	});
+
+	it('rejects an empty or invalid value', () => {
+		expect(parseStartsAt('').isErr()).toBe(true);
+		expect(parseStartsAt('2026-13-40T19:00').isErr()).toBe(true);
+	});
+});
+
 describe('field.optionalImage', () => {
 	const imageSchema = z.object({ photo: field.optionalImage() });
 	const parsePhoto = (photo?: File) =>
