@@ -178,3 +178,11 @@ export const memberSchema = z
 	});
 
 export type MemberInput = z.output<typeof memberSchema>;
+
+export const emailTemplateSchema = z.object({
+	name: field.text(),
+	subject: field.text(),
+	body: field.text()
+});
+
+export type EmailTemplateInput = z.output<typeof emailTemplateSchema>;

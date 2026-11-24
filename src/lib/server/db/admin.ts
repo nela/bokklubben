@@ -4,6 +4,7 @@ import { and, asc, count, eq, inArray, isNotNull, ne, sql } from 'drizzle-orm';
 import { fromPromise, type ResultAsync } from 'neverthrow';
 import type {
 	AdminAuthorListItem,
+	AdminEmailTemplate,
 	AdminElectedBook,
 	AdminMeet,
 	AdminMeetListItem,
@@ -14,6 +15,7 @@ import type {
 import { toDbError, type DbError } from '$lib/errors/db';
 import type {
 	AuthorInput,
+	EmailTemplateInput,
 	MeetBookInput,
 	MeetInput,
 	MeetPitchInput,
@@ -26,6 +28,7 @@ import {
 	authors,
 	bookAuthors,
 	books,
+	emailTemplates,
 	meetAttendance,
 	meetBooks,
 	meets,
@@ -546,5 +549,52 @@ export function fetchAdminAuthors(): ResultAsync<Array<AdminAuthorListItem>, DbE
 			.groupBy(authors.id)
 			.orderBy(asc(authors.name)),
 		toDbError
+	);
+}
+
+const emailTemplateColumns = {
+	id: emailTemplates.id,
+	name: emailTemplates.name,
+	subject: emailTemplates.subject,
+	body: emailTemplates.body,
+	updatedAt: emailTemplates.updatedAt
+};
+
+/** All email templates, by name. */
+export function fetchEmailTemplates(): ResultAsync<Array<AdminEmailTemplate>, DbError> {
+	return fromPromise(
+		db.select(emailTemplateColumns).from(emailTemplates).orderBy(asc(emailTemplates.name)),
+		toDbError
+	);
+}
+
+export function fetchEmailTemplate(id: number): ResultAsync<AdminEmailTemplate | null, DbError> {
+	return fromPromise(
+		db.select(emailTemplateColumns).from(emailTemplates).where(eq(emailTemplates.id, id)),
+		toDbError
+	).map(([template]) => template ?? null);
+}
+
+/** Returns the new template's id. */
+export function createEmailTemplate(input: EmailTemplateInput): ResultAsync<number, DbError> {
+	return fromPromise(
+		db.insert(emailTemplates).values(input).returning({ id: emailTemplates.id }),
+		toDbError
+	).map(([row]) => row.id);
+}
+
+export function updateEmailTemplate(
+	id: number,
+	input: EmailTemplateInput
+): ResultAsync<number, DbError> {
+	return fromPromise(
+		db.update(emailTemplates).set(input).where(eq(emailTemplates.id, id)),
+		toDbError
+	).map(() => id);
+}
+
+export function deleteEmailTemplate(id: number): ResultAsync<void, DbError> {
+	return fromPromise(db.delete(emailTemplates).where(eq(emailTemplates.id, id)), toDbError).map(
+		() => undefined
 	);
 }

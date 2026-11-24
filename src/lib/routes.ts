@@ -12,5 +12,6 @@ export enum AdminRoutes {
 	MEETS = '/admin/meets',
 	BOOKS = '/admin/books',
 	AUTHORS = '/admin/authors',
-	MEMBERS = '/admin/members'
+	MEMBERS = '/admin/members',
+	EMAILS = '/admin/emails'
 }

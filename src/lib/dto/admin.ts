@@ -114,3 +114,12 @@ export interface AdminAuthorListItem {
 	died: Date | null;
 	bookCount: number;
 }
+
+/** An email template written in the admin; see $lib/email-placeholders for what it can contain. */
+export interface AdminEmailTemplate {
+	id: number;
+	name: string;
+	subject: string;
+	body: string;
+	updatedAt: Date;
+}

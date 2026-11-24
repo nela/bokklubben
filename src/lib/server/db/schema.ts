@@ -169,6 +169,21 @@ export const meetAttendance = pgTable(
 	]
 );
 
+/**
+ * Email templates written in the admin, e.g. an invitation. They live here rather than in the
+ * code, which is public.
+ */
+export const emailTemplates = pgTable('email_templates', {
+	id: integer().primaryKey().generatedAlwaysAsIdentity(),
+	name: text().notNull().unique(),
+	subject: text().notNull(),
+	body: text().notNull(),
+	updatedAt: timestamp({ withTimezone: true })
+		.notNull()
+		.defaultNow()
+		.$onUpdate(() => new Date())
+});
+
 export const membersRelations = relations(members, ({ one, many }) => ({
 	user: one(user, { fields: [members.userId], references: [user.id] }),
 	hostedMeets: many(meets),
