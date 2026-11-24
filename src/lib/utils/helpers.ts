@@ -1,3 +1,4 @@
+import { today } from '@internationalized/date';
 import type { Author } from '$lib/dto/dto';
 
 export const validators = {
@@ -62,3 +63,10 @@ export const getLifetime = (author: Pick<Author, 'born' | 'died'>) => {
 	if (diedYear) return `d. ${diedYear}`;
 	return null;
 };
+
+/**
+ * Whether a membership has ended: `memberUntil` (a date column, midnight UTC) is the last day as a
+ * member, so it ends the day after, in Oslo.
+ */
+export const hasLeft = (memberUntil: Date | null, todayInOslo = today('Europe/Oslo').toString()) =>
+	memberUntil !== null && memberUntil.toISOString().slice(0, 10) < todayInOslo;

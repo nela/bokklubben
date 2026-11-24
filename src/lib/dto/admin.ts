@@ -1,5 +1,7 @@
 /** Rows for the admin pages. Unlike the site's DTOs, these include ids and every record. */
 
+import type { AppRole, ClubTitleKey } from './dto';
+
 /** Field name → messages shown under that field. `form` holds errors for the form as a whole. */
 export type FieldErrors = Partial<Record<string, Array<string>>>;
 
@@ -10,6 +12,22 @@ export type FormValues = Record<string, string | Array<string>>;
 export interface AdminFormState {
 	values: FormValues;
 	errors: FieldErrors;
+}
+
+export interface AdminMemberListItem {
+	id: number;
+	firstName: string;
+	lastName: string;
+	nickname: string | null;
+	email: string;
+	role: AppRole;
+	titles: Array<ClubTitleKey>;
+	memberSince: Date;
+	memberUntil: Date | null;
+	/** Has logged in at least once (has a user). Invited members who haven't are false. */
+	signedUp: boolean;
+	/** The membership has ended. */
+	former: boolean;
 }
 
 /** For selects, e.g. choosing a meet's host. */

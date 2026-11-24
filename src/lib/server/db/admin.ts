@@ -7,6 +7,7 @@ import type {
 	AdminElectedBook,
 	AdminMeet,
 	AdminMeetListItem,
+	AdminMemberListItem,
 	MemberOption
 } from '$lib/dto/admin';
 import { toDbError, type DbError } from '$lib/errors/db';
@@ -16,9 +17,34 @@ import type {
 	MeetInput,
 	MeetPitchInput
 } from '$lib/server/admin/schemas';
-import { createSlug, matchSpelling } from '$lib/utils/helpers';
+import { createSlug, hasLeft, matchSpelling } from '$lib/utils/helpers';
 import { db } from './index';
 import { authors, bookAuthors, books, meetAttendance, meetBooks, meets, members } from './schema';
+
+/** All members: current ones first, by member since, then those whose membership has ended. */
+export function fetchAdminMembers(): ResultAsync<Array<AdminMemberListItem>, DbError> {
+	return fromPromise(
+		db
+			.select({
+				id: members.id,
+				firstName: members.firstName,
+				lastName: members.lastName,
+				nickname: members.nickname,
+				email: members.email,
+				role: members.role,
+				titles: members.titles,
+				memberSince: members.memberSince,
+				memberUntil: members.memberUntil,
+				signedUp: sql<boolean>`${members.userId} is not null`
+			})
+			.from(members)
+			.orderBy(asc(members.memberSince), asc(members.firstName)),
+		toDbError
+	).map((rows) => {
+		const list = rows.map((m) => ({ ...m, former: hasLeft(m.memberUntil) }));
+		return [...list.filter((m) => !m.former), ...list.filter((m) => m.former)];
+	});
+}
 
 /** All members, by first name, for selects such as a meet's host. */
 export function fetchMemberOptions(): ResultAsync<Array<MemberOption>, DbError> {
