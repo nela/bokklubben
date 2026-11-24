@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { parseForm } from './form';
-import { meetSchema } from './schemas';
+import { meetSchema, memberSchema } from './schemas';
 
 const formData = (entries: Record<string, string>) => {
 	const data = new FormData();
@@ -129,5 +129,43 @@ describe('meetSchema', () => {
 	it('rejects an invalid ISBN', () => {
 		const result = parseForm(formData({ ...meet, bookTitle: 'Dune', bookIsbn: '123' }), meetSchema);
 		expect(result._unsafeUnwrapErr().data.errors.bookIsbn).toBeDefined();
+	});
+});
+
+describe('memberSchema', () => {
+	const member = {
+		firstName: 'Ola',
+		lastName: 'Nordmann',
+		nickname: '',
+		email: ' Ola.Nordmann@Example.com ',
+		role: 'regular',
+		memberSince: '2020-01-01',
+		memberUntil: ''
+	};
+
+	it('lowercases the email and takes titles as keys', () => {
+		const data = formData(member);
+		data.append('titles', 'CTO');
+		data.append('titles', 'BUREAUCRAT');
+
+		expect(parseForm(data, memberSchema)._unsafeUnwrap().data).toMatchObject({
+			email: 'ola.nordmann@example.com',
+			nickname: null,
+			titles: ['CTO', 'BUREAUCRAT'],
+			memberUntil: null
+		});
+	});
+
+	it('rejects an unknown title, role or bad email', () => {
+		const data = formData({ ...member, role: 'owner', email: 'not-an-email' });
+		data.append('titles', 'King');
+
+		const { errors } = parseForm(data, memberSchema)._unsafeUnwrapErr().data;
+		expect(Object.keys(errors)).toEqual(expect.arrayContaining(['role', 'email', 'titles']));
+	});
+
+	it('rejects an end date before the start date', () => {
+		const result = parseForm(formData({ ...member, memberUntil: '2019-12-31' }), memberSchema);
+		expect(result._unsafeUnwrapErr().data.errors.memberUntil).toBeDefined();
 	});
 });

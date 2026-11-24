@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { appRole, clubTitle } from '$lib/server/db/schema';
 import { field } from './form';
 
 /** ISBN-10 or ISBN-13; hyphens and spaces are dropped. */
@@ -154,3 +155,23 @@ export const meetSchema = z
 export type MeetInput = z.output<typeof meetSchema>;
 export type MeetBookInput = NonNullable<MeetInput['book']>;
 export type MeetPitchInput = MeetInput['pitches'][number];
+
+export const memberSchema = z
+	.object({
+		firstName: field.text(),
+		lastName: field.text(),
+		nickname: field.optionalText(),
+		/** Stored lowercased, as logins compare it. */
+		email: z.string().trim().toLowerCase().pipe(z.email('Ugyldig e-post')),
+		role: z.enum(appRole.enumValues),
+		/** One checkbox per title; the keys, not the display labels. */
+		titles: field.array(z.enum(clubTitle.enumValues)),
+		memberSince: field.date(),
+		memberUntil: field.optionalDate()
+	})
+	.refine((m) => m.memberUntil === null || m.memberUntil >= m.memberSince, {
+		path: ['memberUntil'],
+		message: 'Kan ikke være før «medlem siden»'
+	});
+
+export type MemberInput = z.output<typeof memberSchema>;

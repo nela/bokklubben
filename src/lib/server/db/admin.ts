@@ -7,6 +7,7 @@ import type {
 	AdminElectedBook,
 	AdminMeet,
 	AdminMeetListItem,
+	AdminMember,
 	AdminMemberListItem,
 	MemberOption
 } from '$lib/dto/admin';
@@ -15,11 +16,21 @@ import type {
 	AuthorInput,
 	MeetBookInput,
 	MeetInput,
-	MeetPitchInput
+	MeetPitchInput,
+	MemberInput
 } from '$lib/server/admin/schemas';
 import { createSlug, hasLeft, matchSpelling } from '$lib/utils/helpers';
 import { db } from './index';
-import { authors, bookAuthors, books, meetAttendance, meetBooks, meets, members } from './schema';
+import {
+	authors,
+	bookAuthors,
+	books,
+	meetAttendance,
+	meetBooks,
+	meets,
+	members,
+	user
+} from './schema';
 
 /** All members: current ones first, by member since, then those whose membership has ended. */
 export function fetchAdminMembers(): ResultAsync<Array<AdminMemberListItem>, DbError> {
@@ -44,6 +55,50 @@ export function fetchAdminMembers(): ResultAsync<Array<AdminMemberListItem>, DbE
 		const list = rows.map((m) => ({ ...m, former: hasLeft(m.memberUntil) }));
 		return [...list.filter((m) => !m.former), ...list.filter((m) => m.former)];
 	});
+}
+
+export function fetchAdminMember(id: number): ResultAsync<AdminMember | null, DbError> {
+	return fromPromise(
+		db
+			.select({
+				id: members.id,
+				firstName: members.firstName,
+				lastName: members.lastName,
+				nickname: members.nickname,
+				email: members.email,
+				role: members.role,
+				titles: members.titles,
+				memberSince: members.memberSince,
+				memberUntil: members.memberUntil,
+				signedUp: sql<boolean>`${members.userId} is not null`
+			})
+			.from(members)
+			.where(eq(members.id, id)),
+		toDbError
+	).map(([member]) => member ?? null);
+}
+
+/**
+ * Updates a member. For a member who has signed up, a changed email also changes their login's
+ * email, or password login would stop matching.
+ */
+export function updateMember(id: number, input: MemberInput): ResultAsync<number, DbError> {
+	return fromPromise(
+		db.transaction(async (tx) => {
+			const [current] = await tx
+				.select({ userId: members.userId, email: members.email })
+				.from(members)
+				.where(eq(members.id, id));
+
+			await tx.update(members).set(input).where(eq(members.id, id));
+
+			if (current?.userId && current.email.toLowerCase() !== input.email) {
+				await tx.update(user).set({ email: input.email }).where(eq(user.id, current.userId));
+			}
+			return id;
+		}),
+		toDbError
+	);
 }
 
 /** All members, by first name, for selects such as a meet's host. */

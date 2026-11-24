@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { Badge } from '$lib/components/ui/badge';
 	import { ClubTitle } from '$lib/dto/dto';
+	import { AdminRoutes } from '$lib/routes';
 	import type { PageProps } from './$types';
 
 	let { data }: PageProps = $props();
@@ -28,12 +29,12 @@
 				<tr class={['border-b align-top last:border-0', member.former && 'text-muted-foreground']}>
 					<td class="py-2 pr-4">
 						<div class="flex flex-wrap items-center gap-1.5">
-							<span>
+							<a href={`${AdminRoutes.MEMBERS}/${member.id}`} class="hover:underline">
 								{member.firstName}
 								{#if member.nickname}<span class="text-muted-foreground">«{member.nickname}»</span
 									>{/if}
 								{member.lastName}
-							</span>
+							</a>
 							{#if !member.signedUp}
 								<Badge
 									variant="outline"

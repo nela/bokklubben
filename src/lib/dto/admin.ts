@@ -30,6 +30,20 @@ export interface AdminMemberListItem {
 	former: boolean;
 }
 
+/** A member, as edited in the member form. */
+export interface AdminMember {
+	id: number;
+	firstName: string;
+	lastName: string;
+	nickname: string | null;
+	email: string;
+	role: AppRole;
+	titles: Array<ClubTitleKey>;
+	memberSince: Date;
+	memberUntil: Date | null;
+	signedUp: boolean;
+}
+
 /** For selects, e.g. choosing a meet's host. */
 export interface MemberOption {
 	id: number;
