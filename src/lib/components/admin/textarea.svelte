@@ -2,11 +2,12 @@
 	import type { HTMLTextareaAttributes } from 'svelte/elements';
 	import { cn } from '$lib/utils/shadcn';
 
-	let { class: className, ...restProps }: HTMLTextareaAttributes = $props();
+	let { class: className, value = $bindable(), ...restProps }: HTMLTextareaAttributes = $props();
 </script>
 
 <!-- Styled like $lib/components/ui/input. -->
 <textarea
+	bind:value
 	class={cn(
 		'border-input bg-background dark:bg-input/30 placeholder:text-muted-foreground min-h-24 w-full rounded-md border px-3 py-2 text-base shadow-xs transition-[color,box-shadow] outline-none md:text-sm',
 		'focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]',

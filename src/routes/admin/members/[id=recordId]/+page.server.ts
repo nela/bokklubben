@@ -1,10 +1,17 @@
 import { error, redirect } from '@sveltejs/kit';
+import { ResultAsync } from 'neverthrow';
 import { AdminRoutes } from '$lib/routes';
 import { dbFailure, formFailure, parseForm, parseRecordId } from '$lib/server/admin/form';
-import { memberSchema } from '$lib/server/admin/schemas';
-import { deleteMember, fetchAdminMember, updateMember } from '$lib/server/db/admin';
+import { memberSchema, sendEmailSchema } from '$lib/server/admin/schemas';
+import {
+	createEmailTemplate,
+	deleteMember,
+	fetchAdminMember,
+	fetchEmailTemplates,
+	updateMember
+} from '$lib/server/db/admin';
 import { deleteImage, uploadImage } from '$lib/server/images';
-import { sendInvite } from '$lib/server/services/invite';
+import { sendMemberEmail } from '$lib/server/services/member-email';
 import { createSlug, hasLeft } from '$lib/utils/helpers';
 import type { Actions, PageServerLoad } from './$types';
 
@@ -16,16 +23,18 @@ export const load: PageServerLoad = async ({ params }) => {
 		error(404, 'Nye medlemmer kommer snart.');
 	}
 
-	const member = await fetchAdminMember(id);
-	if (member.isErr()) {
-		console.error(member.error);
+	const result = await ResultAsync.combine([fetchAdminMember(id), fetchEmailTemplates()]);
+	if (result.isErr()) {
+		console.error(result.error);
 		error(500, 'Kunne ikke laste medlemmet.');
 	}
-	if (!member.value) {
+
+	const [member, emailTemplates] = result.value;
+	if (!member) {
 		error(404, 'Fant ikke medlemmet.');
 	}
 
-	return { member: member.value };
+	return { member, emailTemplates };
 };
 
 export const actions: Actions = {
@@ -105,31 +114,52 @@ export const actions: Actions = {
 		redirect(303, AdminRoutes.MEMBERS);
 	},
 
-	/** Emails the invitation again, to a member who hasn't signed up yet. */
-	invite: async ({ params }) => {
+	/**
+	 * From the "Send e-post" panel: sends the written email to this member, and can first save it
+	 * as a new template (unfilled, so it works for anyone).
+	 */
+	sendEmail: async ({ params, request }) => {
 		const id = parseRecordId(params.id);
 		if (id === null) {
 			error(400, 'Medlemmet er ikke lagret.');
 		}
 
+		const form = parseForm(await request.formData(), sendEmailSchema);
+		if (form.isErr()) {
+			return form.error;
+		}
+		const { data, values } = form.value;
+
 		const member = await fetchAdminMember(id);
 		if (member.isErr()) {
 			console.error(member.error);
-			return formFailure({}, { form: ['Kunne ikke sende invitasjonen.'] }, 500);
+			return formFailure(values, { form: ['Kunne ikke sende e-posten.'] }, 500);
 		}
 		if (!member.value) {
 			error(404, 'Fant ikke medlemmet.');
 		}
-		if (member.value.signedUp) {
-			return formFailure({}, { form: ['Medlemmet har allerede registrert seg.'] });
+
+		let savedTemplate: { id: number; name: string } | null = null;
+		if (data.saveAsTemplate && data.templateName) {
+			const name = data.templateName;
+			const created = await createEmailTemplate({ name, subject: data.subject, body: data.body });
+			if (created.isErr()) {
+				return dbFailure(values, created.error, {
+					email_templates_name_unique: {
+						templateName: ['Det finnes allerede en mal med dette navnet.']
+					}
+				});
+			}
+			savedTemplate = { id: created.value, name };
 		}
 
-		const sent = await sendInvite(member.value.email);
+		const sent = await sendMemberEmail(member.value, data);
 		if (sent.isErr()) {
 			console.error(sent.error);
-			return formFailure({}, { form: ['Kunne ikke sende invitasjonen.'] }, 502);
+			const saved = savedTemplate ? ` Malen «${savedTemplate.name}» ble lagret.` : '';
+			return formFailure(values, { form: [`Kunne ikke sende e-posten.${saved}`] }, 502);
 		}
 
-		return { invitedEmail: member.value.email };
+		return { sentTo: member.value.email, savedTemplate };
 	}
 };

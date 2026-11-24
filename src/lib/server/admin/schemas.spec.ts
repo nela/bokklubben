@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { parseForm } from './form';
-import { meetSchema, memberSchema } from './schemas';
+import { meetSchema, memberSchema, sendEmailSchema } from './schemas';
 
 const formData = (entries: Record<string, string>) => {
 	const data = new FormData();
@@ -182,5 +182,22 @@ describe('memberSchema', () => {
 	it('rejects an end date before the start date', () => {
 		const result = parseForm(formData({ ...member, memberUntil: '2019-12-31' }), memberSchema);
 		expect(result._unsafeUnwrapErr().data.errors.memberUntil).toBeDefined();
+	});
+});
+
+describe('sendEmailSchema', () => {
+	const email = { subject: 'Hei {fornavn}', body: 'Velkommen!' };
+
+	it('sends without saving a template by default', () => {
+		const result = parseForm(formData(email), sendEmailSchema);
+		expect(result._unsafeUnwrap().data).toMatchObject({
+			saveAsTemplate: false,
+			templateName: null
+		});
+	});
+
+	it('needs a name to save the email as a template', () => {
+		const result = parseForm(formData({ ...email, saveAsTemplate: 'on' }), sendEmailSchema);
+		expect(result._unsafeUnwrapErr().data.errors.templateName).toEqual(['Gi malen et navn']);
 	});
 });

@@ -186,3 +186,16 @@ export const emailTemplateSchema = z.object({
 });
 
 export type EmailTemplateInput = z.output<typeof emailTemplateSchema>;
+
+/** An email written (or picked from a template) in the "Send e-post" panel. */
+export const sendEmailSchema = z
+	.object({
+		subject: field.text(),
+		body: field.text(),
+		saveAsTemplate: field.checkbox(),
+		templateName: field.optionalText()
+	})
+	.refine((m) => !m.saveAsTemplate || m.templateName !== null, {
+		path: ['templateName'],
+		message: 'Gi malen et navn'
+	});
