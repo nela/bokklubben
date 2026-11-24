@@ -89,6 +89,13 @@
 						{/snippet}
 					</DropdownMenu.Trigger>
 					<DropdownMenu.Content side="top" class="w-(--bits-dropdown-menu-anchor-width)">
+						{#if member.role === 'admin'}
+							<DropdownMenu.Item>
+								{#snippet child({ props })}
+									<a href={Routes.ADMIN} {...props}>Admin</a>
+								{/snippet}
+							</DropdownMenu.Item>
+						{/if}
 						<DropdownMenu.Item onclick={toggleMode}>
 							<span aria-label="Toggle mode">Toggle mode</span>
 						</DropdownMenu.Item>
