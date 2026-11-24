@@ -40,7 +40,7 @@
 <!-- Starts from «Invitasjon» for members who haven't signed up, if that template exists. -->
 <SendEmailSheet
 	bind:open={emailOpen}
-	recipient={data.member}
+	recipients={[data.member]}
 	templates={data.emailTemplates}
 	preselect={data.member.signedUp ? undefined : 'Invitasjon'}
 />

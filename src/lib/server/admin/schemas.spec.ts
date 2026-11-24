@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { parseForm } from './form';
-import { meetSchema, memberSchema, sendEmailSchema } from './schemas';
+import { meetSchema, memberSchema, sendBulkEmailSchema, sendEmailSchema } from './schemas';
 
 const formData = (entries: Record<string, string>) => {
 	const data = new FormData();
@@ -199,5 +199,17 @@ describe('sendEmailSchema', () => {
 	it('needs a name to save the email as a template', () => {
 		const result = parseForm(formData({ ...email, saveAsTemplate: 'on' }), sendEmailSchema);
 		expect(result._unsafeUnwrapErr().data.errors.templateName).toEqual(['Gi malen et navn']);
+	});
+});
+
+describe('sendBulkEmailSchema', () => {
+	it('takes the chosen members, and needs at least one', () => {
+		const data = formData({ subject: 'Nytt', body: 'Hei' });
+		data.append('recipientIds', '3');
+		data.append('recipientIds', '5');
+		expect(parseForm(data, sendBulkEmailSchema)._unsafeUnwrap().data.recipientIds).toEqual([3, 5]);
+
+		const none = parseForm(formData({ subject: 'Nytt', body: 'Hei' }), sendBulkEmailSchema);
+		expect(none._unsafeUnwrapErr().data.errors.recipientIds).toEqual(['Velg minst én mottaker']);
 	});
 });

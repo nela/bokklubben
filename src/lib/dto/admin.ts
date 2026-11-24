@@ -123,3 +123,12 @@ export interface AdminEmailTemplate {
 	body: string;
 	updatedAt: Date;
 }
+
+/** What sending from the "Send e-post" panel returns. */
+export interface SendEmailResult {
+	/** Names of the members it was sent to. */
+	sent: Array<string>;
+	/** Names of the members it couldn't be sent to. */
+	failed: Array<string>;
+	savedTemplate: { id: number; name: string } | null;
+}

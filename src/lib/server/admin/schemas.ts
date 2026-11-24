@@ -187,15 +187,30 @@ export const emailTemplateSchema = z.object({
 
 export type EmailTemplateInput = z.output<typeof emailTemplateSchema>;
 
-/** An email written (or picked from a template) in the "Send e-post" panel. */
-export const sendEmailSchema = z
+const emailFields = {
+	subject: field.text(),
+	body: field.text(),
+	saveAsTemplate: field.checkbox(),
+	templateName: field.optionalText()
+};
+
+/** Saving the email as a template needs a name for it. */
+const hasTemplateName = (m: { saveAsTemplate: boolean; templateName: string | null }) =>
+	!m.saveAsTemplate || m.templateName !== null;
+const templateNameMissing = { path: ['templateName'], message: 'Gi malen et navn' };
+
+/** An email written (or picked from a template) in the "Send e-post" panel, to one member. */
+export const sendEmailSchema = z.object(emailFields).refine(hasTemplateName, templateNameMissing);
+
+export type SendEmailInput = z.output<typeof sendEmailSchema>;
+
+/** The same, to the members chosen in the member list. */
+export const sendBulkEmailSchema = z
 	.object({
-		subject: field.text(),
-		body: field.text(),
-		saveAsTemplate: field.checkbox(),
-		templateName: field.optionalText()
+		...emailFields,
+		/** Member ids, one hidden field each. */
+		recipientIds: field
+			.array(z.coerce.number().int().positive())
+			.refine((ids) => ids.length > 0, 'Velg minst én mottaker')
 	})
-	.refine((m) => !m.saveAsTemplate || m.templateName !== null, {
-		path: ['templateName'],
-		message: 'Gi malen et navn'
-	});
+	.refine(hasTemplateName, templateNameMissing);

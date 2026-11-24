@@ -4,7 +4,7 @@
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
 	import * as Sheet from '$lib/components/ui/sheet';
-	import type { AdminEmailTemplate, FieldErrors } from '$lib/dto/admin';
+	import type { AdminEmailTemplate, FieldErrors, SendEmailResult } from '$lib/dto/admin';
 	import { emailPlaceholders } from '$lib/email-placeholders';
 	import FormField from './form-field.svelte';
 	import Select from './select.svelte';
@@ -12,12 +12,13 @@
 
 	let {
 		open = $bindable(false),
-		recipient,
+		recipients,
 		templates,
 		preselect
 	}: {
 		open?: boolean;
-		recipient: { firstName: string; lastName: string; email: string };
+		/** Each gets their own email. */
+		recipients: Array<{ id: number; firstName: string; lastName: string; email: string }>;
 		templates: Array<AdminEmailTemplate>;
 		/** Name of the template to start with, if it exists (e.g. «Invitasjon»). */
 		preselect?: string;
@@ -59,14 +60,24 @@
 		<Sheet.Header>
 			<Sheet.Title>Send e-post</Sheet.Title>
 			<Sheet.Description>
-				Til {recipient.firstName}
-				{recipient.lastName} ({recipient.email}).
+				{#if recipients.length === 1}
+					Til {recipients[0].firstName}
+					{recipients[0].lastName} ({recipients[0].email}).
+				{:else}
+					Til {recipients.length} medlemmer. Hver får sin egen e-post.
+				{/if}
 			</Sheet.Description>
+			{#if recipients.length > 1}
+				<details class="text-muted-foreground text-sm">
+					<summary class="cursor-pointer">Vis mottakere</summary>
+					<p class="mt-1">{recipients.map((r) => `${r.firstName} ${r.lastName}`).join(', ')}</p>
+				</details>
+			{/if}
 		</Sheet.Header>
 
 		<!--
-			Posts to the member page's sendEmail action. The result is handled here, without updating
-			the page's `form`, so the member form keeps what has been typed into it.
+			Posts to the page's sendEmail action (member page or member list). The result is handled
+			here, without updating the page's `form`, so a form on the page keeps what's typed in it.
 		-->
 		<form
 			method="POST"
@@ -77,10 +88,7 @@
 				return async ({ result }) => {
 					pending = false;
 					if (result.type === 'success') {
-						const { sentTo, savedTemplate } = result.data as {
-							sentTo: string;
-							savedTemplate: AdminEmailTemplate | null;
-						};
+						const { sent, failed, savedTemplate } = result.data as unknown as SendEmailResult;
 						if (savedTemplate) {
 							available = [
 								...available,
@@ -88,7 +96,18 @@
 							];
 							toast.success(`Malen «${savedTemplate.name}» er lagret`);
 						}
-						toast.success(`E-post sendt til ${sentTo}`);
+						if (failed.length > 0) {
+							toast.warning(
+								`Sendt til ${sent.length} av ${sent.length + failed.length}. Feilet: ${failed.join(', ')}`,
+								{ duration: Infinity }
+							);
+						} else {
+							toast.success(
+								sent.length === 1
+									? `E-post sendt til ${sent[0]}`
+									: `E-post sendt til ${sent.length} medlemmer`
+							);
+						}
 						open = false;
 					} else if (result.type === 'failure') {
 						errors = (result.data?.errors as FieldErrors | undefined) ?? {};
@@ -98,6 +117,10 @@
 				};
 			}}
 		>
+			{#each recipients as recipient (recipient.id)}
+				<input type="hidden" name="recipientIds" value={recipient.id} />
+			{/each}
+
 			<FormField label="Mal" id="send-email-template">
 				<Select
 					id="send-email-template"
@@ -164,8 +187,10 @@
 				</FormField>
 			{/if}
 
-			{#if errors.form}
-				<p class="text-destructive text-sm">{errors.form.join(' ')}</p>
+			{#if errors.form || errors.recipientIds}
+				<p class="text-destructive text-sm">
+					{[...(errors.form ?? []), ...(errors.recipientIds ?? [])].join(' ')}
+				</p>
 			{/if}
 
 			<div class="flex gap-2">

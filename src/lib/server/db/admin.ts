@@ -145,6 +145,20 @@ export function deleteMember(id: number): ResultAsync<{ imagePath: string | null
 	);
 }
 
+/** Name and address of the given members, for sending them email. */
+export function fetchEmailRecipients(
+	ids: Array<number>
+): ResultAsync<Array<{ firstName: string; lastName: string; email: string }>, DbError> {
+	return fromPromise(
+		db
+			.select({ firstName: members.firstName, lastName: members.lastName, email: members.email })
+			.from(members)
+			.where(inArray(members.id, ids))
+			.orderBy(asc(members.firstName)),
+		toDbError
+	);
+}
+
 /** All members, by first name, for selects such as a meet's host. */
 export function fetchMemberOptions(): ResultAsync<Array<MemberOption>, DbError> {
 	return fromPromise(

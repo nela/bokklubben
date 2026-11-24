@@ -3,15 +3,14 @@ import { ResultAsync } from 'neverthrow';
 import { AdminRoutes } from '$lib/routes';
 import { dbFailure, formFailure, parseForm, parseRecordId } from '$lib/server/admin/form';
 import { memberSchema, sendEmailSchema } from '$lib/server/admin/schemas';
+import { sendEmailToMembers } from '$lib/server/admin/send-email';
 import {
-	createEmailTemplate,
 	deleteMember,
 	fetchAdminMember,
 	fetchEmailTemplates,
 	updateMember
 } from '$lib/server/db/admin';
 import { deleteImage, uploadImage } from '$lib/server/images';
-import { sendMemberEmail } from '$lib/server/services/member-email';
 import { createSlug, hasLeft } from '$lib/utils/helpers';
 import type { Actions, PageServerLoad } from './$types';
 
@@ -115,8 +114,8 @@ export const actions: Actions = {
 	},
 
 	/**
-	 * From the "Send e-post" panel: sends the written email to this member, and can first save it
-	 * as a new template (unfilled, so it works for anyone).
+	 * From the "Send e-post" panel: sends the written email to this member; see
+	 * `sendEmailToMembers`.
 	 */
 	sendEmail: async ({ params, request }) => {
 		const id = parseRecordId(params.id);
@@ -139,27 +138,6 @@ export const actions: Actions = {
 			error(404, 'Fant ikke medlemmet.');
 		}
 
-		let savedTemplate: { id: number; name: string } | null = null;
-		if (data.saveAsTemplate && data.templateName) {
-			const name = data.templateName;
-			const created = await createEmailTemplate({ name, subject: data.subject, body: data.body });
-			if (created.isErr()) {
-				return dbFailure(values, created.error, {
-					email_templates_name_unique: {
-						templateName: ['Det finnes allerede en mal med dette navnet.']
-					}
-				});
-			}
-			savedTemplate = { id: created.value, name };
-		}
-
-		const sent = await sendMemberEmail(member.value, data);
-		if (sent.isErr()) {
-			console.error(sent.error);
-			const saved = savedTemplate ? ` Malen «${savedTemplate.name}» ble lagret.` : '';
-			return formFailure(values, { form: [`Kunne ikke sende e-posten.${saved}`] }, 502);
-		}
-
-		return { sentTo: member.value.email, savedTemplate };
+		return sendEmailToMembers(data, values, [member.value]);
 	}
 };
