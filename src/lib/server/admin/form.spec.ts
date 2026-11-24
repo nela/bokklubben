@@ -76,3 +76,23 @@ describe('parseForm', () => {
 		expect(Object.keys(failure.data.errors)).toEqual(expect.arrayContaining(['name', 'pages']));
 	});
 });
+
+describe('field.optionalImage', () => {
+	const imageSchema = z.object({ photo: field.optionalImage() });
+	const parsePhoto = (photo?: File) =>
+		parseForm(formData(photo ? [['photo', photo]] : []), imageSchema);
+
+	it('accepts a raster image and an empty input', () => {
+		const jpg = new File(['x'], 'a.jpg', { type: 'image/jpeg' });
+		expect(parsePhoto(jpg)._unsafeUnwrap().data.photo).toBe(jpg);
+		expect(parsePhoto(new File([], ''))._unsafeUnwrap().data.photo).toBeUndefined();
+	});
+
+	it('rejects SVG and files over 4 MB', () => {
+		const svg = new File(['<svg/>'], 'a.svg', { type: 'image/svg+xml' });
+		const huge = new File([new Uint8Array(4 * 1024 * 1024 + 1)], 'a.png', { type: 'image/png' });
+
+		expect(parsePhoto(svg).isErr()).toBe(true);
+		expect(parsePhoto(huge).isErr()).toBe(true);
+	});
+});

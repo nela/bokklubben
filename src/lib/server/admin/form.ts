@@ -1,6 +1,7 @@
 import { fail, type ActionFailure } from '@sveltejs/kit';
 import { err, ok, type Result } from 'neverthrow';
 import { z } from 'zod';
+import { IMAGE_TYPES, MAX_IMAGE_BYTES } from '$lib/server/images';
 
 /** Field name → messages shown under that field. */
 export type FieldErrors = Partial<Record<string, Array<string>>>;
@@ -106,5 +107,13 @@ export const field = {
 	/** A single checkbox: present → true. */
 	checkbox: () => z.preprocess((v) => v !== undefined, z.boolean()),
 
-	optionalFile: () => z.instanceof(File).optional()
+	optionalFile: () => z.instanceof(File).optional(),
+
+	/** An uploaded image that `uploadImage` accepts, or nothing. */
+	optionalImage: () =>
+		z
+			.instanceof(File)
+			.refine((f) => f.type in IMAGE_TYPES, 'Må være JPG, PNG, WebP, GIF eller AVIF')
+			.refine((f) => f.size <= MAX_IMAGE_BYTES, 'Bildet kan være maks 4 MB')
+			.optional()
 };
