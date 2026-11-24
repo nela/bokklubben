@@ -118,6 +118,30 @@ export function updateMember(
 	);
 }
 
+/**
+ * Deletes a member and their login (`user`, which takes their sessions and login methods with it,
+ * so they're logged out). Their attendance goes too; meets they hosted and books they pitched stay,
+ * without them. Returns the photo path, so the file can be deleted.
+ */
+export function deleteMember(id: number): ResultAsync<{ imagePath: string | null }, DbError> {
+	return fromPromise(
+		db.transaction(async (tx) => {
+			const [current] = await tx
+				.select({ userId: members.userId, imagePath: members.imagePath })
+				.from(members)
+				.where(eq(members.id, id));
+
+			if (current?.userId) {
+				await tx.delete(user).where(eq(user.id, current.userId));
+			}
+			await tx.delete(members).where(eq(members.id, id));
+
+			return { imagePath: current?.imagePath ?? null };
+		}),
+		toDbError
+	);
+}
+
 /** All members, by first name, for selects such as a meet's host. */
 export function fetchMemberOptions(): ResultAsync<Array<MemberOption>, DbError> {
 	return fromPromise(

@@ -2,7 +2,7 @@ import { error, redirect } from '@sveltejs/kit';
 import { AdminRoutes } from '$lib/routes';
 import { dbFailure, formFailure, parseForm, parseRecordId } from '$lib/server/admin/form';
 import { memberSchema } from '$lib/server/admin/schemas';
-import { fetchAdminMember, updateMember } from '$lib/server/db/admin';
+import { deleteMember, fetchAdminMember, updateMember } from '$lib/server/db/admin';
 import { deleteImage, uploadImage } from '$lib/server/images';
 import { createSlug, hasLeft } from '$lib/utils/helpers';
 import type { Actions, PageServerLoad } from './$types';
@@ -81,6 +81,25 @@ export const actions: Actions = {
 		if (imagePath !== undefined && previousImagePath && previousImagePath !== imagePath) {
 			await deleteImage('private', previousImagePath).orTee((e) => console.error(e));
 		}
+
+		redirect(303, AdminRoutes.MEMBERS);
+	},
+
+	delete: async ({ params, locals }) => {
+		const id = parseRecordId(params.id);
+		if (id === null) {
+			error(400, 'Medlemmet er ikke lagret.');
+		}
+		if (locals.member?.id === id) {
+			return formFailure({}, { form: ['Du kan ikke slette deg selv.'] });
+		}
+
+		const deleted = await deleteMember(id);
+		if (deleted.isErr()) {
+			console.error(deleted.error);
+			return formFailure({}, { form: ['Kunne ikke slette medlemmet.'] }, 500);
+		}
+		await deleteImage('private', deleted.value.imagePath).orTee((e) => console.error(e));
 
 		redirect(303, AdminRoutes.MEMBERS);
 	}
