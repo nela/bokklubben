@@ -4,11 +4,11 @@ import { AdminRoutes } from '$lib/routes';
 import { dbFailure, formFailure, parseForm, parseRecordId } from '$lib/server/admin/form';
 import { meetSchema } from '$lib/server/admin/schemas';
 import {
-	createMeet,
 	deleteMeet,
 	fetchAdminMeet,
+	fetchGenres,
 	fetchMemberOptions,
-	updateMeet
+	saveMeet
 } from '$lib/server/db/admin';
 import type { Actions, PageServerLoad } from './$types';
 
@@ -17,19 +17,20 @@ export const load: PageServerLoad = async ({ params }) => {
 
 	const result = await ResultAsync.combine([
 		id === null ? okAsync(null) : fetchAdminMeet(id),
-		fetchMemberOptions()
+		fetchMemberOptions(),
+		fetchGenres()
 	]);
 	if (result.isErr()) {
 		console.error(result.error);
 		error(500, 'Kunne ikke laste møtet.');
 	}
 
-	const [meet, members] = result.value;
+	const [meet, members, genres] = result.value;
 	if (id !== null && !meet) {
 		error(404, 'Fant ikke møtet.');
 	}
 
-	return { meet, members };
+	return { meet, members, genres };
 };
 
 export const actions: Actions = {
@@ -40,10 +41,12 @@ export const actions: Actions = {
 		}
 
 		const { data, values } = form.value;
-		const id = parseRecordId(params.id);
-		const saved = await (id === null ? createMeet(data) : updateMeet(id, data));
+		const saved = await saveMeet(parseRecordId(params.id), data);
 		if (saved.isErr()) {
-			return dbFailure(values, saved.error);
+			return dbFailure(values, saved.error, {
+				books_slug_unique: { bookTitle: ['Det finnes allerede en bok med denne tittelen.'] },
+				books_isbn_unique: { bookIsbn: ['Det finnes allerede en bok med dette ISBN-nummeret.'] }
+			});
 		}
 
 		redirect(303, AdminRoutes.MEETS);

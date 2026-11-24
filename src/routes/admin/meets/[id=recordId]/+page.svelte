@@ -12,7 +12,7 @@
 	{data.meet ? `Møte ${dateFmt.format(data.meet.startsAt)}` : 'Nytt møte'}
 </h1>
 
-<MeetForm meet={data.meet} members={data.members} {form} />
+<MeetForm meet={data.meet} members={data.members} genres={data.genres} {form} />
 
 {#if data.meet}
 	<div class="mt-10 border-t pt-6">

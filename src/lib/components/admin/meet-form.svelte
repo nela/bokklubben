@@ -13,11 +13,14 @@
 	let {
 		meet,
 		members,
+		genres,
 		form
 	}: {
 		/** null when creating a new meet. */
 		meet: AdminMeet | null;
 		members: Array<MemberOption>;
+		/** Genres already in use, suggested in the genre field. */
+		genres: Array<string>;
 		form: AdminFormState | null | undefined;
 	} = $props();
 
@@ -26,6 +29,7 @@
 	const value = (name: string, saved: string) => fieldValue(form, name, saved);
 	const errors = $derived(form?.errors ?? {});
 	const hostId = $derived(value('hostId', meet?.hostId?.toString() ?? ''));
+	const book = $derived(meet?.book ?? null);
 </script>
 
 <form
@@ -96,6 +100,109 @@
 			aria-invalid={!!errors.notes}
 		/>
 	</FormField>
+
+	<!-- The border sits on a wrapper: a fieldset draws its legend on top of its own top border. -->
+	<div class="mt-4 border-t pt-6">
+		<fieldset class="flex flex-col gap-4">
+			<legend class="mb-1 text-lg font-semibold">Bok</legend>
+			<p class="text-muted-foreground text-sm">
+				{book
+					? 'Boken som leses på dette møtet. Endringer her oppdaterer boken.'
+					: 'Boken som skal leses. Den opprettes når møtet lagres. La tittelen stå tom for å legge til bok senere.'}
+			</p>
+
+			<FormField label="Tittel" id="bookTitle" errors={errors.bookTitle}>
+				<Input
+					id="bookTitle"
+					name="bookTitle"
+					required={!!book}
+					value={value('bookTitle', book?.title ?? '')}
+					aria-invalid={!!errors.bookTitle}
+				/>
+			</FormField>
+
+			<div class="grid gap-4 sm:grid-cols-3">
+				<FormField label="ISBN" id="bookIsbn" errors={errors.bookIsbn}>
+					<Input
+						id="bookIsbn"
+						name="bookIsbn"
+						inputmode="numeric"
+						value={value('bookIsbn', book?.isbn ?? '')}
+						aria-invalid={!!errors.bookIsbn}
+					/>
+				</FormField>
+				<FormField label="Sider" id="bookPages" errors={errors.bookPages}>
+					<Input
+						id="bookPages"
+						name="bookPages"
+						type="number"
+						min="1"
+						value={value('bookPages', book?.pages?.toString() ?? '')}
+						aria-invalid={!!errors.bookPages}
+					/>
+				</FormField>
+				<FormField
+					label="Første utgivelse"
+					id="bookFirstPublished"
+					errors={errors.bookFirstPublished}
+				>
+					<Input
+						id="bookFirstPublished"
+						name="bookFirstPublished"
+						type="number"
+						placeholder="År"
+						value={value('bookFirstPublished', book?.firstPublished?.toString() ?? '')}
+						aria-invalid={!!errors.bookFirstPublished}
+					/>
+				</FormField>
+			</div>
+
+			<div class="grid gap-4 sm:grid-cols-2">
+				<FormField
+					label="Sjanger"
+					id="bookGenre"
+					errors={errors.bookGenre}
+					hint="Velg en eksisterende, eller skriv en ny."
+				>
+					<Input
+						id="bookGenre"
+						name="bookGenre"
+						list="genres"
+						autocomplete="off"
+						value={value('bookGenre', book?.genre ?? '')}
+						aria-invalid={!!errors.bookGenre}
+					/>
+					<datalist id="genres">
+						{#each genres as genre (genre)}
+							<option value={genre}></option>
+						{/each}
+					</datalist>
+				</FormField>
+				<FormField
+					label="Originalspråk"
+					id="bookOriginalLanguage"
+					errors={errors.bookOriginalLanguage}
+				>
+					<Input
+						id="bookOriginalLanguage"
+						name="bookOriginalLanguage"
+						value={value('bookOriginalLanguage', book?.originalLanguage ?? '')}
+						aria-invalid={!!errors.bookOriginalLanguage}
+					/>
+				</FormField>
+			</div>
+
+			<FormField label="Beskrivelse" id="bookDescription" errors={errors.bookDescription}>
+				<Textarea
+					id="bookDescription"
+					name="bookDescription"
+					rows={5}
+					value={value('bookDescription', book?.description ?? '')}
+					aria-invalid={!!errors.bookDescription}
+				/>
+			</FormField>
+		</fieldset>
+	</div>
 
 	{#if errors.form}
 		<p class="text-destructive text-sm">{errors.form.join(' ')}</p>

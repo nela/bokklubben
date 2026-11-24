@@ -17,14 +17,20 @@ export function formFailure(values: FormValues, errors: FieldErrors, status = 40
 	return fail(status, { values, errors });
 }
 
-/** A failed save: `onConflict` for a duplicate (e.g. same name), otherwise a general error. */
+/**
+ * A failed save. A duplicate gets the errors listed for its unique constraint, e.g.
+ * `{ books_slug_unique: { bookTitle: ['…'] } }`; anything else a general error.
+ */
 export function dbFailure(
 	values: FormValues,
 	error: DbError,
-	onConflict: FieldErrors = { form: ['Finnes allerede.'] }
+	conflicts: Partial<Record<string, FieldErrors>> = {}
 ): FormFailure {
 	if (error instanceof DbConflictError) {
-		return formFailure(values, onConflict, 409);
+		const errors = (error.constraint && conflicts[error.constraint]) || {
+			form: ['Finnes allerede.']
+		};
+		return formFailure(values, errors, 409);
 	}
 	console.error(error);
 	return formFailure(values, { form: ['Noe gikk galt. Prøv igjen.'] }, 500);

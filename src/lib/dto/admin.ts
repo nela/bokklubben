@@ -18,6 +18,18 @@ export interface MemberOption {
 	name: string;
 }
 
+/** The book read at a meet, as edited in the meet form. */
+export interface AdminMeetBook {
+	id: number;
+	title: string;
+	isbn: string | null;
+	pages: number | null;
+	firstPublished: number | null;
+	genre: string | null;
+	originalLanguage: string | null;
+	description: string | null;
+}
+
 export interface AdminMeet {
 	id: number;
 	startsAt: Date;
@@ -25,6 +37,8 @@ export interface AdminMeet {
 	location: string | null;
 	address: string | null;
 	notes: string | null;
+	/** The book read at the meet, or null if it has none yet. */
+	book: AdminMeetBook | null;
 }
 
 export interface AdminMeetListItem {
