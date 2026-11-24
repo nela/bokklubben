@@ -38,7 +38,12 @@ export const authorSchema = z.object({
 
 export type AuthorInput = z.output<typeof authorSchema>;
 
-/** A meet, and the book read at it. The book's fields are prefixed `book` in the form. */
+/**
+ * A meet and the book read at it. The book's fields are prefixed `book` in the form.
+ *
+ * `highlights` and `attendees` are only in the edit form ("Etter møtet"); when creating a meet
+ * they are missing, which gives null and no attendees.
+ */
 export const meetSchema = z
 	.object({
 		startsAt: field.osloDateTime(),
@@ -46,6 +51,9 @@ export const meetSchema = z
 		location: field.optionalText(),
 		address: field.optionalText(),
 		notes: field.optionalText(),
+		highlights: field.optionalText(),
+		/** Member ids, one checkbox each. */
+		attendees: field.array(z.coerce.number().int().positive()),
 		...bookFields
 	})
 	.superRefine((form, ctx) => {
@@ -69,9 +77,11 @@ export const meetSchema = z
 			bookGenres,
 			bookOriginalLanguage,
 			bookDescription,
+			attendees,
 			...meet
 		}) => ({
 			meet,
+			attendees: [...new Set(attendees)],
 			book: bookTitle
 				? {
 						title: bookTitle,

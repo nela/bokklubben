@@ -12,7 +12,7 @@ import { toDbError, type DbError } from '$lib/errors/db';
 import type { AuthorInput, MeetInput } from '$lib/server/admin/schemas';
 import { createSlug, matchSpelling } from '$lib/utils/helpers';
 import { db } from './index';
-import { authors, bookAuthors, books, meetBooks, meets, members } from './schema';
+import { authors, bookAuthors, books, meetAttendance, meetBooks, meets, members } from './schema';
 
 /** All members, by first name, for selects such as a meet's host. */
 export function fetchMemberOptions(): ResultAsync<Array<MemberOption>, DbError> {
@@ -127,9 +127,11 @@ export function fetchAdminMeet(id: number): ResultAsync<AdminMeet | null, DbErro
 				hostId: true,
 				location: true,
 				address: true,
-				notes: true
+				notes: true,
+				highlights: true
 			},
 			with: {
+				attendance: { columns: { memberId: true } },
 				meetBooks: {
 					where: (mb, { eq }) => eq(mb.status, 'read'),
 					orderBy: (mb, { asc }) => asc(mb.bookId),
@@ -149,19 +151,26 @@ export function fetchAdminMeet(id: number): ResultAsync<AdminMeet | null, DbErro
 		if (!meet) {
 			return null;
 		}
-		const { meetBooks, ...rest } = meet;
+		const { meetBooks, attendance, ...rest } = meet;
+		const attendeeIds = attendance.map((a) => a.memberId);
 		const found = meetBooks[0]?.book;
 		if (!found) {
-			return { ...rest, book: null };
+			return { ...rest, attendeeIds, book: null };
 		}
 		const { bookAuthors, ...book } = found;
-		return { ...rest, book: { ...book, authors: bookAuthors.map((ba) => ba.author.name) } };
+		return {
+			...rest,
+			attendeeIds,
+			book: { ...book, authors: bookAuthors.map((ba) => ba.author.name) }
+		};
 	});
 }
 
 /**
- * Creates (`id` null) or updates a meet and its book, in one transaction. Returns the meet's id.
+ * Creates (`id` null) or updates a meet, its attendance and its book, in one transaction. Returns
+ * the meet's id.
  *
+ * - Attendance is replaced by the input's.
  * - The meet has no book yet: a book in the input is created and linked as read.
  * - The meet has a book: the input updates it. Without a book in the input it's left as is; the
  *   form requires the title, so that only happens if the browser skipped validation.
@@ -169,7 +178,7 @@ export function fetchAdminMeet(id: number): ResultAsync<AdminMeet | null, DbErro
  */
 export function saveMeet(
 	id: number | null,
-	{ meet, book }: MeetInput
+	{ meet, attendees, book }: MeetInput
 ): ResultAsync<number, DbError> {
 	return fromPromise(
 		db.transaction(async (tx) => {
@@ -179,6 +188,11 @@ export function saveMeet(
 			} else {
 				await tx.update(meets).set(meet).where(eq(meets.id, id));
 				meetId = id;
+			}
+
+			await tx.delete(meetAttendance).where(eq(meetAttendance.meetId, meetId));
+			if (attendees.length > 0) {
+				await tx.insert(meetAttendance).values(attendees.map((memberId) => ({ meetId, memberId })));
 			}
 
 			if (!book) {

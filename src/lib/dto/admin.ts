@@ -39,6 +39,9 @@ export interface AdminMeet {
 	location: string | null;
 	address: string | null;
 	notes: string | null;
+	highlights: string | null;
+	/** Ids of the members who attended. */
+	attendeeIds: Array<number>;
 	/** The book read at the meet, or null if it has none yet. */
 	book: AdminMeetBook | null;
 }

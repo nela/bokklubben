@@ -62,6 +62,17 @@ describe('meetSchema', () => {
 		expect(result._unsafeUnwrap().data.book).toBeNull();
 	});
 
+	it('takes attendees as member ids, without duplicates, and none when unchecked', () => {
+		const data = formData({ ...meet, highlights: 'God stemning' });
+		['3', '5', '3'].forEach((id) => data.append('attendees', id));
+
+		const parsed = parseForm(data, meetSchema)._unsafeUnwrap().data;
+		expect(parsed.attendees).toEqual([3, 5]);
+		expect(parsed.meet.highlights).toBe('God stemning');
+
+		expect(parseForm(formData(meet), meetSchema)._unsafeUnwrap().data.attendees).toEqual([]);
+	});
+
 	it('rejects an invalid ISBN', () => {
 		const result = parseForm(formData({ ...meet, bookTitle: 'Dune', bookIsbn: '123' }), meetSchema);
 		expect(result._unsafeUnwrapErr().data.errors.bookIsbn).toBeDefined();

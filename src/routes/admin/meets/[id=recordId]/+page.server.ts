@@ -38,23 +38,41 @@ export const load: PageServerLoad = async ({ params }) => {
 	return { meet, members, genres, languages, authorNames };
 };
 
+/** Creates the meet (`id` null) or updates the existing one, then goes back to the list. */
+async function save(id: number | null, request: Request) {
+	const form = parseForm(await request.formData(), meetSchema);
+	if (form.isErr()) {
+		return form.error;
+	}
+
+	const { data, values } = form.value;
+	const saved = await saveMeet(id, data);
+	if (saved.isErr()) {
+		return dbFailure(values, saved.error, {
+			books_slug_unique: { bookTitle: ['Det finnes allerede en bok med denne tittelen.'] },
+			books_isbn_unique: { bookIsbn: ['Det finnes allerede en bok med dette ISBN-nummeret.'] }
+		});
+	}
+
+	redirect(303, AdminRoutes.MEETS);
+}
+
 export const actions: Actions = {
-	save: async ({ params, request }) => {
-		const form = parseForm(await request.formData(), meetSchema);
-		if (form.isErr()) {
-			return form.error;
+	/** `/admin/meets/new`. */
+	create: async ({ params, request }) => {
+		if (parseRecordId(params.id) !== null) {
+			error(400, 'Møtet finnes allerede.');
 		}
+		return save(null, request);
+	},
 
-		const { data, values } = form.value;
-		const saved = await saveMeet(parseRecordId(params.id), data);
-		if (saved.isErr()) {
-			return dbFailure(values, saved.error, {
-				books_slug_unique: { bookTitle: ['Det finnes allerede en bok med denne tittelen.'] },
-				books_isbn_unique: { bookIsbn: ['Det finnes allerede en bok med dette ISBN-nummeret.'] }
-			});
+	/** `/admin/meets/<id>`: updates the existing meet, including what happened at it. */
+	update: async ({ params, request }) => {
+		const id = parseRecordId(params.id);
+		if (id === null) {
+			error(400, 'Møtet er ikke lagret.');
 		}
-
-		redirect(303, AdminRoutes.MEETS);
+		return save(id, request);
 	},
 
 	/** From the "new author" panel. Saved right away, so it can be picked for the book. */

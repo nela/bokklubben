@@ -40,6 +40,7 @@
 	const errors = $derived(form?.errors ?? {});
 	const hostId = $derived(value('hostId', meet?.hostId?.toString() ?? ''));
 	const book = $derived(meet?.book ?? null);
+	const attendees = $derived(fieldValues(form, 'attendees', meet?.attendeeIds.map(String) ?? []));
 
 	// Authors created in the side panel join the options and are chosen for the book.
 	let authorOptions = $state([...authorNames]);
@@ -54,7 +55,7 @@
 
 <form
 	method="POST"
-	action="?/save"
+	action={meet ? '?/update' : '?/create'}
 	class="flex flex-col gap-4"
 	use:enhance={() => {
 		pending = true;
@@ -239,6 +240,47 @@
 			</FormField>
 		</fieldset>
 	</div>
+
+	<!-- Only when editing: there is nothing to record before the meet exists. -->
+	{#if meet}
+		<div class="mt-4 border-t pt-6">
+			<fieldset class="flex flex-col gap-4">
+				<legend class="mb-1 text-lg font-semibold">Etter møtet</legend>
+				<p class="text-muted-foreground text-sm">Fylles ut når møtet er holdt.</p>
+
+				<FormField label="Høydepunkter" id="highlights" errors={errors.highlights}>
+					<Textarea
+						id="highlights"
+						name="highlights"
+						rows={4}
+						value={value('highlights', meet?.highlights ?? '')}
+						aria-invalid={!!errors.highlights}
+					/>
+				</FormField>
+
+				<fieldset class="flex flex-col gap-2">
+					<legend class="mb-2 text-sm font-medium">Oppmøte</legend>
+					<div class="grid grid-cols-2 gap-x-4 gap-y-2 sm:grid-cols-3">
+						{#each members as member (member.id)}
+							<label class="flex items-center gap-2 text-sm">
+								<input
+									type="checkbox"
+									name="attendees"
+									value={member.id}
+									checked={attendees.includes(member.id.toString())}
+									class="accent-primary size-4"
+								/>
+								{member.name}
+							</label>
+						{/each}
+					</div>
+					{#if errors.attendees}
+						<p class="text-destructive text-sm">{errors.attendees.join(' ')}</p>
+					{/if}
+				</fieldset>
+			</fieldset>
+		</div>
+	{/if}
 
 	{#if errors.form}
 		<p class="text-destructive text-sm">{errors.form.join(' ')}</p>
