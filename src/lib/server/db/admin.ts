@@ -4,6 +4,7 @@ import { and, asc, count, eq, inArray, isNotNull, ne, sql } from 'drizzle-orm';
 import { fromPromise, type ResultAsync } from 'neverthrow';
 import type {
 	AdminAuthorListItem,
+	AdminElectedBook,
 	AdminMeet,
 	AdminMeetListItem,
 	MemberOption
@@ -290,9 +291,14 @@ export function saveMeet(
 	);
 }
 
-/** Updates the meet's read book, or creates it and links it as read. */
+/**
+ * Saves the meet's read book:
+ * - the meet already has one: it's updated;
+ * - an existing book was chosen (`id`, e.g. the elected one): it's updated and linked as read;
+ * - otherwise a new book is created and linked as read.
+ */
 async function saveReadBook(tx: Tx, meetId: number, book: MeetBookInput) {
-	const { authors: authorNames, ...fields } = book;
+	const { id: chosenId, authors: authorNames, ...fields } = book;
 	const values = {
 		...fields,
 		genres: matchSpelling(fields.genres, await selectGenres(tx)),
@@ -313,11 +319,64 @@ async function saveReadBook(tx: Tx, meetId: number, book: MeetBookInput) {
 		bookId = current.bookId;
 		await tx.update(books).set(values).where(eq(books.id, bookId));
 	} else {
-		[{ id: bookId }] = await tx.insert(books).values(values).returning({ id: books.id });
-		await tx.insert(meetBooks).values({ meetId, bookId, status: 'read' });
+		if (chosenId !== null) {
+			bookId = chosenId;
+			await tx.update(books).set(values).where(eq(books.id, bookId));
+		} else {
+			[{ id: bookId }] = await tx.insert(books).values(values).returning({ id: books.id });
+		}
+		await tx
+			.insert(meetBooks)
+			.values({ meetId, bookId, status: 'read' })
+			.onConflictDoUpdate({
+				target: [meetBooks.meetId, meetBooks.bookId],
+				set: { status: 'read' }
+			});
 	}
 
 	await setBookAuthors(tx, bookId, authorNames);
+}
+
+/**
+ * Books elected at a meet but not read at any meet yet, newest election first. Usually just the
+ * one chosen for the next meet.
+ */
+export function fetchElectedBooks(): ResultAsync<Array<AdminElectedBook>, DbError> {
+	return fromPromise(
+		db.query.meetBooks.findMany({
+			where: eq(meetBooks.status, 'elected'),
+			columns: { bookId: true },
+			with: {
+				meet: { columns: { startsAt: true } },
+				book: {
+					columns: meetBookColumns,
+					with: {
+						bookAuthors: { with: { author: { columns: { name: true } } } },
+						meetBooks: {
+							where: (mb, { eq }) => eq(mb.status, 'read'),
+							columns: { meetId: true }
+						}
+					}
+				}
+			}
+		}),
+		toDbError
+	).map((rows) => {
+		const latest = new Map<number, AdminElectedBook>();
+		for (const { meet, book } of rows) {
+			const { bookAuthors, meetBooks: readAt, ...fields } = book;
+			const known = latest.get(book.id);
+			if (readAt.length > 0 || (known && known.electedAt >= meet.startsAt)) {
+				continue;
+			}
+			latest.set(book.id, {
+				...fields,
+				authors: bookAuthors.map((ba) => ba.author.name),
+				electedAt: meet.startsAt
+			});
+		}
+		return [...latest.values()].sort((a, b) => b.electedAt.getTime() - a.electedAt.getTime());
+	});
 }
 
 /** Also removes the meet's books and attendance. The books themselves stay. */

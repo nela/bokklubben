@@ -3,7 +3,7 @@
 	import { toast } from 'svelte-sonner';
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
-	import type { AdminFormState, AdminMeet, MemberOption } from '$lib/dto/admin';
+	import type { AdminElectedBook, AdminFormState, AdminMeet, MemberOption } from '$lib/dto/admin';
 	import { AdminRoutes } from '$lib/routes';
 	import FormField from './form-field.svelte';
 	import NewAuthorSheet from './new-author-sheet.svelte';
@@ -22,6 +22,7 @@
 		languages,
 		authorNames,
 		bookTitles,
+		electedBooks,
 		form
 	}: {
 		/** null when creating a new meet. */
@@ -35,6 +36,8 @@
 		authorNames: Array<string>;
 		/** Existing books, suggested in the pitch rows. */
 		bookTitles: Array<string>;
+		/** Elected books not read yet, offered for a meet without a book. */
+		electedBooks: Array<AdminElectedBook>;
 		form: AdminFormState | null | undefined;
 	} = $props();
 
@@ -43,13 +46,39 @@
 	const value = (name: string, saved: string) => fieldValue(form, name, saved);
 	const errors = $derived(form?.errors ?? {});
 	const hostId = $derived(value('hostId', meet?.hostId?.toString() ?? ''));
-	const book = $derived(meet?.book ?? null);
+
+	// A meet without a book can take an existing one, usually the book elected last time. The
+	// most recent election is chosen by default; "Ny bok" (null) creates a new book instead.
+	const dateFmt = new Intl.DateTimeFormat('nb-NO', {
+		dateStyle: 'medium',
+		timeZone: 'Europe/Oslo'
+	});
+	const canChoose = $derived(!meet?.book && electedBooks.length > 0);
+	const initialChoice = form
+		? fieldValue(form, 'bookId', '')
+		: meet?.book
+			? ''
+			: (electedBooks[0]?.id.toString() ?? '');
+	let bookChoice = $state(initialChoice);
+	const chosenBook = $derived(electedBooks.find((b) => b.id.toString() === bookChoice) ?? null);
+	const book = $derived(meet?.book ?? chosenBook);
 	const attendees = $derived(fieldValues(form, 'attendees', meet?.attendeeIds.map(String) ?? []));
 
 	// Authors created in the side panel join the options and are chosen for the book.
 	let authorOptions = $state([...authorNames]);
-	let chosenAuthors = $state(fieldValues(form, 'bookAuthors', meet?.book?.authors ?? []));
+	let chosenAuthors = $state(
+		fieldValues(
+			form,
+			'bookAuthors',
+			(meet?.book ?? electedBooks.find((b) => b.id.toString() === initialChoice))?.authors ?? []
+		)
+	);
 	let authorSheetOpen = $state(false);
+
+	function chooseBook(event: Event & { currentTarget: HTMLSelectElement }) {
+		const choice = event.currentTarget.value;
+		chosenAuthors = electedBooks.find((b) => b.id.toString() === choice)?.authors ?? [];
+	}
 
 	function authorCreated(name: string) {
 		authorOptions = [...authorOptions, name].sort((a, b) => a.localeCompare(b, 'nb-NO'));
@@ -131,117 +160,140 @@
 		<fieldset class="flex flex-col gap-4">
 			<legend class="mb-1 text-lg font-semibold">Bok</legend>
 			<p class="text-muted-foreground text-sm">
-				{book
-					? 'Boken som leses på dette møtet. Endringer her oppdaterer boken.'
-					: 'Boken som skal leses. Den opprettes når møtet lagres. La tittelen stå tom for å legge til bok senere.'}
+				{#if meet?.book}
+					Boken som leses på dette møtet. Endringer her oppdaterer boken.
+				{:else if chosenBook}
+					Den valgte boken. Fyll inn det som mangler; endringene lagres på boken.
+				{:else}
+					Boken som skal leses. Den opprettes når møtet lagres. La tittelen stå tom for å legge til
+					bok senere.
+				{/if}
 			</p>
 
-			<FormField label="Tittel" id="bookTitle" errors={errors.bookTitle}>
-				<Input
-					id="bookTitle"
-					name="bookTitle"
-					required={!!book}
-					value={value('bookTitle', book?.title ?? '')}
-					aria-invalid={!!errors.bookTitle}
-				/>
-			</FormField>
+			{#if canChoose}
+				<FormField label="Hvilken bok?" id="bookChoice">
+					<Select id="bookChoice" bind:value={bookChoice} onchange={chooseBook}>
+						{#each electedBooks as elected (elected.id)}
+							<option value={elected.id.toString()}>
+								{elected.title} (valgt {dateFmt.format(elected.electedAt)})
+							</option>
+						{/each}
+						<option value="">Ny bok</option>
+					</Select>
+				</FormField>
+			{/if}
+			{#if !meet?.book && chosenBook}
+				<input type="hidden" name="bookId" value={chosenBook.id} />
+			{/if}
 
-			<FormField
-				label="Forfattere"
-				id="bookAuthors"
-				errors={errors.bookAuthors}
-				hint="Velg en eksisterende forfatter, eller legg til en ny."
-			>
-				<PickOrCreate
+			{#key bookChoice}
+				<FormField label="Tittel" id="bookTitle" errors={errors.bookTitle}>
+					<Input
+						id="bookTitle"
+						name="bookTitle"
+						required={!!book}
+						value={value('bookTitle', book?.title ?? '')}
+						aria-invalid={!!errors.bookTitle}
+					/>
+				</FormField>
+
+				<FormField
+					label="Forfattere"
 					id="bookAuthors"
-					name="bookAuthors"
-					bind:chosen={chosenAuthors}
-					options={authorOptions}
-					selectLabel="Velg forfatter…"
-					createLabel="Legg til ny forfatter"
-					oncreate={() => (authorSheetOpen = true)}
-					invalid={!!errors.bookAuthors}
-				/>
-			</FormField>
-
-			<div class="grid gap-4 sm:grid-cols-3">
-				<FormField label="ISBN" id="bookIsbn" errors={errors.bookIsbn}>
-					<Input
-						id="bookIsbn"
-						name="bookIsbn"
-						inputmode="numeric"
-						value={value('bookIsbn', book?.isbn ?? '')}
-						aria-invalid={!!errors.bookIsbn}
-					/>
-				</FormField>
-				<FormField label="Sider" id="bookPages" errors={errors.bookPages}>
-					<Input
-						id="bookPages"
-						name="bookPages"
-						type="number"
-						min="1"
-						value={value('bookPages', book?.pages?.toString() ?? '')}
-						aria-invalid={!!errors.bookPages}
-					/>
-				</FormField>
-				<FormField
-					label="Første utgivelse"
-					id="bookFirstPublished"
-					errors={errors.bookFirstPublished}
+					errors={errors.bookAuthors}
+					hint="Velg en eksisterende forfatter, eller legg til en ny."
 				>
-					<Input
+					<PickOrCreate
+						id="bookAuthors"
+						name="bookAuthors"
+						bind:chosen={chosenAuthors}
+						options={authorOptions}
+						selectLabel="Velg forfatter…"
+						createLabel="Legg til ny forfatter"
+						oncreate={() => (authorSheetOpen = true)}
+						invalid={!!errors.bookAuthors}
+					/>
+				</FormField>
+
+				<div class="grid gap-4 sm:grid-cols-3">
+					<FormField label="ISBN" id="bookIsbn" errors={errors.bookIsbn}>
+						<Input
+							id="bookIsbn"
+							name="bookIsbn"
+							inputmode="numeric"
+							value={value('bookIsbn', book?.isbn ?? '')}
+							aria-invalid={!!errors.bookIsbn}
+						/>
+					</FormField>
+					<FormField label="Sider" id="bookPages" errors={errors.bookPages}>
+						<Input
+							id="bookPages"
+							name="bookPages"
+							type="number"
+							min="1"
+							value={value('bookPages', book?.pages?.toString() ?? '')}
+							aria-invalid={!!errors.bookPages}
+						/>
+					</FormField>
+					<FormField
+						label="Første utgivelse"
 						id="bookFirstPublished"
-						name="bookFirstPublished"
-						type="number"
-						placeholder="År"
-						value={value('bookFirstPublished', book?.firstPublished?.toString() ?? '')}
-						aria-invalid={!!errors.bookFirstPublished}
-					/>
-				</FormField>
-			</div>
+						errors={errors.bookFirstPublished}
+					>
+						<Input
+							id="bookFirstPublished"
+							name="bookFirstPublished"
+							type="number"
+							placeholder="År"
+							value={value('bookFirstPublished', book?.firstPublished?.toString() ?? '')}
+							aria-invalid={!!errors.bookFirstPublished}
+						/>
+					</FormField>
+				</div>
 
-			<div class="grid gap-4 sm:grid-cols-2">
-				<FormField
-					label="Sjangre"
-					id="bookGenres"
-					errors={errors.bookGenres}
-					hint="Velg fra listen, eller skriv og velg «Ny sjanger»."
-				>
-					<TagInput
+				<div class="grid gap-4 sm:grid-cols-2">
+					<FormField
+						label="Sjangre"
 						id="bookGenres"
-						name="bookGenres"
-						values={fieldValues(form, 'bookGenres', book?.genres ?? [])}
-						suggestions={genres}
-						createLabel="Ny sjanger"
-						invalid={!!errors.bookGenres}
-					/>
-				</FormField>
-				<FormField
-					label="Originalspråk"
-					id="bookOriginalLanguage"
-					errors={errors.bookOriginalLanguage}
-					hint="Velg fra listen, eller skriv et nytt."
-				>
-					<SuggestInput
+						errors={errors.bookGenres}
+						hint="Velg fra listen, eller skriv og velg «Ny sjanger»."
+					>
+						<TagInput
+							id="bookGenres"
+							name="bookGenres"
+							values={fieldValues(form, 'bookGenres', book?.genres ?? [])}
+							suggestions={genres}
+							createLabel="Ny sjanger"
+							invalid={!!errors.bookGenres}
+						/>
+					</FormField>
+					<FormField
+						label="Originalspråk"
 						id="bookOriginalLanguage"
-						name="bookOriginalLanguage"
-						value={value('bookOriginalLanguage', book?.originalLanguage ?? '')}
-						suggestions={languages}
-						createLabel="Nytt språk"
-						invalid={!!errors.bookOriginalLanguage}
+						errors={errors.bookOriginalLanguage}
+						hint="Velg fra listen, eller skriv et nytt."
+					>
+						<SuggestInput
+							id="bookOriginalLanguage"
+							name="bookOriginalLanguage"
+							value={value('bookOriginalLanguage', book?.originalLanguage ?? '')}
+							suggestions={languages}
+							createLabel="Nytt språk"
+							invalid={!!errors.bookOriginalLanguage}
+						/>
+					</FormField>
+				</div>
+
+				<FormField label="Beskrivelse" id="bookDescription" errors={errors.bookDescription}>
+					<Textarea
+						id="bookDescription"
+						name="bookDescription"
+						rows={5}
+						value={value('bookDescription', book?.description ?? '')}
+						aria-invalid={!!errors.bookDescription}
 					/>
 				</FormField>
-			</div>
-
-			<FormField label="Beskrivelse" id="bookDescription" errors={errors.bookDescription}>
-				<Textarea
-					id="bookDescription"
-					name="bookDescription"
-					rows={5}
-					value={value('bookDescription', book?.description ?? '')}
-					aria-invalid={!!errors.bookDescription}
-				/>
-			</FormField>
+			{/key}
 		</fieldset>
 	</div>
 

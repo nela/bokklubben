@@ -32,6 +32,12 @@ export interface AdminMeetBook {
 	authors: Array<string>;
 }
 
+/** A book elected at a meet but not read yet: the likely book for the next meet. */
+export interface AdminElectedBook extends AdminMeetBook {
+	/** When the meet that elected it started. */
+	electedAt: Date;
+}
+
 /** A book pitched at a meet, as shown in the "Etter møtet" rows. */
 export interface AdminMeetPitch {
 	title: string;

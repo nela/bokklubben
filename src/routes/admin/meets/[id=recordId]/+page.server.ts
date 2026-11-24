@@ -9,6 +9,7 @@ import {
 	fetchAdminMeet,
 	fetchAuthorNames,
 	fetchBookTitles,
+	fetchElectedBooks,
 	fetchGenres,
 	fetchLanguages,
 	fetchMemberOptions,
@@ -25,19 +26,20 @@ export const load: PageServerLoad = async ({ params }) => {
 		fetchGenres(),
 		fetchLanguages(),
 		fetchAuthorNames(),
-		fetchBookTitles()
+		fetchBookTitles(),
+		fetchElectedBooks()
 	]);
 	if (result.isErr()) {
 		console.error(result.error);
 		error(500, 'Kunne ikke laste møtet.');
 	}
 
-	const [meet, members, genres, languages, authorNames, bookTitles] = result.value;
+	const [meet, members, genres, languages, authorNames, bookTitles, electedBooks] = result.value;
 	if (id !== null && !meet) {
 		error(404, 'Fant ikke møtet.');
 	}
 
-	return { meet, members, genres, languages, authorNames, bookTitles };
+	return { meet, members, genres, languages, authorNames, bookTitles, electedBooks };
 };
 
 /** Creates the meet (`id` null) or updates the existing one, then goes back to the list. */

@@ -20,6 +20,7 @@
 	languages={data.languages}
 	authorNames={data.authorNames}
 	bookTitles={data.bookTitles}
+	electedBooks={data.electedBooks}
 	form={failedForm(form)}
 />
 

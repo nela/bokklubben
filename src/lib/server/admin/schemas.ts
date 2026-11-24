@@ -13,6 +13,8 @@ const smallInt = (message: string) =>
 	field.optionalInt().refine((v) => v === null || Math.abs(v) <= 32767, message);
 
 const bookFields = {
+	/** Set when an existing book (e.g. the elected one) is chosen instead of a new one. */
+	bookId: field.optionalInt(),
 	bookTitle: field.optionalText(),
 	/** Author names, one hidden input each. Unknown names become new authors. */
 	bookAuthors: field.array(z.string().trim().min(1)),
@@ -114,6 +116,7 @@ export const meetSchema = z
 	})
 	.transform(
 		({
+			bookId,
 			bookTitle,
 			bookAuthors,
 			bookIsbn,
@@ -134,6 +137,7 @@ export const meetSchema = z
 			pitches: toPitches({ pitchTitles, pitchAuthors, pitchedBy, pitchStatuses }),
 			book: bookTitle
 				? {
+						id: bookId,
 						title: bookTitle,
 						authors: bookAuthors,
 						isbn: bookIsbn,

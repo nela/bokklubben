@@ -118,6 +118,14 @@ describe('meetSchema', () => {
 		});
 	});
 
+	it('keeps the id of an existing book chosen for the meet, and none for a new book', () => {
+		const chosen = parseForm(formData({ ...meet, bookId: '12', bookTitle: 'Sapiens' }), meetSchema);
+		expect(chosen._unsafeUnwrap().data.book?.id).toBe(12);
+
+		const created = parseForm(formData({ ...meet, bookTitle: 'Dune' }), meetSchema);
+		expect(created._unsafeUnwrap().data.book?.id).toBeNull();
+	});
+
 	it('rejects an invalid ISBN', () => {
 		const result = parseForm(formData({ ...meet, bookTitle: 'Dune', bookIsbn: '123' }), meetSchema);
 		expect(result._unsafeUnwrapErr().data.errors.bookIsbn).toBeDefined();
