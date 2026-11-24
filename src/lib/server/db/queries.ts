@@ -58,12 +58,6 @@ export function fetchMembers(): ResultAsync<Array<PublicMember>, DbError> {
 	).map((rows) => rows.map(withMemberImage));
 }
 
-export function fetchMemberEmails(): ResultAsync<Array<string>, DbError> {
-	return fromPromise(db.select({ email: members.email }).from(members), toDbError).map((rows) =>
-		rows.map((r) => r.email)
-	);
-}
-
 /** Books that have been, or are about to be, discussed at a meet. Newest first. */
 export function fetchBooks(): ResultAsync<Array<Book>, DbError> {
 	return fromPromise(

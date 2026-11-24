@@ -2,7 +2,6 @@
 	import { enhance } from '$app/forms';
 	import { toast } from 'svelte-sonner';
 	import * as Avatar from '$lib/components/ui/avatar';
-	import { Badge } from '$lib/components/ui/badge';
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
 	import type { AdminFormState, AdminMember } from '$lib/dto/admin';
@@ -64,17 +63,6 @@
 		};
 	}}
 >
-	<p class="text-muted-foreground flex items-center gap-2 text-sm">
-		{#if member.signedUp}
-			Har registrert seg.
-		{:else}
-			<Badge variant="outline" class="border-amber-500/50 text-amber-600 dark:text-amber-400">
-				Ikke registrert
-			</Badge>
-			Har ikke logget inn ennå.
-		{/if}
-	</p>
-
 	<div class="flex items-center gap-4">
 		<Avatar.Root class="size-20">
 			<Avatar.Image src={shownPhoto} alt={`${member.firstName} ${member.lastName}`} />

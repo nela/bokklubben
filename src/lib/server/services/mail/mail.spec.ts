@@ -1,81 +1,70 @@
-import { afterAll, beforeEach, describe, expect, it, vi } from 'vitest';
-import { sendEmail, type EmailContent } from './mail';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { EmailInternalError } from '$lib/errors/mail';
+import { sendEmail } from './mail';
 
-describe('Mail', () => {
+vi.mock('$env/static/private', () => ({
+	SMTP2GO_URL: 'https://smtp2go.test/v3/email/send',
+	SMTP2GO_API_KEY: 'test-key',
+	SOURCE_EMAIL: 'noreply@bokklubben.test'
+}));
+
+describe('sendEmail', () => {
 	const fetchSpy = vi.spyOn(global, 'fetch');
 
-	vi.stubEnv('VITE_SENDGRID_API_KEY_WEB', 'mocked-sendgrid-apikey');
-	vi.stubEnv('VITE_SENDGRID_URL', 'https://sendgridurl.com');
-	vi.stubEnv('VITE_NO_REPLY_MAIL', 'noreply@noreply.no');
-
 	beforeEach(() => {
-		vi.clearAllMocks();
-		vi.resetModules();
+		fetchSpy.mockReset();
 	});
 
-	afterAll(() => {
-		vi.unstubAllEnvs();
+	const sentBody = () => JSON.parse(fetchSpy.mock.calls[0][1]?.body as string);
+
+	it('posts to SMTP2GO with the API key, and accepts a 2xx answer', async () => {
+		fetchSpy.mockResolvedValueOnce(new Response('{}', { status: 200 }));
+
+		const res = await sendEmail('ola@example.com', 'Hei', {
+			type: 'text/html',
+			value: '<p>Hei</p>'
+		});
+
+		expect(res.isOk()).toBe(true);
+		expect(fetchSpy).toHaveBeenCalledWith(
+			'https://smtp2go.test/v3/email/send',
+			expect.objectContaining({
+				method: 'POST',
+				headers: expect.objectContaining({ 'X-Smtp2go-Api-Key': 'test-key' })
+			})
+		);
+		expect(sentBody()).toEqual({
+			sender: 'noreply@bokklubben.test',
+			to: ['ola@example.com'],
+			subject: 'Hei',
+			html_body: '<p>Hei</p>'
+		});
 	});
 
-	it('should return false when unable to send', async () => {
-		fetchSpy.mockRejectedValueOnce(new Error('oh no!'));
+	it('sends to every recipient, and plain text as text_body', async () => {
+		fetchSpy.mockResolvedValueOnce(new Response('{}', { status: 200 }));
 
-		const res = await sendEmail('to', 'subject', { type: 'text/plain', value: 'invalid' });
+		await sendEmail(['a@example.com', 'b@example.com'], 'Hei', {
+			type: 'text/plain',
+			value: 'Hei'
+		});
 
-		expect(fetchSpy).toHaveBeenCalledOnce();
+		expect(sentBody()).toMatchObject({ to: ['a@example.com', 'b@example.com'], text_body: 'Hei' });
+	});
+
+	it('fails when SMTP2GO refuses the email', async () => {
+		fetchSpy.mockResolvedValueOnce(new Response('{}', { status: 400 }));
+
+		const res = await sendEmail('ola@example.com', 'Hei', { type: 'text/plain', value: 'Hei' });
+
 		expect(res._unsafeUnwrapErr()).toBeInstanceOf(EmailInternalError);
 	});
 
-	[
-		{
-			label: 'recepients is a string',
-			to: 'n@n.no'
-		},
-		{
-			label: 'recepients is an array',
-			to: ['n@n.no', 'm@m.mo']
-		}
-	].forEach(({ label, to }, i) => {
-		it(`should call fetch with correct args when ${label}`, async () => {
-			fetchSpy.mockResolvedValueOnce(new Response('ok', { status: 200 }));
+	it('fails when the request fails', async () => {
+		fetchSpy.mockRejectedValueOnce(new Error('offline'));
 
-			const { sendEmail } = await import('./mail');
+		const res = await sendEmail('ola@example.com', 'Hei', { type: 'text/plain', value: 'Hei' });
 
-			const content = { type: 'text/html', value: '<strong>Hello</strong>' } as EmailContent;
-			const subject = 'subject';
-
-			const expectedBody = (() => {
-				const personalizations =
-					i === 1
-						? [{ to: [{ email: 'n@n.no' }] }, { to: [{ email: 'm@m.mo' }] }]
-						: [{ to: [{ email: 'n@n.no' }] }];
-
-				return {
-					from: {
-						email: 'noreply@noreply.no'
-					},
-					subject: subject,
-					content: [content],
-					personalizations: personalizations
-				};
-			})();
-
-			const expectedPayload = {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-					Authorization: 'Bearer mocked-sendgrid-apikey'
-				},
-				body: JSON.stringify(expectedBody)
-			};
-
-			const res = await sendEmail(to, 'subject', content);
-
-			expect(fetchSpy).toHaveBeenCalledOnce();
-			expect(fetchSpy).toHaveBeenCalledWith('https://sendgridurl.com', expectedPayload);
-			expect(res.isOk()).toEqual(true);
-			expect(res._unsafeUnwrap().status).toEqual(200);
-		});
+		expect(res._unsafeUnwrapErr()).toBeInstanceOf(EmailInternalError);
 	});
 });

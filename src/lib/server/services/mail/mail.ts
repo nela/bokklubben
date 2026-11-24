@@ -1,7 +1,6 @@
-import { fromPromise } from 'neverthrow';
-import { EmailInternalError } from '$lib/errors/mail';
-import { SMTP2GO_URL, SMTP2GO_API_KEY, SOURCE_EMAIL } from '$env/static/private';
-import { json } from '@sveltejs/kit';
+import { errAsync, fromPromise, okAsync, type ResultAsync } from 'neverthrow';
+import { SMTP2GO_API_KEY, SMTP2GO_URL, SOURCE_EMAIL } from '$env/static/private';
+import { EmailInternalError, type EmailError } from '$lib/errors/mail';
 
 export interface EmailContent {
 	value: string;
@@ -17,27 +16,15 @@ export function createHtmlString(head: string, body: string) {
 	);
 }
 
-/* curl --request POST \
-     --url https://api.smtp2go.com/v3/email/send \
-     --header 'Content-Type: application/json' \
-     --header 'X-Smtp2go-Api-Key: api-xxxxxxxxxxxxxxxxxx' \
-     --header 'accept: application/json' \
-     --data '
-{
-  "sender": "email@example.com",
-  "to": [
-    "friend@example.com"
-  ],
-  "subject": "My First Email",
-  "text_body": "Hello from the other side."
-}
-' */
-
+/**
+ * Sends an email through SMTP2GO's API (https://developers.smtp2go.com/reference/send-standard-email).
+ * Fails if the request fails or SMTP2GO doesn't accept it.
+ */
 export function sendEmail(
 	recipients: string | Array<string>,
 	subject: string,
 	content: EmailContent
-) {
+): ResultAsync<void, EmailError> {
 	return fromPromise(
 		fetch(SMTP2GO_URL, {
 			method: 'POST',
@@ -45,19 +32,18 @@ export function sendEmail(
 				'Content-Type': 'application/json',
 				accept: 'application/json',
 				'X-Smtp2go-Api-Key': SMTP2GO_API_KEY
-				// Authorization: `Bearer ${SENDGRID_TOKEN}`
 			},
 			body: JSON.stringify({
 				sender: SOURCE_EMAIL,
-				subject: subject,
-				html_body: content.value,
-				// content: [content],
-				to: Array.isArray(recipients) ? recipients : [recipients]
-				// personalizations: (Array.isArray(recipients) ? recipients : [recipients]).map((e) => ({
-				// 	to: [{ email: e }]
-				// }))
+				to: Array.isArray(recipients) ? recipients : [recipients],
+				subject,
+				[content.type === 'text/html' ? 'html_body' : 'text_body']: content.value
 			})
 		}),
 		(e) => new EmailInternalError({ cause: e })
+	).andThen((res) =>
+		res.ok
+			? okAsync(undefined)
+			: errAsync(new EmailInternalError({ cause: new Error(`SMTP2GO answered ${res.status}`) }))
 	);
 }

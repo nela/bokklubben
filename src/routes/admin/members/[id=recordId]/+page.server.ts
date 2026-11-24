@@ -4,6 +4,7 @@ import { dbFailure, formFailure, parseForm, parseRecordId } from '$lib/server/ad
 import { memberSchema } from '$lib/server/admin/schemas';
 import { deleteMember, fetchAdminMember, updateMember } from '$lib/server/db/admin';
 import { deleteImage, uploadImage } from '$lib/server/images';
+import { sendInvite } from '$lib/server/services/invite';
 import { createSlug, hasLeft } from '$lib/utils/helpers';
 import type { Actions, PageServerLoad } from './$types';
 
@@ -102,5 +103,33 @@ export const actions: Actions = {
 		await deleteImage('private', deleted.value.imagePath).orTee((e) => console.error(e));
 
 		redirect(303, AdminRoutes.MEMBERS);
+	},
+
+	/** Emails the invitation again, to a member who hasn't signed up yet. */
+	invite: async ({ params }) => {
+		const id = parseRecordId(params.id);
+		if (id === null) {
+			error(400, 'Medlemmet er ikke lagret.');
+		}
+
+		const member = await fetchAdminMember(id);
+		if (member.isErr()) {
+			console.error(member.error);
+			return formFailure({}, { form: ['Kunne ikke sende invitasjonen.'] }, 500);
+		}
+		if (!member.value) {
+			error(404, 'Fant ikke medlemmet.');
+		}
+		if (member.value.signedUp) {
+			return formFailure({}, { form: ['Medlemmet har allerede registrert seg.'] });
+		}
+
+		const sent = await sendInvite(member.value.email);
+		if (sent.isErr()) {
+			console.error(sent.error);
+			return formFailure({}, { form: ['Kunne ikke sende invitasjonen.'] }, 502);
+		}
+
+		return { invitedEmail: member.value.email };
 	}
 };
