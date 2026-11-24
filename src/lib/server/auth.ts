@@ -54,7 +54,9 @@ export const auth = betterAuth({
 	secret: env.BETTER_AUTH_SECRET,
 	database: drizzleAdapter(db, { provider: 'pg', schema }),
 	advanced: {
-		database: { generateId: 'uuid' }
+		// The auth tables' text ids have no database default, so Better Auth must create them.
+		// ('uuid' would leave it to the database.)
+		database: { generateId: () => crypto.randomUUID() }
 	},
 	emailAndPassword: {
 		enabled: true,
