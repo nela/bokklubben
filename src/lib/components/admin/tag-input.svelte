@@ -2,6 +2,7 @@
 	import { X } from '@lucide/svelte';
 	import { Badge } from '$lib/components/ui/badge';
 	import { cn } from '$lib/utils/shadcn';
+	import SuggestInput from './suggest-input.svelte';
 
 	let {
 		id,
@@ -29,37 +30,29 @@
 		suggestions.filter((s) => !tags.some((t) => t.toLowerCase() === s.toLowerCase()))
 	);
 
-	/** Adds the typed text as a tag, using a suggestion's spelling if it matches one. */
-	function add() {
-		const text = draft.trim();
+	/** Adds a tag, using a suggestion's spelling if it matches one. */
+	function add(text: string) {
+		const tag = text.trim();
 		draft = '';
-		if (!text || tags.some((t) => t.toLowerCase() === text.toLowerCase())) {
+		if (!tag || tags.some((t) => t.toLowerCase() === tag.toLowerCase())) {
 			return;
 		}
-		tags.push(suggestions.find((s) => s.toLowerCase() === text.toLowerCase()) ?? text);
+		tags.push(suggestions.find((s) => s.toLowerCase() === tag.toLowerCase()) ?? tag);
 	}
 
 	function onkeydown(event: KeyboardEvent) {
-		if (event.key === 'Enter' || event.key === ',') {
+		if (event.key === ',') {
 			event.preventDefault();
-			add();
+			add(draft);
 		} else if (event.key === 'Backspace' && draft === '' && tags.length > 0) {
 			tags.pop();
-		}
-	}
-
-	/** Picking from the suggestion list fills the input in one go; add it right away. */
-	function oninput(event: Event) {
-		const { inputType } = event as InputEvent;
-		if ((!inputType || inputType === 'insertReplacementText') && suggestions.includes(draft)) {
-			add();
 		}
 	}
 </script>
 
 <div
 	class={cn(
-		'border-input bg-background dark:bg-input/30 flex min-h-9 w-full flex-wrap items-center gap-1 rounded-md border px-2 py-1 shadow-xs transition-[color,box-shadow]',
+		'border-input bg-background dark:bg-input/30 flex min-h-9 w-full flex-wrap items-center gap-1 rounded-md border px-2 py-1 text-base shadow-xs transition-[color,box-shadow] md:text-sm',
 		'focus-within:border-ring focus-within:ring-ring/50 focus-within:ring-[3px]',
 		invalid && 'border-destructive ring-destructive/20 dark:ring-destructive/40'
 	)}
@@ -78,21 +71,17 @@
 		</Badge>
 		<input type="hidden" {name} value={tag} />
 	{/each}
-	<input
+	<SuggestInput
 		{id}
-		list={`${id}-suggestions`}
-		autocomplete="off"
-		class="placeholder:text-muted-foreground min-w-24 flex-1 bg-transparent px-1 py-0.5 text-base outline-none md:text-sm"
-		placeholder={tags.length === 0 ? placeholder : undefined}
-		aria-invalid={invalid}
 		bind:value={draft}
+		suggestions={remaining}
+		placeholder={tags.length === 0 ? placeholder : undefined}
+		{invalid}
+		boxed={false}
+		class="min-w-24 flex-1 px-1 py-0.5"
+		onselect={add}
+		onenter={add}
 		{onkeydown}
-		{oninput}
-		onblur={add}
+		onblur={() => add(draft)}
 	/>
-	<datalist id={`${id}-suggestions`}>
-		{#each remaining as suggestion (suggestion)}
-			<option value={suggestion}></option>
-		{/each}
-	</datalist>
 </div>

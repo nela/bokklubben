@@ -8,6 +8,7 @@
 	import FormField from './form-field.svelte';
 	import { fieldValue, fieldValues, osloDateTimeInput } from './form-values';
 	import Select from './select.svelte';
+	import SuggestInput from './suggest-input.svelte';
 	import TagInput from './tag-input.svelte';
 	import Textarea from './textarea.svelte';
 
@@ -182,19 +183,13 @@
 					errors={errors.bookOriginalLanguage}
 					hint="Velg et eksisterende, eller skriv et nytt."
 				>
-					<Input
+					<SuggestInput
 						id="bookOriginalLanguage"
 						name="bookOriginalLanguage"
-						list="languages"
-						autocomplete="off"
 						value={value('bookOriginalLanguage', book?.originalLanguage ?? '')}
-						aria-invalid={!!errors.bookOriginalLanguage}
+						suggestions={languages}
+						invalid={!!errors.bookOriginalLanguage}
 					/>
-					<datalist id="languages">
-						{#each languages as language (language)}
-							<option value={language}></option>
-						{/each}
-					</datalist>
 				</FormField>
 			</div>
 
