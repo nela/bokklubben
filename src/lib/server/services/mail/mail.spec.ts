@@ -34,7 +34,7 @@ describe('sendEmail', () => {
 			})
 		);
 		expect(sentBody()).toEqual({
-			sender: 'noreply@bokklubben.test',
+			sender: 'Bokklubben <noreply@bokklubben.test>',
 			to: ['ola@example.com'],
 			subject: 'Hei',
 			html_body: '<p>Hei</p>'

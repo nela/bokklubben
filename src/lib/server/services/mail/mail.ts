@@ -16,6 +16,10 @@ export function createHtmlString(head: string, body: string) {
 	);
 }
 
+/** Shows the sender as «Bokklubben» in inboxes; an address that already has a name is kept. */
+const senderWithName = (address: string) =>
+	address.includes('<') ? address : `Bokklubben <${address}>`;
+
 /**
  * Sends an email through SMTP2GO's API (https://developers.smtp2go.com/reference/send-standard-email).
  * Fails if the request fails or SMTP2GO doesn't accept it.
@@ -34,7 +38,7 @@ export function sendEmail(
 				'X-Smtp2go-Api-Key': SMTP2GO_API_KEY
 			},
 			body: JSON.stringify({
-				sender: SOURCE_EMAIL,
+				sender: senderWithName(SOURCE_EMAIL),
 				to: Array.isArray(recipients) ? recipients : [recipients],
 				subject,
 				[content.type === 'text/html' ? 'html_body' : 'text_body']: content.value
