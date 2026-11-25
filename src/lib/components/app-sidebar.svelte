@@ -30,6 +30,9 @@
 	const secondaryItems = $derived(activePrimary?.items.filter((i) => !i.hideFromSidebar) ?? []);
 
 	const displayName = $derived(member.nickname ?? member.firstName.split(" ")[0])
+
+	// The logo flutters once as its link is hovered or focused, and plays to the end.
+	let logoFlutter = $state(false);
 </script>
 
 <Sidebar.Root collapsible="offcanvas" {...restProps}>
@@ -39,12 +42,15 @@
 				<Sidebar.MenuButton size="lg" class="mb-4">
 					{#snippet child({ props })}
 						<p {...props}>
-							<a href={Routes.DASHBOARD} class="group/bkicon inline-flex items-center gap-3">
-								<BkIcon
-									class="zinc-400 h-10 w-10 transition-transform duration-300 ease-in-out group-hover/bkicon:-rotate-90"
-								/>
+							<a
+								href={Routes.DASHBOARD}
+								class="inline-flex items-center gap-3"
+								onmouseenter={() => (logoFlutter = true)}
+								onfocus={() => (logoFlutter = true)}
+							>
+								<BkIcon class="text-foreground h-8 w-8" bind:flutter={logoFlutter} />
 								<span
-									class="font-unbounded from-zing-900 bg-gradient-to-br to-zinc-600 bg-clip-text text-lg font-semibold text-transparent drop-shadow-sm dark:from-zinc-400 dark:to-zinc-300"
+									class="font-unbounded bg-gradient-to-br from-zinc-900 to-zinc-600 bg-clip-text text-xl font-semibold text-transparent drop-shadow-sm dark:from-zinc-200 dark:to-zinc-400"
 								>
 									Bokklubben
 								</span>

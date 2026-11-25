@@ -14,7 +14,7 @@
 	import SubmitButton from '$lib/components/submit-button.svelte';
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
-	import BkIcon from '$lib/components/icons/bk-icon.svelte';
+	import BkIconIntro from '$lib/components/icons/bk-icon-intro.svelte';
 	import GoogleIcon from '$lib/components/icons/google-icon.svelte';
 	import GithubIcon from '$lib/components/icons/github-icon.svelte';
 	import MicrosoftIcon from '$lib/components/icons/microsoft-icon.svelte';
@@ -66,7 +66,7 @@
 >
 	<div class="flex w-full max-w-md flex-col gap-12 overflow-hidden rounded-2xl">
 		<div class="flex flex-col items-center justify-center gap-2 px-4 text-center sm:px-16">
-			<BkIcon size={150} />
+			<BkIconIntro size={150} />
 		</div>
 
 		<form
