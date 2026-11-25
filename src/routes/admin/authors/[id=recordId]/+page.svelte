@@ -20,9 +20,9 @@
 			return '';
 		}
 		const { name, books } = data.author;
-		return books.length > 0
-			? `Slette ${name}? ${books.map((b) => `«${b.title}»`).join(', ')} mister forfatteren, men bøkene beholdes.`
-			: `Slette ${name}?`;
+		return books.length === 0
+			? `Slette ${name}? Ingen tilknytninger, trygt å slette.`
+			: `Slette ${name}? Forfatteren er tilknyttet bøkene: ${books.map((b) => b.title).join(', ')}.`;
 	});
 </script>
 

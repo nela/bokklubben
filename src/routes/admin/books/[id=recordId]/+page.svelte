@@ -35,19 +35,12 @@
 	});
 	const statusLabel = { read: 'Lest', pitched: 'Pitchet', elected: 'Valgt' } as const;
 
-	// Names the meets the book is removed from, e.g. "12. nov. 2026 (lest)". The meets stay.
+	// Names the meets the book is on; deleting it removes it from them, the meets stay.
 	const deleteMessage = $derived.by(() => {
 		const { title, meets } = data.book;
-		if (meets.length === 0) {
-			return `Slette «${title}»? Forfatterne beholdes.`;
-		}
-		const list = meets
-			.map((m) => `${dateFmt.format(m.startsAt)} (${statusLabel[m.status].toLowerCase()})`)
-			.join(', ');
-		const read = meets.some((m) => m.status === 'read')
-			? ' Et møte der den ble lest, står igjen uten bok, og boken vises ikke lenger på siden.'
-			: '';
-		return `Slette «${title}»? Den fjernes fra disse møtene: ${list}.${read} Møtene og forfatterne beholdes.`;
+		return meets.length === 0
+			? `Slette ${title}? Ingen tilknytninger, trygt å slette.`
+			: `Slette ${title}? Boken er tilknyttet møtene: ${meets.map((m) => dateFmt.format(m.startsAt)).join(', ')}.`;
 	});
 </script>
 
