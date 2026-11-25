@@ -48,6 +48,21 @@ export interface AdminMember {
 	imageUrl: string | null;
 }
 
+export interface AdminClubTitleListItem {
+	id: number;
+	name: string;
+	slug: string;
+	memberCount: number;
+}
+
+export interface AdminClubTitle {
+	id: number;
+	name: string;
+	slug: string;
+	/** Names of the members who hold it. */
+	members: Array<string>;
+}
+
 /** For the member form's title checkboxes. */
 export interface ClubTitleOption {
 	id: number;

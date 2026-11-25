@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { ArrowLeft, BookIcon, CalendarDays, Mail, PenTool, Users } from '@lucide/svelte';
+	import { ArrowLeft, BookIcon, CalendarDays, Crown, Mail, PenTool, Users } from '@lucide/svelte';
 	import NavItemGroup from '$lib/components/nav-item-group.svelte';
 	import * as Sidebar from '$lib/components/ui/sidebar';
 	import type { NavItemBase } from '$lib/model';
@@ -12,6 +12,7 @@
 		{ title: 'Bøker', pathname: AdminRoutes.BOOKS, icon: BookIcon, hideFromSidebar: false },
 		{ title: 'Forfattere', pathname: AdminRoutes.AUTHORS, icon: PenTool, hideFromSidebar: false },
 		{ title: 'Medlemmer', pathname: AdminRoutes.MEMBERS, icon: Users, hideFromSidebar: false },
+		{ title: 'Titler', pathname: AdminRoutes.TITLES, icon: Crown, hideFromSidebar: false },
 		{ title: 'E-post', pathname: AdminRoutes.EMAILS, icon: Mail, hideFromSidebar: false }
 	];
 </script>

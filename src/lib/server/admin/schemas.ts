@@ -214,3 +214,9 @@ export const sendBulkEmailSchema = z
 			.refine((ids) => ids.length > 0, 'Velg minst én mottaker')
 	})
 	.refine(hasTemplateName, templateNameMissing);
+
+export const clubTitleSchema = z.object({
+	name: field.text()
+});
+
+export type ClubTitleInput = z.output<typeof clubTitleSchema>;

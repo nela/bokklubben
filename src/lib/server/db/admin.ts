@@ -4,6 +4,8 @@ import { and, asc, count, eq, inArray, isNotNull, ne, sql } from 'drizzle-orm';
 import { fromPromise, type ResultAsync } from 'neverthrow';
 import type {
 	AdminAuthorListItem,
+	AdminClubTitle,
+	AdminClubTitleListItem,
 	AdminEmailTemplate,
 	AdminElectedBook,
 	AdminMeet,
@@ -16,6 +18,7 @@ import type {
 import { toDbError, type DbError } from '$lib/errors/db';
 import type {
 	AuthorInput,
+	ClubTitleInput,
 	EmailTemplateInput,
 	MeetBookInput,
 	MeetInput,
@@ -112,6 +115,80 @@ export function fetchClubTitleOptions(): ResultAsync<Array<ClubTitleOption>, DbE
 			.from(clubTitles)
 			.orderBy(asc(clubTitles.name)),
 		toDbError
+	);
+}
+
+/** All club titles, by name, with how many members hold each. */
+export function fetchAdminClubTitles(): ResultAsync<Array<AdminClubTitleListItem>, DbError> {
+	return fromPromise(
+		db
+			.select({
+				id: clubTitles.id,
+				name: clubTitles.name,
+				slug: clubTitles.slug,
+				memberCount: count(memberTitles.memberId)
+			})
+			.from(clubTitles)
+			.leftJoin(memberTitles, eq(memberTitles.titleId, clubTitles.id))
+			.groupBy(clubTitles.id)
+			.orderBy(asc(clubTitles.name)),
+		toDbError
+	);
+}
+
+export function fetchAdminClubTitle(id: number): ResultAsync<AdminClubTitle | null, DbError> {
+	return fromPromise(
+		db.query.clubTitles.findFirst({
+			where: eq(clubTitles.id, id),
+			columns: { id: true, name: true, slug: true },
+			with: {
+				memberTitles: { with: { member: { columns: { firstName: true, lastName: true } } } }
+			}
+		}),
+		toDbError
+	).map((title) => {
+		if (!title) {
+			return null;
+		}
+		const { memberTitles: holders, ...rest } = title;
+		return {
+			...rest,
+			members: holders
+				.map(({ member }) => `${member.firstName} ${member.lastName}`)
+				.toSorted((a, b) => a.localeCompare(b, 'nb-NO'))
+		};
+	});
+}
+
+/** Returns the new title's id. The slug (for its page's URL) comes from the name. */
+export function createClubTitle({ name }: ClubTitleInput): ResultAsync<number, DbError> {
+	return fromPromise(
+		db
+			.insert(clubTitles)
+			.values({ name, slug: createSlug(name) })
+			.returning({ id: clubTitles.id }),
+		toDbError
+	).map(([row]) => row.id);
+}
+
+/** A new name gives a new slug, so the title's page moves to a new URL. */
+export function updateClubTitle(
+	id: number,
+	{ name }: ClubTitleInput
+): ResultAsync<number, DbError> {
+	return fromPromise(
+		db
+			.update(clubTitles)
+			.set({ name, slug: createSlug(name) })
+			.where(eq(clubTitles.id, id)),
+		toDbError
+	).map(() => id);
+}
+
+/** Members who hold the title lose it; the members themselves stay. */
+export function deleteClubTitle(id: number): ResultAsync<void, DbError> {
+	return fromPromise(db.delete(clubTitles).where(eq(clubTitles.id, id)), toDbError).map(
+		() => undefined
 	);
 }
 
