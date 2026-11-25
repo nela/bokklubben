@@ -4,6 +4,7 @@
 	import type { Book } from '$lib/dto/dto';
 	import { Routes } from '$lib/routes';
 	import AnimatedUnderline from './animated-underline.svelte';
+	import { createSlug } from '$lib/utils/helpers';
 
 	let {
 		book,
@@ -57,7 +58,10 @@
 			{#if book.genres.length > 0}
 				<p class="text-base">
 					<span class="font-semibold">Sjanger: </span>
-					{book.genres.join(', ')}
+					{#each book.genres as genre, i (genre)}
+						<AnimatedUnderline href={`${Routes.BOOK_GENRES}/${createSlug(genre)}`} text={genre} />
+						{#if i < book.genres.length - 1},&nbsp;{/if}
+					{/each}
 				</p>
 			{/if}
 
