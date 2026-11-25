@@ -4,16 +4,17 @@
 	import BkIcon from './icons/bk-icon.svelte';
 
 	/**
-	 * The frame around an email to a member: the text from the admin (already filled in), a button
-	 * to the site and the logo. Rendered on the server; see $lib/server/services/member-email.
+	 * The frame around an email to a member: the text (already filled in), a button and the logo.
+	 * Rendered on the server; see $lib/server/services/member-email and password-reset.
 	 */
 	let {
 		paragraphs,
-		siteUrl = 'https://bokklubben.eu'
+		button = { label: 'Gå til Bokklubben', url: 'https://bokklubben.eu' }
 	}: {
 		/** Each paragraph as its lines. Rendered as text, so it can't add HTML. */
 		paragraphs: Array<Array<string>>;
-		siteUrl?: string;
+		/** The button under the text; to the site unless given. */
+		button?: { label: string; url: string };
 	} = $props();
 </script>
 
@@ -25,7 +26,7 @@
 			{/each}
 		</p>
 	{/each}
-	<a href={siteUrl} class="btn">Gå til Bokklubben</a>
+	<a href={button.url} class="btn">{button.label}</a>
 	<BkIcon class="width=50 height=50" />
 </div>
 

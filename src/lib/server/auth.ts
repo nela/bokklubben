@@ -6,6 +6,7 @@ import { sveltekitCookies } from 'better-auth/svelte-kit';
 import { compare, hash } from 'bcryptjs';
 import { eq, sql } from 'drizzle-orm';
 import { db } from './db';
+import { sendPasswordResetEmail } from './services/password-reset';
 import * as schema from './db/schema';
 
 type SocialProviders = NonNullable<BetterAuthOptions['socialProviders']>;
@@ -64,7 +65,14 @@ export const auth = betterAuth({
 		password: {
 			hash: (password) => hash(password, 10),
 			verify: ({ hash: passwordHash, password }) => compare(password, passwordHash)
-		}
+		},
+		// "Glemt passord" (src/routes/auth/reset). A member without a password, e.g. one who only
+		// uses Google, gets one this way.
+		sendResetPassword: async ({ user, url }) => {
+			await sendPasswordResetEmail(user, url).orTee((e) => console.error(e));
+		},
+		// A new password logs out every session, in case the old one was known to someone else.
+		revokeSessionsOnPasswordReset: true
 	},
 	socialProviders: socialProviders(),
 	account: {

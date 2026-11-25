@@ -38,6 +38,9 @@
 		if (error) {
 			toast.error(errorMessages[error] ?? errorMessages.oauth_failed, { duration: 5000 });
 		}
+		if (page.url.searchParams.get('reset') === 'done') {
+			toast.success('Passordet er endret. Logg inn med det nye.', { duration: 5000 });
+		}
 	});
 
 	const disabled = false;
@@ -90,6 +93,12 @@
 				<Label for="password" class="text-zinc-600 dark:text-zinc-400">Passord</Label>
 
 				<Input id="password" name="password" class="text-md bg-muted md:text-sm" type="password" />
+				<a
+					href="/auth/reset"
+					class="self-end text-sm text-zinc-600 hover:underline dark:text-zinc-400"
+				>
+					Glemt passord?
+				</a>
 			</div>
 
 			<SubmitButton {disabled} {pending} {success}>Logg inn</SubmitButton>
