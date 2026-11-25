@@ -34,6 +34,21 @@
 		timeZone: 'Europe/Oslo'
 	});
 	const statusLabel = { read: 'Lest', pitched: 'Pitchet', elected: 'Valgt' } as const;
+
+	// Names the meets the book is removed from, e.g. "12. nov. 2026 (lest)". The meets stay.
+	const deleteMessage = $derived.by(() => {
+		const { title, meets } = data.book;
+		if (meets.length === 0) {
+			return `Slette «${title}»? Forfatterne beholdes.`;
+		}
+		const list = meets
+			.map((m) => `${dateFmt.format(m.startsAt)} (${statusLabel[m.status].toLowerCase()})`)
+			.join(', ');
+		const read = meets.some((m) => m.status === 'read')
+			? ' Et møte der den ble lest, står igjen uten bok, og boken vises ikke lenger på siden.'
+			: '';
+		return `Slette «${title}»? Den fjernes fra disse møtene: ${list}.${read} Møtene og forfatterne beholdes.`;
+	});
 </script>
 
 <h1 class="mb-6 text-2xl font-semibold">{data.book.title}</h1>
@@ -127,9 +142,7 @@
 </section>
 
 <div class="mt-10 border-t pt-6">
-	<DeleteForm
-		confirmMessage={`Slette «${data.book.title}»? Den fjernes fra møtene den var på, og vises ikke lenger på siden. Forfatterne beholdes.`}
-	/>
+	<DeleteForm confirmMessage={deleteMessage} />
 </div>
 
 <!-- Outside the form above: the panel has a form of its own. -->
