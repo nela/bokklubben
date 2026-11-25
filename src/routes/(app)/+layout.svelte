@@ -5,7 +5,6 @@
 	import AppSidebar from '$lib/components/app-sidebar.svelte';
 	import Header from '$lib/components/header.svelte';
 	import { page } from '$app/state';
-	import { ClubTitle } from '$lib/dto/dto';
 	import type { NavItemPrimary } from '$lib/model';
 	import { Routes } from '$lib/routes';
 	import { authClient } from '$lib/auth-client';
@@ -20,19 +19,14 @@
 			pathname: Routes.MEMBERS,
 			hideFromSidebar: false,
 			icon: Users,
-			items: [...new Set(allMembers.flatMap((m) => m.titles))]
-				.toSorted((a, b) => ClubTitle[a].localeCompare(ClubTitle[b], 'nb-NO'))
-				.map((t) => {
-					const label = ClubTitle[t];
-					const title = t === 'FOUNDING_FATHER' ? label + 's' : label;
-
-					return {
-						title: title,
-						type: 'secondary',
-						pathname: `${Routes.MEMBERS}/${t.toLowerCase()}`,
-						hideFromSidebar: false
-					};
-				})
+			// The titles members hold, each once.
+			items: [...new Map(allMembers.flatMap((m) => m.titles).map((t) => [t.slug, t])).values()]
+				.toSorted((a, b) => a.name.localeCompare(b.name, 'nb-NO'))
+				.map((t) => ({
+					title: t.name,
+					pathname: `${Routes.MEMBER_TITLES}/${t.slug}`,
+					hideFromSidebar: false
+				}))
 		},
 		{
 			title: 'Bøker',

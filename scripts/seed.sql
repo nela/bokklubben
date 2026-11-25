@@ -13,18 +13,44 @@ end $$;
 
 begin;
 
-truncate meet_attendance, meet_books, book_authors, meets, books, authors, members restart identity cascade;
+truncate meet_attendance, meet_books, book_authors, meets, books, authors, member_titles, club_titles,
+	members restart identity cascade;
 
 -- Members -------------------------------------------------------------------
 
-insert into members (first_name, last_name, nickname, email, role, titles, member_since, member_until) values
-	('Kari',    'Nordmann',  null,       'kari@example.com',    'admin',   '{FOUNDING_FATHER,CTO}',  '2019-02-01', null),
-	('Ola',     'Hansen',    'Bokormen', 'ola@example.com',     'regular', '{FOUNDING_FATHER,CFO}',  '2019-02-01', null),
-	('Ingrid',  'Berg',      null,       'ingrid@example.com',  'regular', '{WHIP}',                 '2020-08-15', null),
-	('Per',     'Johansen',  null,       'per@example.com',     'regular', '{BUREAUCRAT,EXECUTIONER}','2021-01-10', null),
-	('Sofie',   'Larsen',    'Sossen',   'sofie@example.com',   'regular', '{USURPER}',              '2022-05-03', null),
-	('Magnus',  'Dahl',      null,       'magnus@example.com',  'regular', '{PROBATE}',              '2025-10-01', null),
-	('Hanne',   'Strand',    null,       'hanne@example.com',   'regular', '{HONORARY}',             '2019-06-01', '2024-12-31');
+insert into members (first_name, last_name, nickname, email, role, member_since, member_until) values
+	('Kari',    'Nordmann',  null,       'kari@example.com',    'admin',   '2019-02-01', null),
+	('Ola',     'Hansen',    'Bokormen', 'ola@example.com',     'regular', '2019-02-01', null),
+	('Ingrid',  'Berg',      null,       'ingrid@example.com',  'regular', '2020-08-15', null),
+	('Per',     'Johansen',  null,       'per@example.com',     'regular', '2021-01-10', null),
+	('Sofie',   'Larsen',    'Sossen',   'sofie@example.com',   'regular', '2022-05-03', null),
+	('Magnus',  'Dahl',      null,       'magnus@example.com',  'regular', '2025-10-01', null),
+	('Hanne',   'Strand',    null,       'hanne@example.com',   'regular', '2019-06-01', '2024-12-31');
+
+insert into club_titles (name, slug) values
+	('CTO', 'cto'),
+	('CFO', 'cfo'),
+	('Whip', 'whip'),
+	('Byråkraten', 'byrakraten'),
+	('Tittel raner', 'tittel-raner'),
+	('Bøddel', 'boddel'),
+	('Prospekt', 'prospekt'),
+	('Ærede Medlem', 'aerede-medlem'),
+	('Founding Father', 'founding-father');
+
+insert into member_titles (member_id, title_id)
+select m.id, t.id
+from (values
+	('kari@example.com', 'founding-father'), ('kari@example.com', 'cto'),
+	('ola@example.com', 'founding-father'), ('ola@example.com', 'cfo'),
+	('ingrid@example.com', 'whip'),
+	('per@example.com', 'byrakraten'), ('per@example.com', 'boddel'),
+	('sofie@example.com', 'tittel-raner'),
+	('magnus@example.com', 'prospekt'),
+	('hanne@example.com', 'aerede-medlem')
+) as v(email, slug)
+join members m on m.email = v.email
+join club_titles t on t.slug = v.slug;
 
 -- Authors -------------------------------------------------------------------
 

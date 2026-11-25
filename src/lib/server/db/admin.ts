@@ -10,6 +10,7 @@ import type {
 	AdminMeetListItem,
 	AdminMember,
 	AdminMemberListItem,
+	ClubTitleOption,
 	MemberOption
 } from '$lib/dto/admin';
 import { toDbError, type DbError } from '$lib/errors/db';
@@ -28,65 +29,98 @@ import {
 	authors,
 	bookAuthors,
 	books,
+	clubTitles,
 	emailTemplates,
 	meetAttendance,
 	meetBooks,
 	meets,
 	members,
+	memberTitles,
 	user
 } from './schema';
 
 /** All members: current ones first, by member since, then those whose membership has ended. */
 export function fetchAdminMembers(): ResultAsync<Array<AdminMemberListItem>, DbError> {
 	return fromPromise(
-		db
-			.select({
-				id: members.id,
-				firstName: members.firstName,
-				lastName: members.lastName,
-				nickname: members.nickname,
-				email: members.email,
-				role: members.role,
-				titles: members.titles,
-				memberSince: members.memberSince,
-				memberUntil: members.memberUntil,
-				signedUp: sql<boolean>`${members.userId} is not null`
-			})
-			.from(members)
-			.orderBy(asc(members.memberSince), asc(members.firstName)),
+		db.query.members.findMany({
+			columns: {
+				id: true,
+				firstName: true,
+				lastName: true,
+				nickname: true,
+				email: true,
+				role: true,
+				memberSince: true,
+				memberUntil: true,
+				userId: true
+			},
+			with: { memberTitles: { with: { title: { columns: { name: true } } } } },
+			orderBy: (m, { asc }) => [asc(m.memberSince), asc(m.firstName)]
+		}),
 		toDbError
 	).map((rows) => {
-		const list = rows.map((m) => ({ ...m, former: hasLeft(m.memberUntil) }));
+		const list = rows.map(({ userId, memberTitles, ...m }) => ({
+			...m,
+			titles: memberTitles
+				.map((mt) => mt.title.name)
+				.toSorted((a, b) => a.localeCompare(b, 'nb-NO')),
+			signedUp: userId !== null,
+			former: hasLeft(m.memberUntil)
+		}));
 		return [...list.filter((m) => !m.former), ...list.filter((m) => m.former)];
 	});
 }
 
 export function fetchAdminMember(id: number): ResultAsync<AdminMember | null, DbError> {
 	return fromPromise(
-		db
-			.select({
-				id: members.id,
-				firstName: members.firstName,
-				lastName: members.lastName,
-				nickname: members.nickname,
-				email: members.email,
-				role: members.role,
-				titles: members.titles,
-				memberSince: members.memberSince,
-				memberUntil: members.memberUntil,
-				signedUp: sql<boolean>`${members.userId} is not null`,
-				imagePath: members.imagePath
-			})
-			.from(members)
-			.where(eq(members.id, id)),
+		db.query.members.findFirst({
+			where: eq(members.id, id),
+			columns: {
+				id: true,
+				firstName: true,
+				lastName: true,
+				nickname: true,
+				email: true,
+				role: true,
+				memberSince: true,
+				memberUntil: true,
+				userId: true,
+				imagePath: true
+			},
+			with: { memberTitles: { columns: { titleId: true } } }
+		}),
 		toDbError
-	).map(([member]) => {
+	).map((member) => {
 		if (!member) {
 			return null;
 		}
-		const { imagePath, ...rest } = member;
-		return { ...rest, imageUrl: privateImageUrl(imagePath) };
+		const { imagePath, userId, memberTitles, ...rest } = member;
+		return {
+			...rest,
+			titles: memberTitles.map((mt) => mt.titleId),
+			signedUp: userId !== null,
+			imageUrl: privateImageUrl(imagePath)
+		};
 	});
+}
+
+/** All club titles, by name, for the member form's checkboxes. */
+export function fetchClubTitleOptions(): ResultAsync<Array<ClubTitleOption>, DbError> {
+	return fromPromise(
+		db
+			.select({ id: clubTitles.id, name: clubTitles.name })
+			.from(clubTitles)
+			.orderBy(asc(clubTitles.name)),
+		toDbError
+	);
+}
+
+/** Replaces a member's titles. */
+async function setMemberTitles(tx: Tx, memberId: number, titleIds: Array<number>) {
+	await tx.delete(memberTitles).where(eq(memberTitles.memberId, memberId));
+	if (titleIds.length > 0) {
+		await tx.insert(memberTitles).values(titleIds.map((titleId) => ({ memberId, titleId })));
+	}
 }
 
 /** The member fields that are saved; `imagePath` only when the photo changes. */
@@ -95,9 +129,14 @@ export type MemberUpdate = Omit<MemberInput, 'photo' | 'removePhoto'> & {
 };
 
 /** Adds a member, who can then sign up with their email. Returns the new member's id. */
-export function createMember(input: MemberUpdate): ResultAsync<number, DbError> {
-	return fromPromise(db.insert(members).values(input).returning({ id: members.id }), toDbError).map(
-		([row]) => row.id
+export function createMember({ titles, ...fields }: MemberUpdate): ResultAsync<number, DbError> {
+	return fromPromise(
+		db.transaction(async (tx) => {
+			const [{ id }] = await tx.insert(members).values(fields).returning({ id: members.id });
+			await setMemberTitles(tx, id, titles);
+			return id;
+		}),
+		toDbError
 	);
 }
 
@@ -108,7 +147,7 @@ export function createMember(input: MemberUpdate): ResultAsync<number, DbError> 
  */
 export function updateMember(
 	id: number,
-	input: MemberUpdate
+	{ titles, ...input }: MemberUpdate
 ): ResultAsync<{ previousImagePath: string | null }, DbError> {
 	return fromPromise(
 		db.transaction(async (tx) => {
@@ -118,6 +157,7 @@ export function updateMember(
 				.where(eq(members.id, id));
 
 			await tx.update(members).set(input).where(eq(members.id, id));
+			await setMemberTitles(tx, id, titles);
 
 			if (current?.userId && current.email.toLowerCase() !== input.email) {
 				await tx.update(user).set({ email: input.email }).where(eq(user.id, current.userId));

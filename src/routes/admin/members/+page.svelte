@@ -3,7 +3,6 @@
 	import SendEmailSheet from '$lib/components/admin/send-email-sheet.svelte';
 	import { Badge } from '$lib/components/ui/badge';
 	import { Button } from '$lib/components/ui/button';
-	import { ClubTitle } from '$lib/dto/dto';
 	import { AdminRoutes } from '$lib/routes';
 	import type { PageProps } from './$types';
 
@@ -101,7 +100,7 @@
 					</td>
 					<td class="hidden py-2 pr-4 md:table-cell">{member.email}</td>
 					<td class="hidden py-2 pr-4 sm:table-cell">
-						{member.titles.map((t) => ClubTitle[t]).join(', ') || '–'}
+						{member.titles.join(', ') || '–'}
 					</td>
 					<td class="py-2 text-right tabular-nums">{member.memberSince.getFullYear()}</td>
 				</tr>

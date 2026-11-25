@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { appRole, clubTitle } from '$lib/server/db/schema';
+import { appRole } from '$lib/server/db/schema';
 import { field } from './form';
 
 /** ISBN-10 or ISBN-13; hyphens and spaces are dropped. */
@@ -164,8 +164,8 @@ export const memberSchema = z
 		/** Stored lowercased, as logins compare it. */
 		email: z.string().trim().toLowerCase().pipe(z.email('Ugyldig e-post')),
 		role: z.enum(appRole.enumValues),
-		/** One checkbox per title; the keys, not the display labels. */
-		titles: field.array(z.enum(clubTitle.enumValues)),
+		/** Club title ids, one checkbox each. */
+		titles: field.array(z.coerce.number().int().positive()),
 		memberSince: field.date(),
 		memberUntil: field.optionalDate(),
 		/** A new profile photo; empty keeps the current one. */

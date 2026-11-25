@@ -1,17 +1,9 @@
-/** Display labels for club titles. The database stores the keys. */
-export enum ClubTitle {
-	CTO = 'CTO',
-	CFO = 'CFO',
-	WHIP = 'Whip',
-	BUREAUCRAT = 'Byråkraten',
-	USURPER = 'Tittel raner',
-	EXECUTIONER = 'Bøddel',
-	PROBATE = 'Prospekt',
-	HONORARY = 'Ærede Medlem',
-	FOUNDING_FATHER = 'Founding Father'
+/** A club title, e.g. «Byråkraten». Titles are added and renamed in the admin. */
+export interface ClubTitleRef {
+	name: string;
+	/** For the title's page, /members/titles/<slug>. */
+	slug: string;
 }
-
-export type ClubTitleKey = keyof typeof ClubTitle;
 
 export type AppRole = 'admin' | 'regular';
 
@@ -23,7 +15,8 @@ export interface PublicMember {
 	nickname: string | null;
 	memberSince: Date;
 	memberUntil: Date | null;
-	titles: Array<ClubTitleKey>;
+	/** By name. */
+	titles: Array<ClubTitleRef>;
 	imageUrl: string | null;
 }
 

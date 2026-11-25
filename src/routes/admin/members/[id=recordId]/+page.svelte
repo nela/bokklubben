@@ -45,7 +45,7 @@
 		{/if}
 	</div>
 
-	<MemberForm {member} form={failedForm(form)} />
+	<MemberForm {member} titleOptions={data.titleOptions} form={failedForm(form)} />
 
 	<div class="mt-10 border-t pt-6">
 		<DeleteForm
@@ -66,5 +66,5 @@
 		Etter lagring kan du sende en invitasjon. Medlemmet logger så inn med e-postadressen sin.
 	</p>
 
-	<MemberForm member={null} form={failedForm(form)} />
+	<MemberForm member={null} titleOptions={data.titleOptions} form={failedForm(form)} />
 {/if}

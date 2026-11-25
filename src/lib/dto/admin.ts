@@ -1,6 +1,6 @@
 /** Rows for the admin pages. Unlike the site's DTOs, these include ids and every record. */
 
-import type { AppRole, ClubTitleKey } from './dto';
+import type { AppRole } from './dto';
 
 /** Field name → messages shown under that field. `form` holds errors for the form as a whole. */
 export type FieldErrors = Partial<Record<string, Array<string>>>;
@@ -21,7 +21,8 @@ export interface AdminMemberListItem {
 	nickname: string | null;
 	email: string;
 	role: AppRole;
-	titles: Array<ClubTitleKey>;
+	/** Title names, alphabetically. */
+	titles: Array<string>;
 	memberSince: Date;
 	memberUntil: Date | null;
 	/** Has logged in at least once (has a user). Invited members who haven't are false. */
@@ -38,12 +39,19 @@ export interface AdminMember {
 	nickname: string | null;
 	email: string;
 	role: AppRole;
-	titles: Array<ClubTitleKey>;
+	/** Ids of the member's club titles. */
+	titles: Array<number>;
 	memberSince: Date;
 	memberUntil: Date | null;
 	signedUp: boolean;
 	/** The profile photo, through /images (see privateImageUrl). */
 	imageUrl: string | null;
+}
+
+/** For the member form's title checkboxes. */
+export interface ClubTitleOption {
+	id: number;
+	name: string;
 }
 
 /** For selects, e.g. choosing a meet's host. */

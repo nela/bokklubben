@@ -1,7 +1,7 @@
 import { asc, desc, eq, gte, sql } from 'drizzle-orm';
 import { fromPromise, ResultAsync } from 'neverthrow';
 import { toDbError, type DbError } from '$lib/errors/db';
-import type { Author, Book, Meet, Member, PublicMember } from '$lib/dto/dto';
+import type { Author, Book, ClubTitleRef, Meet, Member, PublicMember } from '$lib/dto/dto';
 import { privateImageUrl, publicImageUrl } from '$lib/server/images';
 import { db } from './index';
 import { meets, members } from './schema';
@@ -15,6 +15,22 @@ const withImage =
 		...rest,
 		imageUrl: toUrl(imagePath)
 	});
+
+/** Loads a member's titles along with the member; see `withTitles`. */
+const memberTitlesWith = {
+	memberTitles: { with: { title: { columns: { name: true, slug: true } } } }
+} as const;
+
+/** Swaps the loaded title links for the titles, by name. */
+const withTitles = <T extends { memberTitles: Array<{ title: ClubTitleRef }> }>({
+	memberTitles,
+	...rest
+}: T) => ({
+	...rest,
+	titles: memberTitles
+		.map((mt) => mt.title)
+		.toSorted((a, b) => a.name.localeCompare(b.name, 'nb-NO'))
+});
 
 const withMemberImage = withImage(privateImageUrl);
 const withPublicImage = withImage(publicImageUrl);
@@ -32,12 +48,12 @@ export function fetchMemberByUserId(userId: string): ResultAsync<Member | null, 
 				nickname: true,
 				memberSince: true,
 				memberUntil: true,
-				titles: true,
 				imagePath: true
-			}
+			},
+			with: memberTitlesWith
 		}),
 		toDbError
-	).map((member) => (member ? withMemberImage(member) : null));
+	).map((member) => (member ? withMemberImage(withTitles(member)) : null));
 }
 
 export function fetchMembers(): ResultAsync<Array<PublicMember>, DbError> {
@@ -49,13 +65,13 @@ export function fetchMembers(): ResultAsync<Array<PublicMember>, DbError> {
 				nickname: true,
 				memberSince: true,
 				memberUntil: true,
-				titles: true,
 				imagePath: true
 			},
+			with: memberTitlesWith,
 			orderBy: [asc(members.memberSince), asc(members.firstName)]
 		}),
 		toDbError
-	).map((rows) => rows.map(withMemberImage));
+	).map((rows) => rows.map((member) => withMemberImage(withTitles(member))));
 }
 
 /** Books that have been, or are about to be, discussed at a meet. Newest first. */

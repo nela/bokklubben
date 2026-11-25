@@ -26,19 +26,6 @@ const timestamps = {
 
 export const appRole = pgEnum('app_role', ['admin', 'regular']);
 
-/** Stored as keys; display labels live in the UI (`ClubTitle` in dto.ts). */
-export const clubTitle = pgEnum('club_title', [
-	'CTO',
-	'CFO',
-	'WHIP',
-	'BUREAUCRAT',
-	'USURPER',
-	'EXECUTIONER',
-	'PROBATE',
-	'HONORARY',
-	'FOUNDING_FATHER'
-]);
-
 /**
  * A book's relation to a meet:
  * - pitched: proposed at this meet
@@ -60,7 +47,6 @@ export const members = pgTable(
 		nickname: text(),
 		email: text().notNull(),
 		role: appRole().notNull().default('regular'),
-		titles: clubTitle().array().notNull().default(sql`'{}'`),
 		memberSince: date({ mode: 'date' }).notNull().defaultNow(),
 		memberUntil: date({ mode: 'date' }),
 		/** Path in the private Blob store, or an absolute URL. See $lib/server/images. */
@@ -68,6 +54,32 @@ export const members = pgTable(
 		...timestamps
 	},
 	(t) => [uniqueIndex('members_email_lower_idx').on(sql`lower(${t.email})`)]
+);
+
+/** Club titles, e.g. «Byråkraten». Added, renamed and removed in the admin. */
+export const clubTitles = pgTable('club_titles', {
+	id: integer().primaryKey().generatedAlwaysAsIdentity(),
+	name: text().notNull().unique(),
+	/** For the title's page, /members/titles/<slug>. */
+	slug: text().notNull().unique(),
+	...timestamps
+});
+
+/** Which members hold which titles. */
+export const memberTitles = pgTable(
+	'member_titles',
+	{
+		memberId: integer()
+			.notNull()
+			.references(() => members.id, { onDelete: 'cascade' }),
+		titleId: integer()
+			.notNull()
+			.references(() => clubTitles.id, { onDelete: 'cascade' })
+	},
+	(t) => [
+		primaryKey({ columns: [t.memberId, t.titleId] }),
+		index('member_titles_title_id_idx').on(t.titleId)
+	]
 );
 
 export const authors = pgTable('authors', {
@@ -186,6 +198,7 @@ export const emailTemplates = pgTable('email_templates', {
 
 export const membersRelations = relations(members, ({ one, many }) => ({
 	user: one(user, { fields: [members.userId], references: [user.id] }),
+	memberTitles: many(memberTitles),
 	hostedMeets: many(meets),
 	pitches: many(meetBooks),
 	attendance: many(meetAttendance)
@@ -220,4 +233,13 @@ export const meetBooksRelations = relations(meetBooks, ({ one }) => ({
 export const meetAttendanceRelations = relations(meetAttendance, ({ one }) => ({
 	meet: one(meets, { fields: [meetAttendance.meetId], references: [meets.id] }),
 	member: one(members, { fields: [meetAttendance.memberId], references: [members.id] })
+}));
+
+export const clubTitlesRelations = relations(clubTitles, ({ many }) => ({
+	memberTitles: many(memberTitles)
+}));
+
+export const memberTitlesRelations = relations(memberTitles, ({ one }) => ({
+	member: one(members, { fields: [memberTitles.memberId], references: [members.id] }),
+	title: one(clubTitles, { fields: [memberTitles.titleId], references: [clubTitles.id] })
 }));

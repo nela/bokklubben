@@ -143,15 +143,15 @@ describe('memberSchema', () => {
 		memberUntil: ''
 	};
 
-	it('lowercases the email and takes titles as keys', () => {
+	it('lowercases the email and takes titles as ids', () => {
 		const data = formData(member);
-		data.append('titles', 'CTO');
-		data.append('titles', 'BUREAUCRAT');
+		data.append('titles', '1');
+		data.append('titles', '4');
 
 		expect(parseForm(data, memberSchema)._unsafeUnwrap().data).toMatchObject({
 			email: 'ola.nordmann@example.com',
 			nickname: null,
-			titles: ['CTO', 'BUREAUCRAT'],
+			titles: [1, 4],
 			memberUntil: null
 		});
 	});

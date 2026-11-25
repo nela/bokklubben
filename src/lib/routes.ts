@@ -1,6 +1,8 @@
 export enum Routes {
 	DASHBOARD = '/',
 	MEMBERS = '/members',
+	/** A club title's members: /members/titles/<slug>. */
+	MEMBER_TITLES = '/members/titles',
 	BOOKS = '/books',
 	AUTHORS = '/authors',
 	PROTOCOL = '/protocol',

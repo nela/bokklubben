@@ -5,8 +5,7 @@
 	import * as Avatar from '$lib/components/ui/avatar';
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
-	import type { AdminFormState, AdminMember } from '$lib/dto/admin';
-	import { ClubTitle, type ClubTitleKey } from '$lib/dto/dto';
+	import type { AdminFormState, AdminMember, ClubTitleOption } from '$lib/dto/admin';
 	import { AdminRoutes } from '$lib/routes';
 	import FormField from './form-field.svelte';
 	import { dateInput, fieldValue, fieldValues } from './form-values';
@@ -14,10 +13,13 @@
 
 	let {
 		member,
+		titleOptions,
 		form
 	}: {
 		/** null when adding a new member. */
 		member: AdminMember | null;
+		/** All club titles, for the checkboxes. */
+		titleOptions: Array<ClubTitleOption>;
 		form: AdminFormState | null | undefined;
 	} = $props();
 
@@ -42,7 +44,7 @@
 	const value = (name: string, saved: string) => fieldValue(form, name, saved);
 	const errors = $derived(form?.errors ?? {});
 	const role = $derived(value('role', shown.role));
-	const titles = $derived(fieldValues(form, 'titles', shown.titles));
+	const titles = $derived(fieldValues(form, 'titles', shown.titles.map(String)));
 
 	// A chosen file is previewed before it's saved; "remove" hides the current photo.
 	let photoPreview = $state<string | null>(null);
@@ -59,10 +61,6 @@
 			removePhoto = false;
 		}
 	}
-
-	const titleKeys = (Object.keys(ClubTitle) as Array<ClubTitleKey>).toSorted((a, b) =>
-		ClubTitle[a].localeCompare(ClubTitle[b], 'nb-NO')
-	);
 </script>
 
 <form
@@ -203,17 +201,19 @@
 	<fieldset class="flex flex-col gap-2">
 		<legend class="mb-2 text-sm font-medium">Titler</legend>
 		<div class="grid grid-cols-2 gap-x-4 gap-y-2 sm:grid-cols-3">
-			{#each titleKeys as key (key)}
+			{#each titleOptions as title (title.id)}
 				<label class="flex items-center gap-2 text-sm">
 					<input
 						type="checkbox"
 						name="titles"
-						value={key}
-						checked={titles.includes(key)}
+						value={title.id}
+						checked={titles.includes(title.id.toString())}
 						class="accent-primary size-4"
 					/>
-					{ClubTitle[key]}
+					{title.name}
 				</label>
+			{:else}
+				<p class="text-muted-foreground text-sm">Ingen titler ennå.</p>
 			{/each}
 		</div>
 		{#if errors.titles}

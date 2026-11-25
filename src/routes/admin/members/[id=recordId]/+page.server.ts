@@ -8,6 +8,7 @@ import {
 	createMember,
 	deleteMember,
 	fetchAdminMember,
+	fetchClubTitleOptions,
 	fetchEmailTemplates,
 	updateMember
 } from '$lib/server/db/admin';
@@ -38,19 +39,20 @@ export const load: PageServerLoad = async ({ params }) => {
 
 	const result = await ResultAsync.combine([
 		id === null ? okAsync(null) : fetchAdminMember(id),
-		fetchEmailTemplates()
+		fetchEmailTemplates(),
+		fetchClubTitleOptions()
 	]);
 	if (result.isErr()) {
 		console.error(result.error);
 		error(500, 'Kunne ikke laste medlemmet.');
 	}
 
-	const [member, emailTemplates] = result.value;
+	const [member, emailTemplates, titleOptions] = result.value;
 	if (id !== null && !member) {
 		error(404, 'Fant ikke medlemmet.');
 	}
 
-	return { member, emailTemplates };
+	return { member, emailTemplates, titleOptions };
 };
 
 export const actions: Actions = {
