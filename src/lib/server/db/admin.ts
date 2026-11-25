@@ -3,6 +3,7 @@
 import { and, asc, count, eq, inArray, isNotNull, ne, sql } from 'drizzle-orm';
 import { fromPromise, type ResultAsync } from 'neverthrow';
 import type {
+	AdminAuthor,
 	AdminAuthorListItem,
 	AdminBook,
 	AdminBookListItem,
@@ -340,15 +341,55 @@ export function fetchAuthorNames(): ResultAsync<Array<string>, DbError> {
 	).map((rows) => rows.map((r) => r.name));
 }
 
-/** Creates an author; the slug (used in URLs) comes from the name. Returns the saved name. */
-export function createAuthor(input: AuthorInput): ResultAsync<{ name: string }, DbError> {
+/** Creates an author; the slug (used in URLs) comes from the name. Returns the id and name. */
+export function createAuthor(
+	input: AuthorInput
+): ResultAsync<{ id: number; name: string }, DbError> {
 	return fromPromise(
 		db
 			.insert(authors)
 			.values({ ...input, slug: createSlug(input.name) })
-			.returning({ name: authors.name }),
+			.returning({ id: authors.id, name: authors.name }),
 		toDbError
 	).map(([author]) => author);
+}
+
+export function fetchAdminAuthor(id: number): ResultAsync<AdminAuthor | null, DbError> {
+	return fromPromise(
+		db.query.authors.findFirst({
+			where: eq(authors.id, id),
+			columns: { id: true, name: true, born: true, died: true, bio: true, awards: true },
+			with: { bookAuthors: { with: { book: { columns: { id: true, title: true } } } } }
+		}),
+		toDbError
+	).map((author) => {
+		if (!author) {
+			return null;
+		}
+		const { bookAuthors, ...rest } = author;
+		return {
+			...rest,
+			books: bookAuthors
+				.map((ba) => ba.book)
+				.toSorted((a, b) => a.title.localeCompare(b.title, 'nb-NO'))
+		};
+	});
+}
+
+/** A new name gives a new slug, so the author's page on the site moves to a new URL. */
+export function updateAuthor(id: number, input: AuthorInput): ResultAsync<number, DbError> {
+	return fromPromise(
+		db
+			.update(authors)
+			.set({ ...input, slug: createSlug(input.name) })
+			.where(eq(authors.id, id)),
+		toDbError
+	).map(() => id);
+}
+
+/** Also removes the author from their books; the books themselves stay. */
+export function deleteAuthor(id: number): ResultAsync<void, DbError> {
+	return fromPromise(db.delete(authors).where(eq(authors.id, id)), toDbError).map(() => undefined);
 }
 
 type Tx = Parameters<Parameters<typeof db.transaction>[0]>[0];

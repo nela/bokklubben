@@ -1,11 +1,17 @@
 <script lang="ts">
+	import { Plus } from '@lucide/svelte';
+	import { Button } from '$lib/components/ui/button';
+	import { AdminRoutes } from '$lib/routes';
 	import { getLifetime } from '$lib/utils/helpers';
 	import type { PageProps } from './$types';
 
 	let { data }: PageProps = $props();
 </script>
 
-<h1 class="mb-6 text-2xl font-semibold">Forfattere</h1>
+<div class="mb-6 flex items-center justify-between gap-4">
+	<h1 class="text-2xl font-semibold">Forfattere</h1>
+	<Button href={`${AdminRoutes.AUTHORS}/new`}><Plus />Ny forfatter</Button>
+</div>
 
 {#if data.authors.length > 0}
 	<table class="w-full text-left text-sm">
@@ -19,7 +25,11 @@
 		<tbody>
 			{#each data.authors as author (author.id)}
 				<tr class="border-b last:border-0">
-					<td class="py-2 pr-4">{author.name}</td>
+					<td class="py-2 pr-4">
+						<a href={`${AdminRoutes.AUTHORS}/${author.id}`} class="hover:underline">
+							{author.name}
+						</a>
+					</td>
 					<td class="text-muted-foreground py-2 pr-4">{getLifetime(author) ?? '–'}</td>
 					<td class="py-2 text-right tabular-nums">{author.bookCount}</td>
 				</tr>

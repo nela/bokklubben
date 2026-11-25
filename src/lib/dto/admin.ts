@@ -154,6 +154,18 @@ export interface AdminAuthorListItem {
 	bookCount: number;
 }
 
+/** An author on their own admin page. */
+export interface AdminAuthor {
+	id: number;
+	name: string;
+	born: Date | null;
+	died: Date | null;
+	bio: string | null;
+	awards: Array<string>;
+	/** Their books, by title. */
+	books: Array<{ id: number; title: string }>;
+}
+
 /** An email template written in the admin; see $lib/email-placeholders for what it can contain. */
 export interface AdminEmailTemplate {
 	id: number;
