@@ -63,15 +63,22 @@
 	</Sidebar.Header>
 	<Sidebar.Content>
 		<NavItemGroup items={primaryItems} />
-		{#if secondaryItems.length > 0}
-			<div
-				in:fly={{ x: -10, duration: 300, delay: 300 }}
-				out:fly={{ x: -10, duration: 300, delay: 0 }}
-			>
-				<Separator orientation="horizontal" />
-				<NavItemGroup items={secondaryItems} />
-			</div>
-		{/if}
+		<!-- The submenu slides out and the next one in, also between two sections that both have
+		     one (e.g. Medlemmer → Bøker). Both share one grid cell, so the new one doesn't jump. -->
+		<div class="grid">
+			{#key activePrimary?.pathname}
+				{#if secondaryItems.length > 0}
+					<div
+						class="[grid-area:1/1]"
+						in:fly|global={{ x: -10, duration: 300, delay: 300 }}
+						out:fly|global={{ x: -10, duration: 300, delay: 0 }}
+					>
+						<Separator orientation="horizontal" />
+						<NavItemGroup items={secondaryItems} />
+					</div>
+				{/if}
+			{/key}
+		</div>
 	</Sidebar.Content>
 	<Sidebar.Footer>
 		<Sidebar.Menu>
