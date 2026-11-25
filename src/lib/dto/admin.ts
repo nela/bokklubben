@@ -1,6 +1,6 @@
 /** Rows for the admin pages. Unlike the site's DTOs, these include ids and every record. */
 
-import type { AppRole } from './dto';
+import type { AppRole, MeetBookStatus } from './dto';
 
 /** Field name → messages shown under that field. `form` holds errors for the form as a whole. */
 export type FieldErrors = Partial<Record<string, Array<string>>>;
@@ -87,6 +87,22 @@ export interface AdminMeetBook {
 	description: string | null;
 	/** Author names. */
 	authors: Array<string>;
+}
+
+export interface AdminBookListItem {
+	id: number;
+	title: string;
+	authors: Array<string>;
+	/** When it was read: its first meet with status read. null if it hasn't been read. */
+	readAt: Date | null;
+}
+
+/** A book on its own admin page. */
+export interface AdminBook extends AdminMeetBook {
+	rating: number | null;
+	awards: Array<string>;
+	/** The meets it was read, pitched or elected at, newest first. */
+	meets: Array<{ id: number; startsAt: Date; status: MeetBookStatus }>;
 }
 
 /** A book elected at a meet but not read yet: the likely book for the next meet. */

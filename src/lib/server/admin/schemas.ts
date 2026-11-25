@@ -220,3 +220,33 @@ export const clubTitleSchema = z.object({
 });
 
 export type ClubTitleInput = z.output<typeof clubTitleSchema>;
+
+/**
+ * A book on its own page: the same fields as in the meet form (`bookFields`, prefixed `book`),
+ * plus the Goodreads rating and awards. The title is required here.
+ */
+export const bookSchema = z
+	.object({
+		...bookFields,
+		bookTitle: field.text(),
+		/** Goodreads rating, 0–5. */
+		bookRating: field
+			.optionalNumber()
+			.refine((v) => v === null || (v >= 0 && v <= 5), 'Mellom 0 og 5'),
+		/** Separated by semicolons; see `field.semicolonList`. */
+		bookAwards: field.semicolonList()
+	})
+	.transform((b) => ({
+		title: b.bookTitle,
+		authors: b.bookAuthors,
+		isbn: b.bookIsbn,
+		pages: b.bookPages,
+		firstPublished: b.bookFirstPublished,
+		genres: b.bookGenres,
+		originalLanguage: b.bookOriginalLanguage,
+		description: b.bookDescription,
+		rating: b.bookRating,
+		awards: b.bookAwards
+	}));
+
+export type BookInput = z.output<typeof bookSchema>;

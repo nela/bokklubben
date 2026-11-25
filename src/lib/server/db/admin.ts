@@ -4,6 +4,8 @@ import { and, asc, count, eq, inArray, isNotNull, ne, sql } from 'drizzle-orm';
 import { fromPromise, type ResultAsync } from 'neverthrow';
 import type {
 	AdminAuthorListItem,
+	AdminBook,
+	AdminBookListItem,
 	AdminClubTitle,
 	AdminClubTitleListItem,
 	AdminEmailTemplate,
@@ -18,6 +20,7 @@ import type {
 import { toDbError, type DbError } from '$lib/errors/db';
 import type {
 	AuthorInput,
+	BookInput,
 	ClubTitleInput,
 	EmailTemplateInput,
 	MeetBookInput,
@@ -555,14 +558,13 @@ export function saveMeet(
 }
 
 /**
- * Saves the meet's read book:
- * - the meet already has one: it's updated;
- * - an existing book was chosen (`id`, e.g. the elected one): it's updated and linked as read;
- * - otherwise a new book is created and linked as read.
+ * A book's fields as saved: genres and language take the spelling already in use (so
+ * "science fiction" becomes "Science Fiction"), and the slug comes from the title.
  */
-async function saveReadBook(tx: Tx, meetId: number, book: MeetBookInput) {
-	const { id: chosenId, authors: authorNames, ...fields } = book;
-	const values = {
+async function bookValues<
+	T extends { title: string; genres: Array<string>; originalLanguage: string | null }
+>(tx: Tx, fields: T) {
+	return {
 		...fields,
 		genres: matchSpelling(fields.genres, await selectGenres(tx)),
 		originalLanguage: fields.originalLanguage
@@ -570,6 +572,17 @@ async function saveReadBook(tx: Tx, meetId: number, book: MeetBookInput) {
 			: null,
 		slug: createSlug(fields.title)
 	};
+}
+
+/**
+ * Saves the meet's read book:
+ * - the meet already has one: it's updated;
+ * - an existing book was chosen (`id`, e.g. the elected one): it's updated and linked as read;
+ * - otherwise a new book is created and linked as read.
+ */
+async function saveReadBook(tx: Tx, meetId: number, book: MeetBookInput) {
+	const { id: chosenId, authors: authorNames, ...fields } = book;
+	const values = await bookValues(tx, fields);
 
 	const current = await tx.query.meetBooks.findFirst({
 		where: and(eq(meetBooks.meetId, meetId), eq(meetBooks.status, 'read')),
@@ -735,4 +748,93 @@ export function deleteEmailTemplate(id: number): ResultAsync<void, DbError> {
 	return fromPromise(db.delete(emailTemplates).where(eq(emailTemplates.id, id)), toDbError).map(
 		() => undefined
 	);
+}
+
+/** All books: read ones first, newest first, then the ones never read (only pitched), by title. */
+export function fetchAdminBooks(): ResultAsync<Array<AdminBookListItem>, DbError> {
+	return fromPromise(
+		db.query.books.findMany({
+			columns: { id: true, title: true },
+			with: {
+				bookAuthors: { with: { author: { columns: { name: true } } } },
+				meetBooks: {
+					where: (mb, { eq }) => eq(mb.status, 'read'),
+					columns: { meetId: true },
+					with: { meet: { columns: { startsAt: true } } }
+				}
+			}
+		}),
+		toDbError
+	).map((rows) =>
+		rows
+			.map(({ bookAuthors, meetBooks, ...book }) => {
+				const reads = meetBooks.map((mb) => mb.meet.startsAt.getTime());
+				return {
+					...book,
+					authors: bookAuthors.map((ba) => ba.author.name),
+					readAt: reads.length > 0 ? new Date(Math.min(...reads)) : null
+				};
+			})
+			.toSorted((a, b) =>
+				a.readAt && b.readAt
+					? b.readAt.getTime() - a.readAt.getTime()
+					: a.readAt
+						? -1
+						: b.readAt
+							? 1
+							: a.title.localeCompare(b.title, 'nb-NO')
+			)
+	);
+}
+
+export function fetchAdminBook(id: number): ResultAsync<AdminBook | null, DbError> {
+	return fromPromise(
+		db.query.books.findFirst({
+			where: eq(books.id, id),
+			columns: { ...meetBookColumns, rating: true, awards: true },
+			with: {
+				bookAuthors: { with: { author: { columns: { name: true } } } },
+				meetBooks: {
+					columns: { status: true },
+					with: { meet: { columns: { id: true, startsAt: true } } }
+				}
+			}
+		}),
+		toDbError
+	).map((book) => {
+		if (!book) {
+			return null;
+		}
+		const { bookAuthors, meetBooks, ...rest } = book;
+		return {
+			...rest,
+			authors: bookAuthors.map((ba) => ba.author.name),
+			meets: meetBooks
+				.map(({ status, meet }) => ({ ...meet, status }))
+				.toSorted((a, b) => b.startsAt.getTime() - a.startsAt.getTime())
+		};
+	});
+}
+
+/** Updates a book and replaces its authors (see `setBookAuthors`), in one transaction. */
+export function updateBook(
+	id: number,
+	{ authors: authorNames, ...fields }: BookInput
+): ResultAsync<number, DbError> {
+	return fromPromise(
+		db.transaction(async (tx) => {
+			await tx
+				.update(books)
+				.set(await bookValues(tx, fields))
+				.where(eq(books.id, id));
+			await setBookAuthors(tx, id, authorNames);
+			return id;
+		}),
+		toDbError
+	);
+}
+
+/** Also removes the book from its meets and its authors; the authors themselves stay. */
+export function deleteBook(id: number): ResultAsync<void, DbError> {
+	return fromPromise(db.delete(books).where(eq(books.id, id)), toDbError).map(() => undefined);
 }

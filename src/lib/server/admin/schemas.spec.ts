@@ -1,6 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import { parseForm } from './form';
-import { meetSchema, memberSchema, sendBulkEmailSchema, sendEmailSchema } from './schemas';
+import {
+	bookSchema,
+	meetSchema,
+	memberSchema,
+	sendBulkEmailSchema,
+	sendEmailSchema
+} from './schemas';
 
 const formData = (entries: Record<string, string>) => {
 	const data = new FormData();
@@ -211,5 +217,31 @@ describe('sendBulkEmailSchema', () => {
 
 		const none = parseForm(formData({ subject: 'Nytt', body: 'Hei' }), sendBulkEmailSchema);
 		expect(none._unsafeUnwrapErr().data.errors.recipientIds).toEqual(['Velg minst én mottaker']);
+	});
+});
+
+describe('bookSchema', () => {
+	it('takes the book fields plus rating and awards', () => {
+		const data = formData({
+			bookTitle: 'Dune',
+			bookRating: '4.26',
+			bookAwards: 'Hugo Award; Nebula Award, Best Novel'
+		});
+		data.append('bookAuthors', 'Frank Herbert');
+
+		expect(parseForm(data, bookSchema)._unsafeUnwrap().data).toMatchObject({
+			title: 'Dune',
+			authors: ['Frank Herbert'],
+			rating: 4.26,
+			awards: ['Hugo Award', 'Nebula Award, Best Novel']
+		});
+	});
+
+	it('needs a title, and a rating between 0 and 5', () => {
+		const { errors } = parseForm(
+			formData({ bookTitle: '', bookRating: '7' }),
+			bookSchema
+		)._unsafeUnwrapErr().data;
+		expect(Object.keys(errors)).toEqual(expect.arrayContaining(['bookTitle', 'bookRating']));
 	});
 });

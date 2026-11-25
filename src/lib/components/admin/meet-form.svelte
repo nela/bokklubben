@@ -5,14 +5,12 @@
 	import { Input } from '$lib/components/ui/input';
 	import type { AdminElectedBook, AdminFormState, AdminMeet, MemberOption } from '$lib/dto/admin';
 	import { AdminRoutes } from '$lib/routes';
+	import BookFields from './book-fields.svelte';
 	import FormField from './form-field.svelte';
 	import NewAuthorSheet from './new-author-sheet.svelte';
 	import { fieldValue, fieldValues, osloDateTimeInput } from './form-values';
-	import PickOrCreate from './pick-or-create.svelte';
 	import PitchRows from './pitch-rows.svelte';
 	import Select from './select.svelte';
-	import SuggestInput from './suggest-input.svelte';
-	import TagInput from './tag-input.svelte';
 	import Textarea from './textarea.svelte';
 
 	let {
@@ -187,112 +185,16 @@
 			{/if}
 
 			{#key bookChoice}
-				<FormField label="Tittel" id="bookTitle" errors={errors.bookTitle}>
-					<Input
-						id="bookTitle"
-						name="bookTitle"
-						required={!!book}
-						value={value('bookTitle', book?.title ?? '')}
-						aria-invalid={!!errors.bookTitle}
-					/>
-				</FormField>
-
-				<FormField
-					label="Forfattere"
-					id="bookAuthors"
-					errors={errors.bookAuthors}
-					hint="Velg en eksisterende forfatter, eller legg til en ny."
-				>
-					<PickOrCreate
-						id="bookAuthors"
-						name="bookAuthors"
-						bind:chosen={chosenAuthors}
-						options={authorOptions}
-						selectLabel="Velg forfatter…"
-						createLabel="Legg til ny forfatter"
-						oncreate={() => (authorSheetOpen = true)}
-						invalid={!!errors.bookAuthors}
-					/>
-				</FormField>
-
-				<div class="grid gap-4 sm:grid-cols-3">
-					<FormField label="ISBN" id="bookIsbn" errors={errors.bookIsbn}>
-						<Input
-							id="bookIsbn"
-							name="bookIsbn"
-							inputmode="numeric"
-							value={value('bookIsbn', book?.isbn ?? '')}
-							aria-invalid={!!errors.bookIsbn}
-						/>
-					</FormField>
-					<FormField label="Sider" id="bookPages" errors={errors.bookPages}>
-						<Input
-							id="bookPages"
-							name="bookPages"
-							type="number"
-							min="1"
-							value={value('bookPages', book?.pages?.toString() ?? '')}
-							aria-invalid={!!errors.bookPages}
-						/>
-					</FormField>
-					<FormField
-						label="Første utgivelse"
-						id="bookFirstPublished"
-						errors={errors.bookFirstPublished}
-					>
-						<Input
-							id="bookFirstPublished"
-							name="bookFirstPublished"
-							type="number"
-							placeholder="År"
-							value={value('bookFirstPublished', book?.firstPublished?.toString() ?? '')}
-							aria-invalid={!!errors.bookFirstPublished}
-						/>
-					</FormField>
-				</div>
-
-				<div class="grid gap-4 sm:grid-cols-2">
-					<FormField
-						label="Sjangre"
-						id="bookGenres"
-						errors={errors.bookGenres}
-						hint="Velg fra listen, eller skriv og velg «Ny sjanger»."
-					>
-						<TagInput
-							id="bookGenres"
-							name="bookGenres"
-							values={fieldValues(form, 'bookGenres', book?.genres ?? [])}
-							suggestions={genres}
-							createLabel="Ny sjanger"
-							invalid={!!errors.bookGenres}
-						/>
-					</FormField>
-					<FormField
-						label="Originalspråk"
-						id="bookOriginalLanguage"
-						errors={errors.bookOriginalLanguage}
-						hint="Velg fra listen, eller skriv et nytt."
-					>
-						<SuggestInput
-							id="bookOriginalLanguage"
-							name="bookOriginalLanguage"
-							value={value('bookOriginalLanguage', book?.originalLanguage ?? '')}
-							suggestions={languages}
-							createLabel="Nytt språk"
-							invalid={!!errors.bookOriginalLanguage}
-						/>
-					</FormField>
-				</div>
-
-				<FormField label="Beskrivelse" id="bookDescription" errors={errors.bookDescription}>
-					<Textarea
-						id="bookDescription"
-						name="bookDescription"
-						rows={5}
-						value={value('bookDescription', book?.description ?? '')}
-						aria-invalid={!!errors.bookDescription}
-					/>
-				</FormField>
+				<BookFields
+					{book}
+					{form}
+					{genres}
+					{languages}
+					{authorOptions}
+					bind:chosenAuthors
+					onnewauthor={() => (authorSheetOpen = true)}
+					titleRequired={!!book}
+				/>
 			{/key}
 		</fieldset>
 	</div>

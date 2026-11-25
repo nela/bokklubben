@@ -2,9 +2,9 @@ import { error, redirect } from '@sveltejs/kit';
 import { okAsync, ResultAsync } from 'neverthrow';
 import { AdminRoutes } from '$lib/routes';
 import { dbFailure, formFailure, parseForm, parseRecordId } from '$lib/server/admin/form';
-import { authorSchema, meetSchema } from '$lib/server/admin/schemas';
+import { createAuthorFromForm } from '$lib/server/admin/create-author';
+import { meetSchema } from '$lib/server/admin/schemas';
 import {
-	createAuthor,
 	deleteMeet,
 	fetchAdminMeet,
 	fetchAuthorNames,
@@ -79,23 +79,8 @@ export const actions: Actions = {
 		return save(id, request);
 	},
 
-	/** From the "new author" panel. Saved right away, so it can be picked for the book. */
-	createAuthor: async ({ request }) => {
-		const form = parseForm(await request.formData(), authorSchema);
-		if (form.isErr()) {
-			return form.error;
-		}
-
-		const { data, values } = form.value;
-		const created = await createAuthor(data);
-		if (created.isErr()) {
-			return dbFailure(values, created.error, {
-				authors_slug_unique: { name: ['Det finnes allerede en forfatter med dette navnet.'] }
-			});
-		}
-
-		return { author: created.value };
-	},
+	/** From the "Ny forfatter" panel; see `createAuthorFromForm`. */
+	createAuthor: ({ request }) => createAuthorFromForm(request),
 
 	delete: async ({ params }) => {
 		const id = parseRecordId(params.id);
