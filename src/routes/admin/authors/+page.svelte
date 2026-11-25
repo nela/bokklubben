@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { Plus } from '@lucide/svelte';
+	import WarningBadge from '$lib/components/admin/warning-badge.svelte';
 	import { Button } from '$lib/components/ui/button';
 	import { AdminRoutes } from '$lib/routes';
 	import { getLifetime } from '$lib/utils/helpers';
@@ -26,9 +27,16 @@
 			{#each data.authors as author (author.id)}
 				<tr class="border-b last:border-0">
 					<td class="py-2 pr-4">
-						<a href={`${AdminRoutes.AUTHORS}/${author.id}`} class="hover:underline">
-							{author.name}
-						</a>
+						<div class="flex flex-wrap items-center gap-1.5">
+							<a href={`${AdminRoutes.AUTHORS}/${author.id}`} class="hover:underline">
+								{author.name}
+							</a>
+							{#if !author.hasReadBook}
+								<WarningBadge title="Vises ikke på siden før en av bøkene er lest">
+									Ingen lest bok
+								</WarningBadge>
+							{/if}
+						</div>
 					</td>
 					<td class="text-muted-foreground py-2 pr-4">{getLifetime(author) ?? '–'}</td>
 					<td class="py-2 text-right tabular-nums">{author.bookCount}</td>

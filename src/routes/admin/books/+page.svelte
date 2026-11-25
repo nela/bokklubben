@@ -1,4 +1,5 @@
 <script lang="ts">
+	import WarningBadge from '$lib/components/admin/warning-badge.svelte';
 	import { Badge } from '$lib/components/ui/badge';
 	import { AdminRoutes } from '$lib/routes';
 	import type { PageProps } from './$types';
@@ -29,7 +30,17 @@
 			{#each data.books as book (book.id)}
 				<tr class="border-b last:border-0">
 					<td class="py-2 pr-4">
-						<a href={`${AdminRoutes.BOOKS}/${book.id}`} class="hover:underline">{book.title}</a>
+						<div class="flex flex-wrap items-center gap-1.5">
+							<a href={`${AdminRoutes.BOOKS}/${book.id}`} class="hover:underline">{book.title}</a>
+							{#if !book.onAMeet}
+								<WarningBadge title="Ikke lest, pitchet eller valgt på noe møte">
+									Ingen møte
+								</WarningBadge>
+							{/if}
+							{#if book.authors.length === 0}
+								<WarningBadge>Ingen forfatter</WarningBadge>
+							{/if}
+						</div>
 					</td>
 					<td class="text-muted-foreground hidden py-2 pr-4 sm:table-cell">
 						{book.authors.join(', ') || '–'}

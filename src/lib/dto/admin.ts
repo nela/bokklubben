@@ -95,6 +95,8 @@ export interface AdminBookListItem {
 	authors: Array<string>;
 	/** When it was read: its first meet with status read. null if it hasn't been read. */
 	readAt: Date | null;
+	/** On any meet at all, read, pitched or elected. */
+	onAMeet: boolean;
 }
 
 /** A book on its own admin page. */
@@ -152,6 +154,8 @@ export interface AdminAuthorListItem {
 	born: Date | null;
 	died: Date | null;
 	bookCount: number;
+	/** Has a book that has been read; otherwise the author doesn't show on the site. */
+	hasReadBook: boolean;
 }
 
 /** An author on their own admin page. */

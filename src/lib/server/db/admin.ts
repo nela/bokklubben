@@ -1,6 +1,6 @@
 /** Queries and changes for the admin pages. The site's own reads live in queries.ts. */
 
-import { and, asc, count, eq, inArray, isNotNull, ne, sql } from 'drizzle-orm';
+import { and, asc, count, countDistinct, eq, inArray, isNotNull, ne, sql } from 'drizzle-orm';
 import { fromPromise, type ResultAsync } from 'neverthrow';
 import type {
 	AdminAuthor,
@@ -734,13 +734,20 @@ export function fetchAdminAuthors(): ResultAsync<Array<AdminAuthorListItem>, DbE
 				name: authors.name,
 				born: authors.born,
 				died: authors.died,
-				bookCount: count(bookAuthors.bookId)
+				bookCount: countDistinct(bookAuthors.bookId),
+				readBookCount: countDistinct(meetBooks.bookId)
 			})
 			.from(authors)
 			.leftJoin(bookAuthors, eq(bookAuthors.authorId, authors.id))
+			.leftJoin(
+				meetBooks,
+				and(eq(meetBooks.bookId, bookAuthors.bookId), eq(meetBooks.status, 'read'))
+			)
 			.groupBy(authors.id)
 			.orderBy(asc(authors.name)),
 		toDbError
+	).map((rows) =>
+		rows.map(({ readBookCount, ...author }) => ({ ...author, hasReadBook: readBookCount > 0 }))
 	);
 }
 
@@ -799,8 +806,7 @@ export function fetchAdminBooks(): ResultAsync<Array<AdminBookListItem>, DbError
 			with: {
 				bookAuthors: { with: { author: { columns: { name: true } } } },
 				meetBooks: {
-					where: (mb, { eq }) => eq(mb.status, 'read'),
-					columns: { meetId: true },
+					columns: { status: true },
 					with: { meet: { columns: { startsAt: true } } }
 				}
 			}
@@ -809,11 +815,14 @@ export function fetchAdminBooks(): ResultAsync<Array<AdminBookListItem>, DbError
 	).map((rows) =>
 		rows
 			.map(({ bookAuthors, meetBooks, ...book }) => {
-				const reads = meetBooks.map((mb) => mb.meet.startsAt.getTime());
+				const reads = meetBooks
+					.filter((mb) => mb.status === 'read')
+					.map((mb) => mb.meet.startsAt.getTime());
 				return {
 					...book,
 					authors: bookAuthors.map((ba) => ba.author.name),
-					readAt: reads.length > 0 ? new Date(Math.min(...reads)) : null
+					readAt: reads.length > 0 ? new Date(Math.min(...reads)) : null,
+					onAMeet: meetBooks.length > 0
 				};
 			})
 			.toSorted((a, b) =>
