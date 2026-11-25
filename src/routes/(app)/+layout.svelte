@@ -5,10 +5,11 @@
 	import AppSidebar from '$lib/components/app-sidebar.svelte';
 	import Header from '$lib/components/header.svelte';
 	import { page } from '$app/state';
-	import type { NavItemPrimary } from '$lib/model';
+	import type { NavItemBase, NavItemPrimary } from '$lib/model';
 	import { Routes } from '$lib/routes';
 	import { authClient } from '$lib/auth-client';
 	import { goto } from '$app/navigation';
+	import { createSlug } from '$lib/utils/helpers';
 
 	let { data, children }: LayoutProps = $props();
 	const { allMembers, books, authors, member } = data;
@@ -35,13 +36,25 @@
 			hideFromSidebar: false,
 			items: [...new Set(books.map((b) => b.readAt.getFullYear()))]
 				.toSorted((a, b) => b - a)
-				.map((year) => {
-					return {
+				.map(
+					(year): NavItemBase => ({
 						hideFromSidebar: false,
 						title: year.toString(),
-						pathname: `${Routes.BOOKS}/${year}`
-					};
-				})
+						pathname: `${Routes.BOOKS}/${year}`,
+						group: 'År'
+					})
+				)
+				.concat(
+					// The genres the books have, each once, alphabetically.
+					[...new Map(books.flatMap((b) => b.genres).map((g) => [createSlug(g), g])).entries()]
+						.toSorted(([, a], [, b]) => a.localeCompare(b, 'nb-NO'))
+						.map(([slug, genre]) => ({
+							hideFromSidebar: false,
+							title: genre,
+							pathname: `${Routes.BOOK_GENRES}/${slug}`,
+							group: 'Sjanger'
+						}))
+				)
 				.concat(
 					books.map((b) => ({
 						title: b.title,

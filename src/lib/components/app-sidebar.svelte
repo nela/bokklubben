@@ -12,6 +12,7 @@
 	import { toggleMode } from 'mode-watcher';
 	import * as Avatar from '$lib/components/ui/avatar';
 	import { fly } from 'svelte/transition';
+	import { page } from '$app/state';
 
 	let {
 		ref = $bindable(null),
@@ -27,7 +28,26 @@
 		signOut: () => Promise<void>;
 	} = $props();
 
-	const secondaryItems = $derived(activePrimary?.items.filter((i) => !i.hideFromSidebar) ?? []);
+	const sidebarItems = $derived(activePrimary?.items.filter((i) => !i.hideFromSidebar) ?? []);
+
+	// A submenu can have more than one list (Bøker: by year or by genre); one is shown at a time.
+	const groups = $derived([...new Set(sidebarItems.flatMap((i) => (i.group ? [i.group] : [])))]);
+	// A switch made on this page; after moving to another page, that page's own list wins.
+	let chosen = $state<{ group: string; pathname: string } | null>(null);
+	const shownGroup = $derived.by(() => {
+		if (groups.length < 2) return undefined;
+		const pageGroup = sidebarItems.find((i) => page.url.pathname.startsWith(i.pathname))?.group;
+		if (chosen && groups.includes(chosen.group)) {
+			if (chosen.pathname === page.url.pathname || !pageGroup) return chosen.group;
+		}
+		return pageGroup ?? groups[0];
+	});
+	const otherGroup = $derived(
+		shownGroup === undefined ? undefined : groups[(groups.indexOf(shownGroup) + 1) % groups.length]
+	);
+	const secondaryItems = $derived(
+		shownGroup === undefined ? sidebarItems : sidebarItems.filter((i) => i.group === shownGroup)
+	);
 
 	const displayName = $derived(member.nickname ?? member.firstName.split(" ")[0])
 
@@ -64,9 +84,10 @@
 	<Sidebar.Content>
 		<NavItemGroup items={primaryItems} />
 		<!-- The submenu slides out and the next one in, also between two sections that both have
-		     one (e.g. Medlemmer → Bøker). Both share one grid cell, so the new one doesn't jump. -->
+		     one (e.g. Medlemmer → Bøker) and between a section's lists (År ⇄ Sjanger). Both share
+		     one grid cell, so the new one doesn't jump. -->
 		<div class="grid">
-			{#key activePrimary?.pathname}
+			{#key `${activePrimary?.pathname}:${shownGroup}`}
 				{#if secondaryItems.length > 0}
 					<div
 						class="[grid-area:1/1]"
@@ -74,7 +95,16 @@
 						out:fly|global={{ x: -10, duration: 300, delay: 0 }}
 					>
 						<Separator orientation="horizontal" />
-						<NavItemGroup items={secondaryItems} />
+						<NavItemGroup
+							items={secondaryItems}
+							label={shownGroup}
+							switchTo={shownGroup !== undefined && otherGroup !== undefined
+								? {
+										label: otherGroup,
+										onswitch: () => (chosen = { group: otherGroup, pathname: page.url.pathname })
+									}
+								: undefined}
+						/>
 					</div>
 				{/if}
 			{/key}
