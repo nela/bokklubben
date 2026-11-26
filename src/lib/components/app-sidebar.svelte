@@ -85,15 +85,17 @@
 		<NavItemGroup items={primaryItems} />
 		<!-- The submenu slides out and the next one in, also between two sections that both have
 		     one (e.g. Medlemmer → Bøker) and between a section's lists (År ⇄ Sjanger). Both share
-		     one grid cell, so the new one doesn't jump. -->
+		     one grid cell, so the new one doesn't jump. The transitions are local, so they don't play
+		     when the whole sidebar goes (the mobile sheet closing); that would hold it on screen after
+		     the sheet has slid out. -->
 		<div class="grid">
 			{#key `${activePrimary?.pathname}:${shownGroup}`}
-				{#if secondaryItems.length > 0}
-					<div
-						class="[grid-area:1/1]"
-						in:fly|global={{ x: -10, duration: 300, delay: 300 }}
-						out:fly|global={{ x: -10, duration: 300, delay: 0 }}
-					>
+				<div
+					class="[grid-area:1/1]"
+					in:fly={{ x: -10, duration: 300, delay: 300 }}
+					out:fly={{ x: -10, duration: 300, delay: 0 }}
+				>
+					{#if secondaryItems.length > 0}
 						<Separator orientation="horizontal" />
 						<NavItemGroup
 							items={secondaryItems}
@@ -105,8 +107,8 @@
 									}
 								: undefined}
 						/>
-					</div>
-				{/if}
+					{/if}
+				</div>
 			{/key}
 		</div>
 	</Sidebar.Content>
