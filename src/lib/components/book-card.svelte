@@ -29,9 +29,11 @@
 			<AnimatedUnderline
 				href={bookHref}
 				text={book.title}
+				touchUnderline={false}
 				className="font-montserrat text-xl font-semibold bg-gradient-to-r from-current to-current bg-no-repeat [background-position:0_100%] [background-size:0_1px] transition-[background-size] duration-300 hover:[background-size:100%_1px] "
 			/>
 		</Card.Title>
+		<Card.Description>{book.firstPublished}</Card.Description>
 		{#if includeAuthor}
 			<Card.Description class="text-base">
 				{#each book.authors as author, i (author.slug)}
@@ -48,11 +50,6 @@
 	</Card.Header>
 
 	<Card.Content class="flex flex-col gap-2 p-0 pt-4 [grid-area:details] md:pt-6 md:pb-4">
-		<p class="text-base">
-			<span class="font-semibold">Utgivelsesår: </span>
-			{book.firstPublished}
-		</p>
-
 		{#if book.awards.length > 0}
 			<p class="text-base">
 				<span class="font-semibold">Priser: </span>
@@ -74,6 +71,7 @@
 			<div class="flex items-center gap-1" role="img">
 				<span class="font-semibold">Goodreads rating:</span>
 				<StarRating value={book.rating} />
+				<span class="text-muted-foreground">({book.rating.toFixed(1)})</span>
 			</div>
 		{/if}
 	</Card.Content>
