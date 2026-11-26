@@ -14,7 +14,7 @@
 
 	// Determine container classes based on the layout prop
 	const containerClasses =
-		layout === 'grid' ? 'grid grid-cols-1 gap-4 md:grid-cols-2' : 'flex flex-col gap-4';
+		layout === 'grid' ? 'grid grid-cols-1 gap-4 xl:grid-cols-2' : 'flex flex-col gap-4';
 </script>
 
 <div class={containerClasses}>

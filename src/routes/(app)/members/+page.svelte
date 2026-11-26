@@ -4,7 +4,7 @@
 	const { allMembers } = data;
 </script>
 
-<div class="p-4">
+<div class="mx-auto w-full max-w-[90rem] p-4 md:p-8">
 	{#if allMembers && allMembers.length > 0}
 		<MemberList members={allMembers} />
 	{:else}
