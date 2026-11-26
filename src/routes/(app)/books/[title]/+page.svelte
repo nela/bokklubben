@@ -24,7 +24,7 @@
 </script>
 
 {#if book}
-	<div class="p-4">
+	<div class="mx-auto w-full max-w-6xl p-4 md:p-8">
 		<div class="grid grid-cols-1 gap-8 md:grid-cols-3">
 			<div class="col-span-1">
 				<img
