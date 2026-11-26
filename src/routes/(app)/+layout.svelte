@@ -105,7 +105,7 @@
 		const primary = { crumb: activePrimary.title, pathname: activePrimary.pathname };
 
 		return secondary
-			? [{ crumb: secondary.title, pathname: secondary.pathname }, primary]
+			? [primary, { crumb: secondary.title, pathname: secondary.pathname }]
 			: [primary];
 	});
 
