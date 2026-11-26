@@ -4,7 +4,7 @@
 	const { books } = data;
 </script>
 
-<div class="p-4">
+<div class="mx-auto w-full max-w-[90rem] p-4 md:p-8">
 	{#if books && books.length > 0}
 		<BookList {books} />
 	{:else}
