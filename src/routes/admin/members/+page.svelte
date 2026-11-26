@@ -10,9 +10,9 @@
 
 	const signedUpCount = $derived(data.members.filter((m) => m.signedUp).length);
 
-	// Who a group email goes to. Starts as everyone current; former members are left out.
+	// Who a group email goes to. Starts empty; «Alle nåværende» picks everyone but former members.
 	const current = () => data.members.filter((m) => !m.former).map((m) => m.id);
-	let selected = $state(current());
+	let selected = $state<Array<number>>([]);
 	const recipients = $derived(data.members.filter((m) => selected.includes(m.id)));
 	let emailOpen = $state(false);
 
