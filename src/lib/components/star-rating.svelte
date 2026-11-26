@@ -11,93 +11,25 @@
 		showValue?: boolean;
 	} = $props();
 
-	// const aria = $derived(`${v.toFixed(1)} out of ${max} stars`);
-	// Clamp helper
-	const clamp01 = (x: number) => Math.min(1, Math.max(0, x));
+	// Share of the star's area left of each 5% step across its width, measured from the star path.
+	// The arms are thin, so the last star is filled by area rather than by width.
+	const AREA_BY_WIDTH = [
+		0, 0.004, 0.015, 0.033, 0.058, 0.116, 0.187, 0.256, 0.33, 0.411, 0.5, 0.589, 0.67, 0.744, 0.813,
+		0.884, 0.942, 0.967, 0.985, 0.996, 1
+	];
 
-	/**
-	 * Symmetric concave/convex mapping that preserves the midpoint:
-	 * - y(0.5) = 0.5 for any gamma > 0
-	 * - gamma < 1 lifts small fractions and compresses large ones
-	 * - gamma = 1 is linear (no skew)
-	 */
-	export function skewSymmetric(x: number, gamma = 0.8): number {
-		const t = clamp01(x);
-		if (t <= 0.5) {
-			return 0.5 * Math.pow(2 * t, gamma);
-		}
-		return 1 - 0.5 * Math.pow(2 * (1 - t), gamma);
+	function widthForArea(area: number) {
+		const i = AREA_BY_WIDTH.findIndex((a) => a >= area);
+		if (i <= 0) return 0;
+		const [a0, a1] = [AREA_BY_WIDTH[i - 1], AREA_BY_WIDTH[i]];
+		return (i - 1 + (area - a0) / (a1 - a0)) / (AREA_BY_WIDTH.length - 1);
 	}
 
-	/** Truncate to N decimals (returns number) */
-	export function truncTo(x: number, n = 3): number {
-		const k = Math.pow(10, n);
-		return Math.trunc(x * k) / k;
-	}
-
-	// Smoothstep for gentler transitions (optional but recommended)
-	const smoothstep01 = (t: number) => t * t * (3 - 2 * t);
-
-	// Linear interpolation
-	const mix = (a: number, b: number, t: number) => a + (b - a) * t;
-
-	/**
-	 * Gamma that increases "strength" toward the edges.
-	 * - center: gamma used at x = 0.5 (≈1.0 → almost linear at the midpoint)
-	 * - edge:   gamma used at x = 0 or 1   (< center → stronger concave effect)
-	 * - curve:  shapes how quickly it ramps up with distance (>=1 for gentler)
-	 * - ease:   whether to apply smoothstep easing (true = smoother near 0.5)
-	 */
-	export function dynamicGamma(
-		x: number,
-		{
-			center = 0.95,
-			edge = 0.65,
-			curve = 1.5,
-			ease = true
-		}: { center?: number; edge?: number; curve?: number; ease?: boolean } = {}
-	): number {
-		const t = clamp01(x);
-		// distance from 0.5 mapped to [0,1]
-		const d = 2 * Math.abs(t - 0.5);
-		const w0 = Math.pow(d, Math.max(0.0001, curve)); // avoid 0^0
-		const w = ease ? smoothstep01(w0) : w0;
-		return mix(center, edge, w);
-	}
-
-	/**
-	 * Symmetric skew that preserves the midpoint:
-	 *   - y(0.5) = 0.5
-	 *   - y(0) = 0, y(1) = 1
-	 * Uses a gamma that varies with x: smaller near edges → stronger skew.
-	 */
-	export function skewSymmetricDynamic(
-		x: number,
-		opts?: Parameters<typeof dynamicGamma>[1]
-	): number {
-		const t = clamp01(x);
-		const g = dynamicGamma(t, opts);
-		if (t < 0.4) {
-			return 0.8 * Math.pow(2 * t, g);
-		}
-		if (t >= 0.47 && t <= 0.53) {
-			return 0.5 * Math.pow(2 * t, g);
-		}
-		return 1 - 0.8 * Math.pow(2 * (1 - t), g);
-	}
-
-	const fullStars = Math.floor(value);
-	const fractional = value - fullStars;
-	const emptyStars = max - fullStars - (fractional ? 1 : 0);
-	const adjustedFraction = truncTo(
-		skewSymmetricDynamic(fractional, {
-			center: 0.95, // ~linear near 0.5
-			edge: 0.5, // stronger lift/pull near edges
-			curve: 1.7, // how quickly strength increases with distance
-			ease: true // smoother transition
-		}),
-		3
-	);
+	const fullStars = $derived(Math.floor(value));
+	const fractional = $derived(value - fullStars);
+	const emptyStars = $derived(max - fullStars - (fractional ? 1 : 0));
+	// The star spans x≈2–22 of the 24-wide icon.
+	const clipRight = $derived(((24 - (2 + 20 * widthForArea(fractional))) / 24) * 100);
 </script>
 
 <!-- <div class={`flex items-center gap-1 ${className}`} role="img"> -->
@@ -138,7 +70,7 @@
 				viewBox="0 0 24 24"
 				fill="currentColor"
 				class="absolute top-0 left-0 h-5 w-5 text-yellow-500"
-				style={`clip-path: inset(0 ${(1 - adjustedFraction) * 100}% 0 0`}
+				style={`clip-path: inset(0 ${clipRight}% 0 0)`}
 			>
 				<path
 					fill-rule="evenodd"
@@ -165,7 +97,7 @@
 		</svg>
 	{/each}
 	{#if showValue}
-		<span class="text-muted-foreground ml-2 text-xs">{adjustedFraction.toFixed(1)}/{max}</span>
+		<span class="text-muted-foreground ml-2 text-xs">{value.toFixed(1)}/{max}</span>
 	{/if}
 </div>
 <!-- </div> -->
