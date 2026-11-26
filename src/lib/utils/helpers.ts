@@ -70,3 +70,24 @@ export const getLifetime = (author: Pick<Author, 'born' | 'died'>) => {
  */
 export const hasLeft = (memberUntil: Date | null, todayInOslo = today('Europe/Oslo').toString()) =>
 	memberUntil !== null && memberUntil.toISOString().slice(0, 10) < todayInOslo;
+
+/**
+ * Splits prizes stored as "Name (1959)" into name and year, oldest first. Prizes without a year in
+ * that form keep their order at the end.
+ */
+export const parseAwards = (awards: Array<string>) =>
+	awards
+		.map((award) => {
+			const match = award.match(/^(.*?)\s*\((\d{4})\)\s*$/);
+			return match ? { name: match[1], year: match[2] } : { name: award, year: null };
+		})
+		.toSorted((a, b) => (a.year ?? '9999').localeCompare(b.year ?? '9999'));
+
+/** One line per prize, oldest first, with every year it was won: "Hugo Award (1985, 1990)". */
+export const groupAwards = (awards: Array<string>) => {
+	const years = new Map<string, Array<string>>();
+	for (const { name, year } of parseAwards(awards)) {
+		years.set(name, [...(years.get(name) ?? []), ...(year ? [year] : [])]);
+	}
+	return [...years].map(([name, y]) => (y.length > 0 ? `${name} (${y.join(', ')})` : name));
+};

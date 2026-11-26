@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { PageProps } from './$types';
-	import { getLifetime } from '$lib/utils/helpers';
+	import { getLifetime, groupAwards } from '$lib/utils/helpers';
 	import { Separator } from '$lib/components/ui/separator/index.js';
 	import BookCard from '$lib/components/book-card.svelte';
 
@@ -41,7 +41,7 @@
 					<div>
 						<h2 class="text-lg font-semibold">Priser</h2>
 						<ul class="list-inside list-disc">
-							{#each author.awards as award}
+							{#each groupAwards(author.awards) as award (award)}
 								<li class="text-base">{award}</li>
 							{/each}
 						</ul>

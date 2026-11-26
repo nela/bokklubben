@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { Author } from '$lib/dto/dto';
 	import * as Card from '$lib/components/ui/card/index.js';
-	import { getLifetime } from '$lib/utils/helpers';
+	import { getLifetime, parseAwards } from '$lib/utils/helpers';
 	import AnimatedUnderline from './animated-underline.svelte';
 	import { Routes } from '$lib/routes';
 
@@ -16,12 +16,7 @@
 	const lifetime = $derived(getLifetime(author));
 	const splitName = $derived(author.name.replace(' ', '\n'));
 	const intro = $derived((author.bio ?? '').split('\n').find((p) => p.trim()));
-	const awards = $derived(
-		author.awards.map((award) => {
-			const match = award.match(/^(.*?)\s*\((\d{4})\)\s*$/);
-			return match ? { name: match[1], year: match[2] } : { name: award, year: null };
-		})
-	);
+	const awards = $derived(parseAwards(author.awards));
 </script>
 
 <Card.Root

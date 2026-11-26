@@ -4,7 +4,7 @@
 	import StarRating from '$lib/components/star-rating.svelte';
 	import * as Card from '$lib/components/ui/card';
 	import { Routes } from '$lib/routes';
-	import { getLifetime } from '$lib/utils/helpers';
+	import { getLifetime, groupAwards } from '$lib/utils/helpers';
 
 	const { data } = $props();
 	const { allMembers, nextMeet, books, authors } = data;
@@ -175,7 +175,7 @@
 									<div>
 										<h3 class="text-md mb-2 font-semibold">Priser</h3>
 										<ul class="list-inside list-disc">
-											{#each author.awards as award}
+											{#each groupAwards(author.awards) as award (award)}
 												<li>{award}</li>
 											{/each}
 										</ul>
