@@ -9,7 +9,7 @@
 	{#if authors && authors.length > 0}
 		<div class="grid grid-cols-1 gap-4 md:grid-cols-2">
 			{#each authors as author (author.name)}
-				<AuthorCard {author} />
+				<AuthorCard {author} detail="bio" />
 			{/each}
 		</div>
 	{:else}

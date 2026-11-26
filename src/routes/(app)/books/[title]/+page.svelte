@@ -102,7 +102,7 @@
 		{#if authors.length > 0}
 			<div class="mt-12">
 				<h2 class="mb-6 text-2xl font-bold">Forfatter{authors.length > 1 ? 'e:' : ':'}</h2>
-				<div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+				<div class="grid max-w-3xl grid-cols-1 gap-4">
 					{#each authors as author (author.slug)}
 						<AuthorCard {author} />
 					{/each}
